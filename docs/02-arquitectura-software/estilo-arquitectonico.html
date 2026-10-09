@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LlegueYa - Estilo arquitectónico: monolito modular en capas</title>
+<style>body{margin:0;padding:24px;background:#fff;color:#222;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}h1{font-size:20px;margin:0 0 4px}p{margin:0 0 16px;color:#555;font-size:14px}.wrap{overflow-x:auto}svg{width:100%;min-width:900px;height:auto;display:block}.gt{font-size:13px;font-weight:700;fill:#222}.bt{font-size:11.5px;fill:#222}.lt{font-size:11px;fill:#333}</style></head>
+<body><h1>LlegueYa - Estilo arquitectónico: monolito modular en capas</h1><p>Arquitectura de Software (IS-488) - UNSCH - 2026-II</p>
+<div class="wrap"><svg viewBox="0 0 1080 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Estilo arquitectónico: monolito modular en capas"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#333"/></marker></defs>
+<rect x="40" y="20" width="720" height="90" rx="12" fill="#dae8fc" stroke="#6c8ebf" stroke-width="2"/>
+<text x="400.0" y="40" text-anchor="middle" class="gt">ACTORES</text>
+<rect x="40" y="150" width="720" height="100" rx="12" fill="#e1d5e7" stroke="#9673a6" stroke-width="2"/>
+<text x="400.0" y="170" text-anchor="middle" class="gt">PRESENTACIÓN</text>
+<rect x="40" y="290" width="720" height="250" rx="12" fill="#d5e8d4" stroke="#82b366" stroke-width="2"/>
+<text x="400.0" y="310" text-anchor="middle" class="gt">LÓGICA DE NEGOCIO - monolito modular (una sola aplicación desplegable)</text>
+<rect x="40" y="580" width="720" height="100" rx="12" fill="#ffe6cc" stroke="#d79b00" stroke-width="2"/>
+<text x="400.0" y="600" text-anchor="middle" class="gt">DATOS</text>
+<rect x="810" y="290" width="240" height="250" rx="12" fill="#f8cecc" stroke="#b85450" stroke-width="2"/>
+<text x="930.0" y="310" text-anchor="middle" class="gt">SISTEMAS EXTERNOS</text>
+<rect x="70" y="55" width="200" height="40" rx="7" fill="#fff" stroke="#6c8ebf" stroke-width="1.5"/>
+<text x="170.0" y="79.0" text-anchor="middle" class="bt">Turista</text>
+<rect x="300" y="55" width="200" height="40" rx="7" fill="#fff" stroke="#6c8ebf" stroke-width="1.5"/>
+<text x="400.0" y="79.0" text-anchor="middle" class="bt">Proveedor</text>
+<rect x="530" y="55" width="200" height="40" rx="7" fill="#fff" stroke="#6c8ebf" stroke-width="1.5"/>
+<text x="630.0" y="79.0" text-anchor="middle" class="bt">Administrador</text>
+<rect x="70" y="195" width="200" height="40" rx="7" fill="#fff" stroke="#9673a6" stroke-width="1.5"/>
+<text x="170.0" y="219.0" text-anchor="middle" class="bt">Aplicación web + chatbot web</text>
+<rect x="300" y="195" width="200" height="40" rx="7" fill="#fff" stroke="#9673a6" stroke-width="1.5"/>
+<text x="400.0" y="219.0" text-anchor="middle" class="bt">API REST</text>
+<rect x="530" y="195" width="200" height="40" rx="7" fill="#fff" stroke="#9673a6" stroke-width="1.5"/>
+<text x="630.0" y="219.0" text-anchor="middle" class="bt">CDN (fotos y libros)</text>
+<rect x="65" y="335" width="210" height="48" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="170.0" y="363.0" text-anchor="middle" class="bt">Usuarios</text>
+<rect x="295" y="335" width="210" height="48" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="400.0" y="363.0" text-anchor="middle" class="bt">Sitios y puntos de venta</text>
+<rect x="525" y="335" width="210" height="48" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="630.0" y="363.0" text-anchor="middle" class="bt">Proveedores</text>
+<rect x="65" y="400" width="210" height="48" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="170.0" y="428.0" text-anchor="middle" class="bt">Reseñas y puntuación</text>
+<rect x="295" y="400" width="210" height="48" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="400.0" y="428.0" text-anchor="middle" class="bt">Fotos de experiencias</text>
+<rect x="525" y="400" width="210" height="48" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="630.0" y="428.0" text-anchor="middle" class="bt">Historias, fotografías y libros</text>
+<rect x="65" y="465" width="210" height="48" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="170.0" y="493.0" text-anchor="middle" class="bt">Paquetes y recomendaciones</text>
+<rect x="295" y="465" width="210" height="48" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="400.0" y="493.0" text-anchor="middle" class="bt">Chatbot / Asistente IA</text>
+<rect x="525" y="465" width="210" height="48" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="630.0" y="493.0" text-anchor="middle" class="bt">Notificaciones</text>
+<rect x="60" y="625" width="160" height="40" rx="7" fill="#fff" stroke="#d79b00" stroke-width="1.5"/>
+<text x="140.0" y="649.0" text-anchor="middle" class="bt">Base de datos principal</text>
+<rect x="235" y="625" width="160" height="40" rx="7" fill="#fff" stroke="#d79b00" stroke-width="1.5"/>
+<text x="315.0" y="649.0" text-anchor="middle" class="bt">Almacén de archivos</text>
+<rect x="410" y="625" width="160" height="40" rx="7" fill="#fff" stroke="#d79b00" stroke-width="1.5"/>
+<text x="490.0" y="642.0" text-anchor="middle" class="bt">Base de conocimiento</text>
+<text x="490.0" y="656.0" text-anchor="middle" class="bt">turística</text>
+<rect x="585" y="625" width="160" height="40" rx="7" fill="#fff" stroke="#d79b00" stroke-width="1.5"/>
+<text x="665.0" y="649.0" text-anchor="middle" class="bt">Caché</text>
+<rect x="830" y="335" width="200" height="40" rx="7" fill="#fff" stroke="#b85450" stroke-width="1.5"/>
+<text x="930.0" y="359.0" text-anchor="middle" class="bt">Servicio de mapas</text>
+<rect x="830" y="385" width="200" height="40" rx="7" fill="#fff" stroke="#b85450" stroke-width="1.5"/>
+<text x="930.0" y="409.0" text-anchor="middle" class="bt">Sitios de venta de entradas</text>
+<rect x="830" y="435" width="200" height="40" rx="7" fill="#fff" stroke="#b85450" stroke-width="1.5"/>
+<text x="930.0" y="452.0" text-anchor="middle" class="bt">Servicio de IA (modelo de</text>
+<text x="930.0" y="466.0" text-anchor="middle" class="bt">lenguaje)</text>
+<rect x="830" y="485" width="200" height="40" rx="7" fill="#fff" stroke="#b85450" stroke-width="1.5"/>
+<text x="930.0" y="509.0" text-anchor="middle" class="bt">Servicio de correo</text>
+<line x1="400" y1="110" x2="400" y2="150" stroke="#333" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="400" y1="250" x2="400" y2="290" stroke="#333" stroke-width="2" marker-end="url(#ah)"/>
+<text x="400" y="264" text-anchor="middle" class="lt">API REST</text>
+<line x1="400" y1="540" x2="400" y2="580" stroke="#333" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="760" y1="415" x2="810" y2="415" stroke="#333" stroke-width="2" marker-end="url(#ah)"/>
+<text x="785" y="409" text-anchor="middle" class="lt">integraciones</text>
+</svg></div></body></html>

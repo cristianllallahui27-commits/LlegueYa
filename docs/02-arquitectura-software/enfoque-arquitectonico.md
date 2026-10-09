@@ -41,7 +41,7 @@ Los nombres de los puertos son una propuesta del equipo para ilustrar el enfoque
 
 ## Diagrama
 
-Diagrama editable: `enfoque-arquitectonico.drawio`. Versión web: `enfoque-arquitectonico.html`.
+Diagrama editable: [Draw.io](enfoque/enfoque-arquitectonico.drawio). Versión web: [HTML](enfoque/enfoque-arquitectonico.html).
 
 ```mermaid
 flowchart LR
@@ -93,3 +93,7 @@ flowchart LR
 
 ## Decisiones relacionadas
 ADR-002 (Clean Architecture), ADR-005 (puertos y adaptadores), ADR-006 (solo redirección a sitios de venta), ADR-007 (verificación de proveedores).
+
+## Estado del enfoque
+
+Diseño conceptual: los nombres no corresponden a código implementado. Los puertos pueden pertenecer a Aplicación o Dominio según su responsabilidad; el diseño de referencia de Proveedores los ubica en Aplicación. Infraestructura depende del contrato interior que implementa. El correo sigue por confirmar (RC09).

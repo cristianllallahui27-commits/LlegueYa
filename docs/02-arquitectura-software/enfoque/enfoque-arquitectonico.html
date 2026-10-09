@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LlegueYa - Enfoque: Clean Architecture</title>
+<style>body{margin:0;padding:24px;background:#fff;color:#222;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}h1{font-size:20px;margin:0 0 4px}p{margin:0 0 16px;color:#555;font-size:14px}.wrap{overflow-x:auto}svg{width:100%;min-width:900px;height:auto;display:block}.gt{font-size:13px;font-weight:700;fill:#222}.bt{font-size:11.5px;fill:#222}.lt{font-size:11px;fill:#333}</style></head>
+<body><h1>LlegueYa - Enfoque: Clean Architecture</h1><p>Arquitectura de Software (IS-488) - UNSCH - 2026-II</p>
+<div class="wrap"><svg viewBox="0 0 1250 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Enfoque: Clean Architecture"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#333"/></marker></defs>
+<rect x="30" y="50" width="230" height="430" rx="12" fill="#dae8fc" stroke="#6c8ebf" stroke-width="2"/>
+<text x="145.0" y="70" text-anchor="middle" class="gt">PRESENTACIÓN</text>
+<rect x="290" y="50" width="430" height="170" rx="12" fill="#d5e8d4" stroke="#82b366" stroke-width="2"/>
+<text x="505.0" y="70" text-anchor="middle" class="gt">APLICACIÓN - casos de uso</text>
+<rect x="310" y="250" width="390" height="215" rx="12" fill="#fff2cc" stroke="#d6b656" stroke-width="2"/>
+<text x="505.0" y="270" text-anchor="middle" class="gt">DOMINIO - núcleo del negocio</text>
+<rect x="750" y="50" width="230" height="430" rx="12" fill="#e1d5e7" stroke="#9673a6" stroke-width="2"/>
+<text x="865.0" y="70" text-anchor="middle" class="gt">INFRAESTRUCTURA</text>
+<rect x="1010" y="50" width="220" height="430" rx="12" fill="#f8cecc" stroke="#b85450" stroke-width="2"/>
+<text x="1120.0" y="70" text-anchor="middle" class="gt">SISTEMAS EXTERNOS</text>
+<rect x="50" y="95" width="190" height="55" rx="7" fill="#fff" stroke="#6c8ebf" stroke-width="1.5"/>
+<text x="145.0" y="119.5" text-anchor="middle" class="bt">Pantallas de sitios, mapa y</text>
+<text x="145.0" y="133.5" text-anchor="middle" class="bt">proveedores</text>
+<rect x="50" y="170" width="190" height="55" rx="7" fill="#fff" stroke="#6c8ebf" stroke-width="1.5"/>
+<text x="145.0" y="194.5" text-anchor="middle" class="bt">Reseñas y fotos de</text>
+<text x="145.0" y="208.5" text-anchor="middle" class="bt">experiencias</text>
+<rect x="50" y="245" width="190" height="55" rx="7" fill="#fff" stroke="#6c8ebf" stroke-width="1.5"/>
+<text x="145.0" y="269.5" text-anchor="middle" class="bt">Historias, fotografías y</text>
+<text x="145.0" y="283.5" text-anchor="middle" class="bt">libros</text>
+<rect x="50" y="320" width="190" height="55" rx="7" fill="#fff" stroke="#6c8ebf" stroke-width="1.5"/>
+<text x="145.0" y="351.5" text-anchor="middle" class="bt">Chatbot web</text>
+<rect x="50" y="395" width="190" height="55" rx="7" fill="#fff" stroke="#6c8ebf" stroke-width="1.5"/>
+<text x="145.0" y="426.5" text-anchor="middle" class="bt">Controladores API REST</text>
+<rect x="305" y="90" width="195" height="36" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="402.5" y="105.0" text-anchor="middle" class="bt">ConsultarSitios y</text>
+<text x="402.5" y="119.0" text-anchor="middle" class="bt">ObtenerEnlaceDeVenta</text>
+<rect x="510" y="90" width="195" height="36" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="607.5" y="112.0" text-anchor="middle" class="bt">ListarProveedoresVerificados</text>
+<rect x="305" y="130" width="195" height="36" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="402.5" y="145.0" text-anchor="middle" class="bt">RegistrarReseña /</text>
+<text x="402.5" y="159.0" text-anchor="middle" class="bt">SubirFotoExperiencia</text>
+<rect x="510" y="130" width="195" height="36" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="607.5" y="145.0" text-anchor="middle" class="bt">PublicarContenido y</text>
+<text x="607.5" y="159.0" text-anchor="middle" class="bt">NotificarNuevoContenido</text>
+<rect x="305" y="170" width="195" height="36" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="402.5" y="185.0" text-anchor="middle" class="bt">RecomendarPaquete /</text>
+<text x="402.5" y="199.0" text-anchor="middle" class="bt">RecomendarMejorMes</text>
+<rect x="510" y="170" width="195" height="36" rx="7" fill="#fff" stroke="#82b366" stroke-width="1.5"/>
+<text x="607.5" y="185.0" text-anchor="middle" class="bt">VerificarProveedor /</text>
+<text x="607.5" y="199.0" text-anchor="middle" class="bt">ModerarContenido</text>
+<rect x="330" y="290" width="350" height="70" rx="7" fill="#fff" stroke="#d6b656" stroke-width="1.5"/>
+<text x="505.0" y="315.0" text-anchor="middle" class="bt">Entidades: Usuario, Sitio, PuntoDeVenta, Proveedor,</text>
+<text x="505.0" y="329.0" text-anchor="middle" class="bt">Reseña, FotoExperiencia, Historia, Fotografía, Libro,</text>
+<text x="505.0" y="343.0" text-anchor="middle" class="bt">Paquete</text>
+<rect x="330" y="370" width="350" height="40" rx="7" fill="#fff" stroke="#d6b656" stroke-width="1.5"/>
+<text x="505.0" y="387.0" text-anchor="middle" class="bt">Reglas: solo proveedores aprobados se muestran; solo</text>
+<text x="505.0" y="401.0" text-anchor="middle" class="bt">enlaces de venta verificados se redirigen</text>
+<rect x="330" y="418" width="350" height="40" rx="7" fill="#fff" stroke="#d6b656" stroke-width="1.5"/>
+<text x="505.0" y="428.0" text-anchor="middle" class="bt">Puertos: RepositorioSitios, RepositorioProveedores,</text>
+<text x="505.0" y="442.0" text-anchor="middle" class="bt">ServicioMapas, ServicioIA, NotificadorCorreo,</text>
+<text x="505.0" y="456.0" text-anchor="middle" class="bt">AlmacenArchivos</text>
+<rect x="770" y="95" width="190" height="55" rx="7" fill="#fff" stroke="#9673a6" stroke-width="1.5"/>
+<text x="865.0" y="126.5" text-anchor="middle" class="bt">Repositorios (base de datos)</text>
+<rect x="770" y="170" width="190" height="55" rx="7" fill="#fff" stroke="#9673a6" stroke-width="1.5"/>
+<text x="865.0" y="201.5" text-anchor="middle" class="bt">Adaptador de mapas</text>
+<rect x="770" y="245" width="190" height="55" rx="7" fill="#fff" stroke="#9673a6" stroke-width="1.5"/>
+<text x="865.0" y="276.5" text-anchor="middle" class="bt">Adaptador de IA</text>
+<rect x="770" y="320" width="190" height="55" rx="7" fill="#fff" stroke="#9673a6" stroke-width="1.5"/>
+<text x="865.0" y="351.5" text-anchor="middle" class="bt">Adaptador de correo</text>
+<rect x="770" y="395" width="190" height="55" rx="7" fill="#fff" stroke="#9673a6" stroke-width="1.5"/>
+<text x="865.0" y="419.5" text-anchor="middle" class="bt">Adaptador de almacén de</text>
+<text x="865.0" y="433.5" text-anchor="middle" class="bt">archivos</text>
+<rect x="1030" y="95" width="180" height="55" rx="7" fill="#fff" stroke="#b85450" stroke-width="1.5"/>
+<text x="1120.0" y="126.5" text-anchor="middle" class="bt">Base de datos</text>
+<rect x="1030" y="170" width="180" height="55" rx="7" fill="#fff" stroke="#b85450" stroke-width="1.5"/>
+<text x="1120.0" y="201.5" text-anchor="middle" class="bt">Servicio de mapas</text>
+<rect x="1030" y="245" width="180" height="55" rx="7" fill="#fff" stroke="#b85450" stroke-width="1.5"/>
+<text x="1120.0" y="269.5" text-anchor="middle" class="bt">Servicio de IA (modelo de</text>
+<text x="1120.0" y="283.5" text-anchor="middle" class="bt">lenguaje)</text>
+<rect x="1030" y="320" width="180" height="55" rx="7" fill="#fff" stroke="#b85450" stroke-width="1.5"/>
+<text x="1120.0" y="351.5" text-anchor="middle" class="bt">Servicio de correo</text>
+<rect x="1030" y="395" width="180" height="55" rx="7" fill="#fff" stroke="#b85450" stroke-width="1.5"/>
+<text x="1120.0" y="426.5" text-anchor="middle" class="bt">Almacén de archivos / CDN</text>
+<line x1="260" y1="223" x2="290" y2="213" stroke="#333" stroke-width="2" marker-end="url(#ah)"/>
+<text x="275" y="212" text-anchor="middle" class="lt">invoca</text>
+<line x1="505" y1="220" x2="505" y2="250" stroke="#333" stroke-width="2" marker-end="url(#ah)"/>
+<text x="505" y="229" text-anchor="middle" class="lt">usa</text>
+<line x1="750" y1="295" x2="700" y2="307" stroke="#333" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#ah)"/>
+<text x="725" y="295" text-anchor="middle" class="lt">implementa puertos</text>
+<line x1="980" y1="265" x2="1010" y2="265" stroke="#333" stroke-width="2" marker-end="url(#ah)"/>
+<text x="995" y="259" text-anchor="middle" class="lt">usa</text>
+</svg></div></body></html>

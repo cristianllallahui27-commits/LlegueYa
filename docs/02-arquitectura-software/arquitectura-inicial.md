@@ -44,7 +44,7 @@ flowchart TD
         BD["Base de datos principal"]
         Archivos["Almacenamiento de archivos (fotos y libros)"]
         Conocimiento["Base de conocimiento turística"]
-        Cache["Caché (Redis)"]
+        Cache["Caché (tecnología por definir)"]
     end
 
     %% =========================
@@ -134,7 +134,7 @@ flowchart TD
     style Correo fill:#222,stroke:#fff,color:#fff
 ```
 
-El diagrama editable en Draw.io está en `arquitectura-inicial.drawio`.
+La imagen existente se conserva en [arquitectura-inicial-drawio.png](../img/arquitectura-inicial-drawio.png). No se dispone del archivo editable original en este repositorio.
 
 ## Descripción
 
@@ -170,16 +170,17 @@ Además, la lógica de negocio se integra con sistemas externos: el **servicio d
 
 ## Tecnologías sugeridas (no obligatorias)
 
-Tomadas del documento del proyecto: NGINX, HAProxy o balanceador gestionado; Redis como caché; Kubernetes para orquestar y autoescalar; Cloudflare o CloudFront como CDN para contenido estático (fotos); Prometheus y Grafana para monitoreo.
+Opciones históricas tomadas del documento inicial; no constituyen una selección de tecnologías para el monolito actual: NGINX, HAProxy o balanceador gestionado; Redis como caché; Kubernetes para orquestar y autoescalar; Cloudflare o CloudFront como CDN para contenido estático (fotos); Prometheus y Grafana para monitoreo.
 
 ## Fuera de alcance por ahora
 
 - Venta o cobro de entradas, pasarela de pagos, QR de boletos y control de aforo.
 - Chatbot por WhatsApp y Telegram.
-<<<<<<< HEAD
-=======
 
-## DIAGRAMA EN DRAWIO DE LLEGUE YA!
+## Imagen de la arquitectura inicial
 
-![Esquema de Arquitectura](arquitectura-inicial-drawio.png)
->>>>>>> f44e5dd8822fafc3b552279b428d0db5dbdc1bbe
+![Esquema de Arquitectura](../img/arquitectura-inicial-drawio.png)
+
+## Estado de esta vista
+
+Vista inicial conservada como antecedente. La [vista de componentes](componentes-arquitectonicos.md) precisa las interacciones y límites del alcance actual. Las integraciones pasan por adaptadores; el correo está por confirmar (RC09). Ver [diferencias con el PDF inicial](../fuentes/README.md).

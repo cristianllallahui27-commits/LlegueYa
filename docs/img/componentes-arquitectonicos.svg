@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1490" viewBox="0 0 1800 1490">
+<rect width="1800" height="1490" fill="#f8fafc"/>
+<text x="60" y="78" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#23364d">LlegueYa | Componentes arquitectónicos</text>
+<text x="60" y="117" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#23364d">Vista lógica propuesta · Monolito modular · Tecnologías por definir</text>
+<rect x="160" y="155" width="360" height="100" rx="14" fill="#e8effa" stroke="#cbd5e1" stroke-width="2"/>
+<text x="297.015625" y="199" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Turista</text>
+<text x="240.5" y="235" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Consulta y comparte</text>
+<rect x="650" y="155" width="360" height="100" rx="14" fill="#e8effa" stroke="#cbd5e1" stroke-width="2"/>
+<text x="766.5" y="199" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Proveedor</text>
+<text x="688.5" y="235" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Registra oferta y documentos</text>
+<rect x="1140" y="155" width="360" height="100" rx="14" fill="#e8effa" stroke="#cbd5e1" stroke-width="2"/>
+<text x="1231.5" y="199" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Administrador</text>
+<text x="1231.0078125" y="235" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Verifica y gestiona</text>
+<line x1="340" y1="255" x2="340" y2="290" stroke="#64748b" stroke-width="3"/>
+<polygon points="340,290 333.91048252244275,277.39374056706254 346.08951747755725,277.39374056706254" fill="#64748b"/>
+<line x1="830" y1="255" x2="830" y2="290" stroke="#64748b" stroke-width="3"/>
+<polygon points="830,290 823.9104825224427,277.39374056706254 836.0895174775573,277.39374056706254" fill="#64748b"/>
+<line x1="1320" y1="255" x2="1320" y2="290" stroke="#64748b" stroke-width="3"/>
+<polygon points="1320,290 1313.9104825224429,277.39374056706254 1326.0895174775571,277.39374056706254" fill="#64748b"/>
+<rect x="160" y="290" width="1340" height="76" rx="14" fill="#33527c" stroke="#33527c" stroke-width="2"/>
+<text x="629.0" y="340" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#ffffff">Aplicación web + chatbot web</text>
+<line x1="830" y1="366" x2="830" y2="418" stroke="#64748b" stroke-width="3"/>
+<polygon points="830,418 823.9104825224427,405.39374056706254 836.0895174775573,405.39374056706254" fill="#64748b"/>
+<text x="842.0" y="395.0" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#23364d">API REST</text>
+<rect x="55" y="420" width="1255" height="625" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+<text x="82" y="470" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#23364d">Backend: módulos internos de una misma aplicación</text>
+<rect x="82" y="493" width="1200" height="62" rx="14" fill="#33527c" stroke="#33527c" stroke-width="2"/>
+<text x="408.0078125" y="535" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#ffffff">Presentación / API REST / autorización por rol</text>
+<line x1="682" y1="555" x2="682" y2="597" stroke="#64748b" stroke-width="3"/>
+<polygon points="682,597 675.9104825224427,584.3937405670625 688.0895174775573,584.3937405670625" fill="#64748b"/>
+<rect x="82" y="598" width="392" height="121" rx="14" fill="#e8effa" stroke="#cbd5e1" stroke-width="2"/>
+<text x="223.0" y="642" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Usuarios</text>
+<text x="165.0" y="678" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Registro, sesión y roles</text>
+<text x="251.5" y="707" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">RF01</text>
+<rect x="486" y="598" width="392" height="121" rx="14" fill="#e8effa" stroke="#cbd5e1" stroke-width="2"/>
+<text x="534.0" y="642" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Sitios y puntos de venta</text>
+<text x="521.5" y="678" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Información y enlaces verificados</text>
+<text x="593.0" y="707" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">RF02-RF04, RF19</text>
+<rect x="890" y="598" width="392" height="121" rx="14" fill="#e8effa" stroke="#cbd5e1" stroke-width="2"/>
+<text x="1008.5" y="642" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Proveedores</text>
+<text x="948.0" y="678" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Oferta y revisión documental</text>
+<text x="994.5" y="707" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">RF05, RF17, RF18</text>
+<rect x="82" y="737" width="392" height="121" rx="14" fill="#e8effa" stroke="#cbd5e1" stroke-width="2"/>
+<text x="141.5" y="781" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Reseñas y puntuación</text>
+<text x="148.5" y="817" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Comentarios y moderación</text>
+<text x="186.5" y="846" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">RF06, RF07, RF21</text>
+<rect x="486" y="737" width="392" height="121" rx="14" fill="#e8effa" stroke="#cbd5e1" stroke-width="2"/>
+<text x="547.5" y="781" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Fotos de experiencias</text>
+<text x="558.0" y="817" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Publicación y moderación</text>
+<text x="590.5" y="846" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">RF08, RF09, RF21</text>
+<rect x="890" y="737" width="392" height="121" rx="14" fill="#e8effa" stroke="#cbd5e1" stroke-width="2"/>
+<text x="967.0" y="781" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Contenido turístico</text>
+<text x="949.0" y="817" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Historias, fotografías y libros</text>
+<text x="994.5078125" y="846" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">RF10, RF11, RF20</text>
+<rect x="82" y="876" width="392" height="121" rx="14" fill="#e8effa" stroke="#cbd5e1" stroke-width="2"/>
+<text x="221.0" y="920" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Paquetes</text>
+<text x="119.0" y="956" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Opciones por días y presupuesto</text>
+<text x="251.5" y="985" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">RF13</text>
+<rect x="486" y="876" width="392" height="121" rx="14" fill="#e8effa" stroke="#cbd5e1" stroke-width="2"/>
+<text x="547.5078125" y="920" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Chatbot / Asistente IA</text>
+<text x="541.5" y="956" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Presupuesto, mes y cercanía</text>
+<text x="625.5" y="985" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">RF14-RF16</text>
+<rect x="890" y="876" width="392" height="121" rx="14" fill="#e8effa" stroke="#cbd5e1" stroke-width="2"/>
+<text x="998.0" y="920" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Notificaciones</text>
+<text x="961.5" y="956" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Aviso de contenido nuevo</text>
+<text x="1059.5" y="985" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">RF12</text>
+<text x="82" y="1032" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Clean Architecture dentro de cada módulo: dominio, aplicación y adaptadores</text>
+<text x="1380" y="465" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#23364d">Integraciones previstas</text>
+<rect x="1370" y="500" width="385" height="118" rx="14" fill="#eef2f6" stroke="#cbd5e1" stroke-width="2"/>
+<text x="1522.5" y="544" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Mapas</text>
+<text x="1397.0" y="580" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Ubicaciones de sitios/proveedores</text>
+<line x1="1310" y1="558" x2="1370" y2="558" stroke="#64748b" stroke-width="3"/>
+<polygon points="1370,558 1357.3937405670624,564.0895174775573 1357.3937405670624,551.9104825224427" fill="#64748b"/>
+<rect x="1370" y="685" width="385" height="118" rx="14" fill="#eef2f6" stroke="#cbd5e1" stroke-width="2"/>
+<text x="1478.0" y="729" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Servicio de IA</text>
+<text x="1399.0" y="765" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Consulta con conocimiento propio</text>
+<line x1="1310" y1="743" x2="1370" y2="743" stroke="#64748b" stroke-width="3"/>
+<polygon points="1370,743 1357.3937405670624,749.0895174775573 1357.3937405670624,736.9104825224427" fill="#64748b"/>
+<rect x="1370" y="870" width="385" height="118" rx="14" fill="#eef2f6" stroke="#cbd5e1" stroke-width="2"/>
+<text x="1423.5" y="914" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Correo (por confirmar)</text>
+<text x="1451.0" y="950" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Canal de avisos: RC09</text>
+<line x1="1310" y1="928" x2="1370" y2="928" stroke="#64748b" stroke-width="3"/>
+<polygon points="1370,928 1357.3937405670624,934.0895174775573 1357.3937405670624,921.9104825224427" fill="#64748b"/>
+<text x="1365" y="650" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#23364d">Mediante puertos y adaptadores</text>
+<text x="1365" y="835" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#23364d">Sin proveedor técnico seleccionado</text>
+<line x1="682" y1="1045" x2="682" y2="1100" stroke="#64748b" stroke-width="3"/>
+<polygon points="682,1100 675.9104825224427,1087.3937405670624 688.0895174775573,1087.3937405670624" fill="#64748b"/>
+<rect x="82" y="1100" width="1200" height="66" rx="14" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="2"/>
+<text x="359.0" y="1142" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#23364d">Puertos y adaptadores de persistencia / archivos / caché</text>
+<line x1="278" y1="1166" x2="278" y2="1202" stroke="#64748b" stroke-width="3"/>
+<polygon points="278,1202 271.91048252244275,1189.3937405670624 284.08951747755725,1189.3937405670624" fill="#64748b"/>
+<rect x="82" y="1202" width="392" height="120" rx="14" fill="#e6f2ec" stroke="#cbd5e1" stroke-width="2"/>
+<text x="169.0" y="1246" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Datos del sistema</text>
+<text x="133.0" y="1282" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Base de datos y conocimiento</text>
+<text x="160.0" y="1311" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Motor/formato por definir</text>
+<line x1="682" y1="1166" x2="682" y2="1202" stroke="#64748b" stroke-width="3"/>
+<polygon points="682,1202 675.9104825224427,1189.3937405670624 688.0895174775573,1189.3937405670624" fill="#64748b"/>
+<rect x="486" y="1202" width="392" height="120" rx="14" fill="#e6f2ec" stroke="#cbd5e1" stroke-width="2"/>
+<text x="627.0" y="1246" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Archivos</text>
+<text x="538.5" y="1282" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Fotos y libros: públicos / CDN</text>
+<text x="542.0" y="1311" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Documentos: acceso privado</text>
+<line x1="1086" y1="1166" x2="1086" y2="1202" stroke="#64748b" stroke-width="3"/>
+<polygon points="1086,1202 1079.9104825224429,1189.3937405670624 1092.0895174775571,1189.3937405670624" fill="#64748b"/>
+<rect x="890" y="1202" width="392" height="120" rx="14" fill="#e6f2ec" stroke="#cbd5e1" stroke-width="2"/>
+<text x="1047.5" y="1246" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Caché</text>
+<text x="984.0" y="1282" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Consultas frecuentes</text>
+<text x="929.0" y="1311" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Invalidar cambios de elegibilidad</text>
+<rect x="1370" y="1202" width="385" height="120" rx="14" fill="#fff3df" stroke="#cbd5e1" stroke-width="2"/>
+<text x="1403.0078125" y="1246" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#23364d">Venta externa de entradas</text>
+<text x="1412.5" y="1282" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">Enlace verificado desde la web</text>
+<text x="1471.5078125" y="1311" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#23364d">LlegueYa no cobra</text>
+<polyline points="1500,328 1778,328 1778,1262 1755,1262" fill="none" stroke="#64748b" stroke-width="3"/>
+<line x1="1778" y1="1262" x2="1755" y2="1262" stroke="#64748b" stroke-width="3"/>
+<polygon points="1755,1262 1767.6062594329376,1255.9104825224429 1767.6062594329376,1268.0895174775571" fill="#64748b"/>
+<text x="1518" y="393" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#23364d">Abre enlace verificado</text>
+<text x="60" y="1393" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#23364d">Lectura: flechas = interacción o acceso. Módulos internos, sin despliegue independiente.</text>
+<text x="60" y="1431" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#23364d">La colaboración entre módulos y la trazabilidad completa se detallan en el documento Markdown.</text>
+</svg>
