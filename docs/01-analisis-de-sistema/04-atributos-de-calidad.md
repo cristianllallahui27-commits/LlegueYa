@@ -11,3 +11,9 @@ Escenario base: en Semana Santa, Carnavales o el Vilcas Raymi, muchos turistas c
 | AC05 | Confiabilidad de la información | Solo deben mostrarse proveedores con documentación vigente, y los comentarios y fotos deben estar asociados a un usuario registrado. |
 | AC06 | Usabilidad | El turista, nacional o extranjero, debe poder consultar, ubicarse en el mapa y usar el chatbot de forma sencilla desde el navegador. |
 | AC07 | Mantenibilidad | El sistema debe organizarse en módulos independientes, para poder cambiar una funcionalidad sin afectar a las demás. |
+
+## Aclaración para el primer entregable
+
+Los atributos generales se conservan; sus escenarios verificables y metas propuestas están en [08-escenarios-atributos-calidad.md](08-escenarios-atributos-calidad.md). No hay resultados de pruebas ejecutadas.
+
+Ver [fuentes y pendientes](../fuentes/README.md).

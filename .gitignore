@@ -12,3 +12,7 @@ Thumbs.db
 *.drawio.bkp
 .$*.bkp
 .$*.dtmp
+
+# Material de trabajo local; no forma parte del entregable
+/tmp/
+/respaldo-pull-*/

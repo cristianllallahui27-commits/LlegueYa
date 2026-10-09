@@ -13,5 +13,10 @@
 | RC09 | Notificaciones por correo | Las notificaciones de nuevo contenido se envían por correo electrónico (por confirmar). |
 | RC10 | Alcance actual | Por ahora no se implementan los canales WhatsApp ni Telegram; el chatbot es solo web. |
 | RC11 | Derechos de contenido | Las fotografías, historias y libros publicados deben contar con autorización de sus autores o titulares (sugerida). |
-| RC12 | Calendario de festividades fijo| Carnaval (feb–mar), Semana Santa (mar–abr) y Vilcas Raymi (28–29 jul) no se pueden mover; las recomendaciones de mes dependen de ellas.
-| RC13 | Dependencia de fuentes oficiales | Horarios, distancias y datos de temporada provienen de PromPerú, Mincetur y la DDC, y deben mantenerse actualizados.
+| RC12 | Calendario turístico de referencia | El material inicial sitúa Carnaval entre febrero y marzo, Semana Santa entre marzo y abril y Vilcas Raymi el 28-29 de julio. Las recomendaciones deben consultar las fechas oficiales de cada año; estas referencias no constituyen un calendario vigente verificado. |
+| RC13 | Dependencia de fuentes oficiales | Horarios, distancias y datos de temporada provienen de PromPerú, Mincetur y la DDC, y deben mantenerse actualizados. |
+## Aclaración para el primer entregable
+
+RC09 permanece por confirmar y RC11 es sugerida. RC12 expresa referencias estacionales del material inicial: Carnaval y Semana Santa tienen fechas variables que se deben confirmar para cada año; no se presupone un calendario fijo vigente. RC13 exige actualización de fuentes, no una integración automática implementada.
+
+Ver [fuentes y pendientes](../fuentes/README.md).

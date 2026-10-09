@@ -33,3 +33,9 @@ Fuente: Reporte Regional de Turismo de Ayacucho, Mincetur (marzo 2025), citado e
 
 ## Resultado
 Objetivos del negocio definidos (OB01 a OB05). Alimentan los requisitos, atributos de calidad y drivers del análisis.
+
+## Aclaración para el primer entregable
+
+Las cifras y afirmaciones contextuales proceden del documento inicial y se conservan como antecedentes; no se han actualizado ni auditado externamente. No permiten inferir usuarios concurrentes del sistema.
+
+Ver [fuentes y pendientes](../fuentes/README.md).

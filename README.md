@@ -1,52 +1,60 @@
 # LlegueYa
+
 Sistema inteligente de guía turística y viaje seguro al patrimonio arqueológico y cultural de Ayacucho.
 
-## Integrantes
-- LLALLAHUI GOMEZ, Cristian Mier - 27222118
-- ATAO HUAMAN, Yordi Ajeo - 27222121
+## Equipo y curso
 
-## Descripción
-Plataforma web de guía turística para los sitios arqueológicos de Ayacucho (Wari, Vilcashuamán, Intihuatana/Pumacocha, Quinua y otros). LlegueYa **no vende entradas**: guía al turista hacia el sitio de venta (presencial o virtual) mediante su ubicación en el mapa. Además ofrece proveedores con documentación verificada (hospedaje, restaurantes, transporte) con puntuación y comentarios, fotos de experiencias, historias y fotografías de personas, libros turísticos con notificaciones y un chatbot web que recomienda según el presupuesto y el mejor mes para viajar.
+- LLALLAHUI GOMEZ, Cristian Mier - 27222118.
+- ATAO HUAMAN, Yordi Ajeo - 27222121.
 
-## Caso de estudio
-LlegueYa: propuesta de plataforma de turismo seguro para Ayacucho (documento `llegueYa_ARQUITECTURA.pdf`), ajustada para guiar a los sitios de venta en lugar de vender boletos.
+Arquitectura de Software (IS-488), Escuela Profesional de Ingeniería de Sistemas, UNSCH. Docente: Ing. Lizbeth Jaico Quispe. Semestre 2026-II.
 
-## Curso
-Arquitectura de Software (IS-488) - Escuela Profesional de Ingeniería de Sistemas, UNSCH.
-Docente: Ing. Lizbeth Jaico Quispe - Semestre 2026-II.
+## Alcance actual
 
-## Alcance
-Incluye: sitios con ubicación en mapa y enlace al sitio de venta, proveedores verificados, puntuación y comentarios, fotos de experiencias, historias, fotografías y libros con notificaciones, paquetes y chatbot web.
-No incluye: venta o cobro de entradas, pasarela de pagos, QR de boletos, control de aforo, ni chatbot por WhatsApp o Telegram.
+Plataforma web que orienta al turista hacia sitios arqueológicos y sus puntos/enlaces de venta de entradas; permite consultar proveedores con documentación verificada, puntuaciones, comentarios, fotos de experiencias, historias, fotografías y libros turísticos. Incluye propuestas de paquetes y un chatbot web que orienta por presupuesto y temporada.
 
-## Entregables
-| Guía | Entregable | Archivo |
-|---|---|---|
-| 02 | Actores, historias de usuario, requisitos funcionales, atributos de calidad, restricciones y drivers | `analisis-de-sistema/01` a `06` |
-| 02 | Arquitectura inicial en 3 capas | `arquitectura/arquitectura-inicial.*` |
-| 03 | 1. Necesidad del negocio | `analisis-de-sistema/00-necesidad-del-negocio.md` |
-| 03 | 4. Drivers arquitectónicos (con DA10 y DA11) | `analisis-de-sistema/06-drivers-arquitectonicos.md` |
-| 03 | 5. Decisiones arquitectónicas (ADR) | `arquitectura/decisiones-arquitectonicas.md` |
-| 03 | 6. Estilo arquitectónico | `arquitectura/estilo-arquitectonico.*` |
-| 03 | Enfoque: Clean Architecture | `arquitectura/enfoque/enfoque-arquitectonico.*` |
+LlegueYa **no vende ni cobra entradas**. No incluye pagos, emisión/validación QR, aforo ni chatbot por WhatsApp/Telegram. El alcance actual está registrado en los requisitos y ADR; las diferencias con el PDF inicial se explican en [fuentes y pendientes](docs/fuentes/README.md).
 
-## Estructura del repositorio
-```
-LlegueYa-arquitSoft-02
-├── analisis-de-sistema
-│   ├── 00-necesidad-del-negocio.md
-│   ├── 01-actores.md
-│   ├── 02-historias-de-usuario.md
-│   ├── 03-requisitos-funcionales.md
-│   ├── 04-atributos-de-calidad.md
-│   ├── 05-restricciones.md
-│   └── 06-drivers-arquitectonicos.md
-├── arquitectura
-│   ├── arquitectura-inicial.md / .drawio / .html
-│   ├── decisiones-arquitectonicas.md
-│   ├── estilo-arquitectonico.md / .drawio / .html
-│   └── enfoque
-│       └── enfoque-arquitectonico.md / .drawio / .html
-├── .gitignore
+## Primer entregable: índice
+
+| Sección | Documentación |
+|---|---|
+| 01. Análisis del sistema | [Necesidad](docs/01-analisis-de-sistema/00-necesidad-del-negocio.md), [actores](docs/01-analisis-de-sistema/01-actores.md), [historias](docs/01-analisis-de-sistema/02-historias-de-usuario.md), [requisitos](docs/01-analisis-de-sistema/03-requisitos-funcionales.md), [calidad](docs/01-analisis-de-sistema/04-atributos-de-calidad.md), [restricciones](docs/01-analisis-de-sistema/05-restricciones.md), [drivers](docs/01-analisis-de-sistema/06-drivers-arquitectonicos.md), [ADR](docs/01-analisis-de-sistema/07-decisiones-arquitectonicas.md) y [escenarios medibles](docs/01-analisis-de-sistema/08-escenarios-atributos-calidad.md). |
+| 02. Arquitectura de software | [Arquitectura inicial](docs/02-arquitectura-software/arquitectura-inicial.md), [estilo](docs/02-arquitectura-software/estilo-arquitectonico.md), [enfoque Clean Architecture](docs/02-arquitectura-software/enfoque-arquitectonico.md) y [componentes](docs/02-arquitectura-software/componentes-arquitectonicos.md). |
+| 03. Diseño de software | [Diseño interno de módulos](docs/03-diseño-de-software/diseño-interno/diseño-interno-de-modulos.md), [patrones de diseño](docs/03-diseño-de-software/diseño-interno/patrones-de-diseño.md) y [principios de diseño](docs/03-diseño-de-software/diseño-interno/principios-de-diseño.md). |
+| 04. Modelo C4 | A cargo del colaborador; pendiente de integración. Esta reorganización no crea ni modifica sus archivos. |
+| Fuentes | [Documentos base, diferencias de alcance y pendientes](docs/fuentes/README.md). |
+| Tecnología | [Ejemplo conceptual sin stack elegido](tecnologia/README.md). |
+
+## Estructura
+
+```text
+LlegueYa/
+├── docs/
+│   ├── 01-analisis-de-sistema/
+│   │   └── 00 a 08: necesidad, análisis, ADR y escenarios
+│   ├── 02-arquitectura-software/
+│   │   ├── arquitectura-inicial.md
+│   │   ├── componentes-arquitectonicos.md
+│   │   ├── estilo-arquitectonico.md / .drawio / .html
+│   │   ├── enfoque-arquitectonico.md
+│   │   └── enfoque/ (recursos conservados)
+│   ├── 03-diseño-de-software/
+│   │   └── diseño-interno/
+│   │       ├── diseño-interno-de-modulos.md
+│   │       ├── patrones-de-diseño.md
+│   │       └── principios-de-diseño.md
+│   ├── img/
+│   └── fuentes/
+├── tecnologia/
+│   └── README.md
 └── README.md
 ```
+
+La carpeta prevista `docs/04-modelo-c4/` será incorporada por el colaborador. No aparece en el árbol actual porque todavía no contiene entregables.
+
+## Estado y exposición
+
+Este repositorio contiene **documentación de análisis y diseño**, no una aplicación construida. Los nombres técnicos nuevos son propuestas conceptuales; las métricas de calidad tienen estado por validar y no se presentan como pruebas realizadas.
+
+La Guía 04 solicita entregar la URL del repositorio y exponer durante 12 minutos por equipo. Cada integrante debe explicar de qué requisito surge cada componente. Las secciones 1-3 están preparadas para revisión; el sprint aún requiere integrar C4 y resolver los pendientes señalados en las fuentes.

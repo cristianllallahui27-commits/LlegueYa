@@ -21,3 +21,9 @@ LlegueYa es una plataforma digital de guía turística para los sitios arqueoló
 | Servicio de correo | Enviar las notificaciones a los usuarios. |
 
 
+
+## Aclaración para el primer entregable
+
+La integración de correo es prevista y permanece por confirmar según RC09. Un punto de venta presencial es un destino de orientación, no una API que se presuponga disponible.
+
+Ver [fuentes y pendientes](../fuentes/README.md).

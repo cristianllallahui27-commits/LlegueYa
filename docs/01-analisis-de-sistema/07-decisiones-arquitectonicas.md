@@ -1,6 +1,6 @@
 # Decisiones arquitectónicas (ADR)
 
-ADR (Architecture Decision Record): registro de las decisiones importantes de la arquitectura y su justificación. Las decisiones responden a los drivers de `analisis-de-sistema/06-drivers-arquitectonicos.md`.
+ADR (Architecture Decision Record): registro de las decisiones importantes de la arquitectura y su justificación. Las decisiones responden a los drivers de [drivers arquitectónicos](06-drivers-arquitectonicos.md).
 
 | ID | Decisión arquitectónica | Driver relacionado | Justificación | Resultado |
 |---|---|---|---|---|
@@ -29,3 +29,7 @@ ADR (Architecture Decision Record): registro de las decisiones importantes de la
 | ADR-009 | Acceso sin autenticación a todas las funciones. | Se necesita registro e inicio de sesión para comentar, puntuar y subir fotos. |
 
 > Nota: las decisiones son una propuesta del equipo. Las tecnologías concretas (framework, base de datos, proveedor de nube) se definen en la etapa de tecnologías.
+
+## Estado del registro
+
+Estas decisiones documentan el diseño del equipo; no acreditan implementación ni despliegue. El canal de correo sigue por confirmar (RC09). Aprobación, vigencia documental e invalidación de caché requieren precisión antes de implementar. Ver [fuentes y diferencias de alcance](../fuentes/README.md).

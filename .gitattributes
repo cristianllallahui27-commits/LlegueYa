@@ -1,0 +1,9 @@
+# Conservar fuentes e imágenes sin conversión de finales de línea
+*.pdf binary
+*.png binary
+
+# Documentación y diagramas de texto
+*.md text eol=lf
+*.svg text eol=lf
+*.drawio text eol=lf
+*.html text eol=lf
