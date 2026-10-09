@@ -2,7 +2,7 @@
 
 ## Alcance y estado
 
-Vista lógica de responsabilidades de la aplicación, derivada de RF01-RF21 y de ADR-001/ADR-002. Es **diseño propuesto**, no inventario de servicios implementados. Los módulos forman un monolito; no se despliegan como nueve microservicios. El detalle de los cuatro niveles C4 se elaborará por separado en la sección 4 a cargo del colaborador.
+Vista lógica de responsabilidades de la aplicación, derivada de RF01-RF21 y de ADR-001/ADR-002. Es **diseño propuesto**, no inventario de servicios implementados. Los módulos forman un monolito; no se despliegan como nueve microservicios. Los cuatro niveles C4 se documentan por separado en `modelo-c4/`, entrega del colaborador conservada sin modificaciones y fuera de la revisión de contenido de este cambio.
 
 ## Diagrama
 

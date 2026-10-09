@@ -33,7 +33,7 @@ El monolito modular y Clean Architecture son propuestas del equipo registradas e
 - Precisar si la moderación ocurre antes o después de publicar, escala de puntuación y reglas de fotos.
 - Actualizar fechas/horarios/precios con fuentes oficiales antes de mostrarlos como vigentes. RC12 es una referencia estacional del material inicial; las fechas variables de Carnaval y Semana Santa no equivalen a un calendario fijo aprobado para cada año.
 - Definir invalidación de caché y contratos del chatbot; no recomendar ofertas inelegibles ni presentar precios inventados.
-- Integrar `04-modelo-c4` del colaborador mediante el flujo Git del equipo. Este cambio no crea ni modifica esa sección.
+- Revisar conjuntamente la coherencia de C4 con las secciones 1-3. El colaborador incorporó los cuatro niveles en `modelo-c4/` (`e50d899`, integrado por `bf1dc91`); se conservaron sin modificaciones al integrar el remoto. Este cambio no crea ni modifica sus archivos. La ubicación propuesta por la guía, `docs/04-modelo-c4/`, puede acordarse después con el colaborador.
 
 ## Revisión de la guía
 
@@ -43,6 +43,6 @@ El monolito modular y Clean Architecture son propuestas del equipo registradas e
 | Escenarios medibles por atributo | `01-analisis-de-sistema/08-escenarios-atributos-calidad.md`, siete escenarios con las seis partes. |
 | Componentes e imagen en Markdown | `02-arquitectura-software/componentes-arquitectonicos.md` y `docs/img/componentes-arquitectonicos.png`. |
 | Diseño interno, patrones y SOLID | Tres archivos en `03-diseño-de-software/diseño-interno`. |
-| Modelo C4 | Pendiente del colaborador, según reparto del equipo. |
+| Modelo C4 | Recibido del colaborador en `modelo-c4/`, conservado sin modificaciones y fuera de la revisión de contenido de este cambio. |
 | Ejemplo tecnológico | Pseudocódigo en `tecnologia`; sin afirmar stack elegido ni aplicación ejecutable. |
-| Exposición | La guía establece 12 minutos por equipo, participación de todo el equipo y trazabilidad de componentes a requisitos. No se declara completo el sprint mientras falte C4. |
+| Exposición | La guía establece 12 minutos por equipo, participación de todo el equipo y trazabilidad de componentes a requisitos. Corresponde al equipo revisar la coherencia del conjunto antes de exponer. |
