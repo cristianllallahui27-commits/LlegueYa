@@ -1,39 +1,7 @@
-# Recursos tecnológicos de LlegueYa
+# Consideraciones tecnológicas de LlegueYa
 
-La Guía 04 separa ejemplos técnicos de la documentación de `docs`. LlegueYa todavía no tiene lenguaje, framework, base de datos o proveedor de nube seleccionado ni aplicación implementada.
+El sistema se diseña con siete servicios de negocio independientes, API REST y eventos durables. Cada servicio aplica Clean Architecture y posee sus datos. No se seleccionan todavía lenguaje, framework, base de datos, nube o transporte de mensajería.
 
-Este ejemplo es **pseudocódigo didáctico**, no código ejecutable ni elección de stack. Ilustra Clean Architecture para RF05.
+La infraestructura debe permitir almacenamiento privado de evidencias, entrega autorizada de galerías y CDN para portadas públicas; ejecución persistida de recordatorios y tareas comerciales; autorización por sesión/propiedad; outbox e idempotencia; observabilidad y aislamiento de fallos por servicio.
 
-```text
-contrato ConsultaProveedoresVerificados:
-    listar(filtros) -> lista de ofertas públicas elegibles
-
-contrato RepositorioProveedores:
-    listarElegibles(filtros) -> proveedores aprobados y vigentes
-
-caso de uso ListarProveedoresVerificados(repositorio: RepositorioProveedores):
-    ejecutar(filtros):
-        proveedores = repositorio.listarElegibles(filtros)
-        devolver datos públicos de proveedores
-        // No devolver documentos privados ni credenciales.
-
-adaptador PersistenciaProveedores implementa RepositorioProveedores:
-    listarElegibles(filtros):
-        consultar persistencia con filtros y regla de elegibilidad
-        convertir resultado a entidades del dominio
-
-controlador Proveedores(casoDeUso):
-    consultar(solicitud):
-        validar filtros de la solicitud
-        resultado = casoDeUso.ejecutar(filtros)
-        convertir resultado a respuesta HTTP
-
-composición:
-    repositorio = PersistenciaProveedores(configuración futura)
-    casoDeUso = ListarProveedoresVerificados(repositorio)
-    controlador = Proveedores(casoDeUso)
-```
-
-El caso de uso depende del contrato y el adaptador lo implementa. Una implementación en memoria podría sustituirlo en pruebas de contrato cuando se programe. La regla de elegibilidad pertenece a Proveedores; los criterios de vigencia documental deben acordarse antes de implementarla.
-
-Referencias: [diseño interno](../docs/03-diseño-de-software/diseño-interno/diseño-interno-de-modulos.md), [patrones](../docs/03-diseño-de-software/diseño-interno/patrones-de-diseño.md) y [SOLID](../docs/03-diseño-de-software/diseño-interno/principios-de-diseño.md).
+Este directorio no contiene implementación. Los contratos y clases de los documentos son elementos conceptuales. La elección tecnológica se evaluará respecto a [drivers](../docs/01-analisis-de-sistema/06-drivers-arquitectonicos.md), [escenarios de calidad](../docs/01-analisis-de-sistema/08-escenarios-atributos-calidad.md) y [diseño de servicios](../docs/04-especificacion-funcional/02-arquitectura-y-diseno.md).

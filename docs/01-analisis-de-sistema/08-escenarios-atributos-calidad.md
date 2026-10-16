@@ -1,6 +1,8 @@
 # Escenarios de atributos de calidad de LlegueYa
 
-La Guía 04 (pp. 9-11) pide convertir los atributos generales en escenarios verificables. Se conservan los siete atributos AC01-AC07 del análisis de LlegueYa y sus identificadores. Cada escenario incluye fuente, estímulo, artefacto, entorno, respuesta y medida, además de su verificación.
+
+
+Los escenarios relacionan atributos AC01-AC07 con fuente, estímulo, artefacto, entorno, respuesta, medida y verificación. Incluyen acceso autenticado, aprobación de propuestas, publicidad y operación distribuida.
 
 **Estado del entregable:** diseño documental. No hay implementación ni resultados de pruebas en este repositorio. Los valores numéricos de rendimiento, disponibilidad, escalabilidad y usabilidad son **propuestas por validar**, no compromisos aprobados ni cifras de usuarios reales. Los valores de 200 usuarios, 2/3 segundos y 99,5 % se toman como referencia del ejemplo académico de la guía; no se deducen de los arribos turísticos anuales.
 
@@ -32,7 +34,7 @@ Trazabilidad: RF02, RF05, RF07, RF09, RF11; DA02; ADR-003 y ADR-004.
 | Verificación | Calcular disponibilidad como comprobaciones exitosas / comprobaciones programadas × 100; simular fallo de IA y revisar las operaciones independientes. |
 | Estado | Pendientes: aprobar meta, intervalo de monitoreo, ventanas de mantenimiento y tiempo límite de espera de IA. |
 
-Trazabilidad: RF02, RF05, RF14-RF16; DA01 y DA06; ADR-001 y ADR-005. Replicar el monolito no garantiza por sí solo la disponibilidad de la base de datos.
+Trazabilidad: RF02, RF05, RF14-RF16; DA01 y DA06; ADR-001 y ADR-005. Replicar servicios no garantiza la disponibilidad de sus almacenes de datos; se evalúa cada dependencia.
 
 ## EQ-03. Escalabilidad: aumento de consultas (AC03)
 
@@ -47,7 +49,7 @@ Trazabilidad: RF02, RF05, RF14-RF16; DA01 y DA06; ADR-001 y ADR-005. Replicar el
 | Verificación | Aumentar la carga por etapas; registrar latencia, errores, CPU, memoria, conexiones y solicitudes por segundo. |
 | Estado | Pendientes: confirmar demanda esperada, número de réplicas, infraestructura y duración de cada etapa. |
 
-Trazabilidad: DA01; ADR-001. No se propone desplegar cada módulo como microservicio.
+Trazabilidad: DA01; ADR-001. Los servicios se despliegan independientemente y se evalúan con su demanda y dependencias.
 
 ## EQ-04. Seguridad: funciones protegidas y enlaces verificados (AC04)
 
@@ -75,7 +77,7 @@ Trazabilidad: RF01, RF04, RF18-RF21; RC06; DA03 y DA11; ADR-006 y ADR-009.
 | Respuesta | Excluir proveedores no aprobados o sin documentación vigente de consultas, paquetes y recomendaciones; asociar reseñas/fotos a su autor registrado. |
 | Medida | **Criterio propuesto:** cero proveedores no elegibles en las consultas posteriores a completar el cambio de estado e invalidar la caché; el 100 % de reseñas/fotos aceptadas en pruebas conserva la referencia a un usuario registrado. |
 | Verificación | Suspender un proveedor y consultar los tres consumidores; revisar autoría y rechazo de publicaciones sin sesión. |
-| Estado | Pendientes: definir vigencia por tipo de documento, momento de publicación/moderación y consistencia de caché. No se presume consulta automática a SUNAT u otra entidad. |
+| Estado | Pendientes: definir vigencia por tipo de documento, duración de revisión y metas de propagación de caché. No se presume consulta automática a SUNAT u otra entidad. |
 
 Trazabilidad: RF05-RF09, RF13, RF16-RF18, RF21; RC07; DA04 y DA08; ADR-003, ADR-007 y ADR-008.
 
@@ -122,3 +124,8 @@ Trazabilidad: DA05 y DA10; ADR-002 y ADR-005.
 | EQ-07 | AC07 Mantenibilidad | Sustituir adaptadores respetando contratos. |
 
 Fuentes: [atributos existentes](04-atributos-de-calidad.md), [requisitos](03-requisitos-funcionales.md), [drivers](06-drivers-arquitectonicos.md), [ADR](07-decisiones-arquitectonicas.md) y [Guía 04](../fuentes/GUIA-004-ASF.pdf).
+
+
+## Escenarios de servicios, acceso y comunidad
+
+Los [EQ-08-EQ-17](../04-especificacion-funcional/02-arquitectura-y-diseno.md#7-escenarios-de-calidad) comprueban muro, idempotencia, revalidación publicitaria, permisos, imágenes, fallos parciales, beneficio gratuito, acceso a detalle y aprobación de propuestas. Son metas de diseño sin mediciones ejecutadas.

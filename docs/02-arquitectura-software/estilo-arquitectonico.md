@@ -2,76 +2,51 @@
 
 ## Estilo seleccionado
 
-**Monolito modular organizado en capas** (Presentación, Lógica de negocio y Datos), con un frontend web que se comunica con el backend mediante una API REST.
+**Arquitectura distribuida orientada a servicios de negocio**, con despliegues independientes, consultas REST y propagación de cambios por eventos durables. Cada servicio tiene límites de responsabilidad, datos y despliegue propios.
 
-| Elemento | Descripción aplicada a LlegueYa |
+| Elemento | Decisión de LlegueYa |
 |---|---|
-| Estilo | Monolito modular en capas, cliente-servidor sobre API REST. |
-| Unidad de despliegue | Una sola aplicación desplegable. La organización lógica es por módulos; el despliegue es único. |
-| Módulos | Usuarios, Sitios y puntos de venta, Proveedores, Reseñas y puntuación, Fotos de experiencias, Historias fotografías y libros, Paquetes y recomendaciones, Chatbot / Asistente IA y Notificaciones. |
-| Escalamiento | Horizontal: se replica la aplicación detrás de un balanceador de carga para las fechas de festividad. Los archivos estáticos (fotos y libros) se sirven por CDN. |
-| Integraciones | Servicio de mapas, sitios de venta de entradas (solo redirección), servicio de IA y servicio de correo. |
+| Despliegue | Siete servicios independientes detrás de una entrada API estable. |
+| Servicios | Identidad; Catálogo y proveedores; Comunidad y contenido; Eventos y notificaciones; Publicidad y planes; Recomendaciones y paquetes; Asistente turístico. |
+| Diseño interno | Clean Architecture en cada servicio; dominio sin dependencias de red o framework. |
+| Datos | Propiedad exclusiva por servicio; bases/esquemas y credenciales aislados, sin acceso a tablas ajenas. |
+| Comunicación | REST con autorización para consultas; eventos durables con outbox e idempotencia para cambios. |
+| Lecturas y fotos | Vistas previas públicas, detalle autenticado, paginación y entrega de imágenes según permisos. |
+| Escalamiento | Cada servicio puede replicarse según su demanda, sin desplegar todos los demás. |
+| Fallos | Límites de tiempo, reintentos acotados y degradación de IA/publicidad sin detener consultas independientes. |
 
 ## Diagrama
 
-Diagrama editable: [Draw.io](estilo-arquitectonico.drawio). Versión web: [HTML](estilo-arquitectonico.html).
+[Diagrama editable Draw.io](estilo-arquitectonico.drawio) y [vista HTML](estilo-arquitectonico.html).
 
 ```mermaid
-flowchart TD
-    subgraph ACTORES["ACTORES"]
-        Turista["Turista"]
-        Proveedor["Proveedor"]
-        Admin["Administrador"]
-    end
-
-    subgraph PRESENTACION["PRESENTACIÓN"]
-        Web["Aplicación web + chatbot web"]
-        API["API REST"]
-        CDN["CDN (fotos y libros)"]
-    end
-
-    subgraph NEGOCIO["LÓGICA DE NEGOCIO - monolito modular"]
-        Usuarios["Usuarios"]
-        Sitios["Sitios y puntos de venta"]
-        Proveedores["Proveedores"]
-        Resenas["Reseñas y puntuación"]
-        Experiencias["Fotos de experiencias"]
-        Contenido["Historias, fotografías y libros"]
-        Paquetes["Paquetes y recomendaciones"]
-        Chatbot["Chatbot / Asistente IA"]
-        Notificaciones["Notificaciones"]
-    end
-
-    subgraph DATOS["DATOS"]
-        BD["Base de datos principal"]
-        Archivos["Almacén de archivos"]
-        Conocimiento["Base de conocimiento turística"]
-        Cache["Caché"]
-    end
-
-    subgraph EXTERNOS["SISTEMAS EXTERNOS"]
-        Mapas["Servicio de mapas"]
-        Venta["Sitios de venta de entradas"]
-        IA["Servicio de IA"]
-        Correo["Servicio de correo"]
-    end
-
-    ACTORES --> PRESENTACION
-    PRESENTACION -->|"API REST"| NEGOCIO
-    NEGOCIO --> DATOS
-    NEGOCIO -->|"integraciones"| EXTERNOS
+flowchart TB
+    Web["Web y paneles"] --> API["Entrada API"]
+    API --> I["Identidad"]
+    API --> C["Catálogo y proveedores"]
+    API --> M["Comunidad y contenido"]
+    API --> E["Eventos y notificaciones"]
+    API --> P["Publicidad y planes"]
+    API --> R["Recomendaciones y paquetes"]
+    API --> A["Asistente turístico"]
+    A --> R
+    A --> P
+    A --> E
+    R --> C
+    P --> C
+    C --> B["Eventos durables"]
+    M --> B
+    P --> B
+    B --> E
+    B --> R
+    B --> A
+    B --> P
 ```
 
-## Reglas del estilo
+## Reglas y consecuencias
 
-1. El flujo funcional va de presentación a casos de uso y datos mediante puertos. Las dependencias del código siguen Clean Architecture: el dominio no depende de infraestructura, y los adaptadores implementan contratos internos.
-2. Un módulo no accede a las tablas de otro módulo: se comunica con su servicio.
-3. Todo se ejecuta en una única aplicación desplegable (ADR-001).
-4. Frontend y backend se comunican solo por API REST (ADR-009).
+Cada servicio mantiene sus transacciones y valida permisos. Cambios de estado se propagan mediante eventos versionados, reintentables y deduplicados. Proyecciones y cachés no habilitan proveedores suspendidos: las nuevas entregas publicitarias se revalidan contra Catálogo. El periodo gratuito y los pagos pertenecen a Publicidad, no a Identidad ni al modelo de IA.
 
-## Decisiones relacionadas
-ADR-001 (monolito modular), ADR-003 (caché), ADR-004 (archivos y CDN), ADR-009 (API REST). Ver [ADR](../01-analisis-de-sistema/07-decisiones-arquitectonicas.md).
+La distribución implica latencia de red, fallos parciales, operación por servicio y consistencia eventual. Los siete servicios se agrupan por capacidad de negocio y exponen contratos versionados.
 
-## Estado y relación con el enfoque
-
-El monolito modular es la organización y unidad de despliegue **propuesta**; Clean Architecture es la organización interna de dependencias. La replicación, balanceo, caché y CDN no están desplegados ni demuestran las metas de calidad. El frontend es la interfaz cliente; no se ha definido si se publica junto al backend o como recurso separado. El correo sigue por confirmar (RC09).
+Detalle: [arquitectura y diseño](../04-especificacion-funcional/02-arquitectura-y-diseno.md). Las vistas Mermaid de los documentos describen el sistema. Stack e infraestructura se definirán al implementar.

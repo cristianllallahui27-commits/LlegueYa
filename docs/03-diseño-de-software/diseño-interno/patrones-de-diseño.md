@@ -1,8 +1,10 @@
 # Patrones de diseño de LlegueYa
 
+
+
 ## Contexto
 
-Diseño propuesto para un monolito modular con Clean Architecture (ADR-001, ADR-002). **No hay backend implementado en este repositorio.** Se distingue lo derivado de decisiones existentes de una alternativa futura. No se copia la tecnología del Marketplace: LlegueYa no define Node.js, PostgreSQL, Stripe, ERP ni pagos.
+Diseño propuesto para servicios independientes con Clean Architecture (ADR-015, ADR-002). **No hay backend implementado en este repositorio.** Las tecnologías no están seleccionadas; los pagos externos de publicidad se registran sin una pasarela automática.
 
 ## Patrones del diseño propuesto
 
@@ -12,7 +14,7 @@ Diseño propuesto para un monolito modular con Clean Architecture (ADR-001, ADR-
 | Repository | Persistencia de cada módulo, con Proveedores como ejemplo. | Los casos de uso solicitan buscar/guardar entidades sin conocer SQL ni ORM. | RepositorioProveedores → AdaptadorPersistenciaProveedores; buscarPorId, guardar y listarElegibles. | ADR-002; DA04 y DA10. |
 | Decorator | Consultas frecuentes de sitios y proveedores. **Propuesta para concretar ADR-003.** | Envolver un contrato de consulta: consultar caché y, si no hay dato válido, consultar la fuente. La caché no cambia el contrato ni las reglas de elegibilidad. | ConsultaProveedoresConCache envuelve ConsultaProveedoresVerificados. | ADR-003; DA02 y DA04. |
 
-Repository es un patrón de acceso a datos; no se presenta como un patrón GoF. Clean Architecture y el monolito modular son decisiones de arquitectura, no patrones de diseño de clases.
+Repository es un patrón de acceso a datos; no se presenta como un patrón GoF. Clean Architecture y la distribución en servicios son decisiones de arquitectura, no patrones de diseño de clases.
 
 ## Ejemplo aplicado: proveedor suspendido
 
@@ -29,7 +31,7 @@ La propuesta de Decorator requiere definir claves, caducidad, invalidación y co
 |---|---|---|
 | Observer | Avisar a Notificaciones cuando Contenido confirma una publicación (RF12). | No adoptado. Evaluar si aparecen varios consumidores del aviso. Para el diseño actual basta una llamada explícita después de persistir; un evento interno tampoco obliga a usar RabbitMQ o Kafka. |
 
-No se agregan Factory, Strategy ni Singleton sin una necesidad documentada. La composición de dependencias conecta implementaciones, pero no exige un contenedor de inyección ni un framework específico.
+Los patrones se seleccionan por su utilidad para el caso de uso. La composición de dependencias conecta implementaciones, pero no exige un contenedor de inyección ni un framework específico.
 
 ## Verificación futura
 

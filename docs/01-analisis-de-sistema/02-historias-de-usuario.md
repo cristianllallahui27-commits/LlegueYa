@@ -1,6 +1,6 @@
 # 02 - Historias de usuario
 
-Formato: Como [actor], quiero [acción], para [beneficio].
+Turista es un único actor; su acceso depende de si ha iniciado sesión. Proveedor y Administrador disponen de permisos propios.
 
 | ID | Historia de usuario |
 |---|---|
@@ -23,3 +23,27 @@ Formato: Como [actor], quiero [acción], para [beneficio].
 | HU17 | Como administrador, quiero registrar sitios con sus puntos y enlaces de venta y su ubicación, para guiar al turista al lugar correcto. |
 | HU18 | Como administrador, quiero publicar y gestionar historias, fotografías y libros, para mantener actualizado el contenido turístico. |
 | HU19 | Como administrador, quiero moderar reseñas y fotos de los usuarios, para mantener contenido adecuado. |
+| HU20 | Como turista quiero publicar mi experiencia con fotos y consejos para orientar a otros viajeros. |
+| HU21 | Como turista quiero comentar con fotos y reportar contenido para participar en una comunidad moderada. |
+| HU22 | Como administrador quiero ampliar destinos y categorías para mantener el catálogo turístico. |
+| HU23 | Como turista quiero consultar actividades por mes, año y destino para planificar mi viaje. |
+| HU24 | Como turista quiero elegir qué avisos recibir y consultar mis notificaciones para conocer actividades y cambios. |
+| HU25 | Como propietario quiero definir planes y tarifas para ofrecer espacios promocionales. |
+| HU26 | Como proveedor quiero solicitar promoción y conocer su pago, estado y vigencia para difundir mi servicio. |
+| HU27 | Como turista quiero recomendaciones según mi familia y presupuesto para evaluar un viaje viable. |
+| HU28 | Como proveedor quiero publicar mis servicios, paquetes y fotos para atraer turistas. |
+| HU29 | Como propietario quiero ofrecer inicialmente un mes gratis y poder cambiar su duración y condiciones. |
+| HU30 | Como proveedor quiero conocer el vencimiento del beneficio y contratar continuidad publicitaria. |
+| HU31 | Como propietario quiero definir tarifas y alcance de cada plan para gestionar la publicidad. |
+| HU32 | Como proveedor quiero mayor difusión y recomendaciones patrocinadas según mi plan y conocer sus resultados. |
+| HU33 | Como turista quiero que las opciones anunciadas sean pertinentes y estén verificadas. |
+| HU34 | Como turista quiero explorar vistas previas sin cuenta y acceder a información detallada y opciones personales al registrarme o iniciar sesión. |
+| HU35 | Como turista quiero identificar categorías acreditadas, reseñas y fotos para comparar servicios. |
+| HU36 | Como turista o proveedor quiero proponer un evento con fotos y ubicación para que administración revise su publicación. |
+| HU37 | Como turista quiero compartir lugares visitados y proponer camping y actividades con fotos para orientar a la comunidad. |
+| HU38 | Como turista quiero explorar vistas previas y acceder a los detalles al registrarme o iniciar sesión. |
+| HU39 | Como administrador quiero difundir eventos y lugares aprobados y controlar su publicidad. |
+| HU40 | Como usuario registrado quiero dar y retirar likes en fotos y comentarios para expresar qué contenido me gusta. |
+| HU41 | Como usuario registrado quiero comentar fotos y responder a otros usuarios para compartir consejos y conversar sobre los lugares. |
+
+Los [requisitos funcionales](03-requisitos-funcionales.md) y la [especificación funcional](../04-especificacion-funcional/01-analisis-y-alcance.md) detallan reglas y permisos.

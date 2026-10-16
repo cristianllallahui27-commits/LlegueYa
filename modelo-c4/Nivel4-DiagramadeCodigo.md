@@ -1,109 +1,78 @@
+# Nivel 4 - Diagrama de código conceptual
 
-# Nivel 4 - Diagrama de código
-
-## Alcance del nivel
-
-Este nivel es una propuesta de diseño de código para el componente **Paquetes y recomendaciones**, uno de los flujos centrales de LlegueYa. El repositorio todavía no contiene una implementación; por eso las clases, interfaces y métodos siguientes funcionan como guía para construir el monolito modular con Clean Architecture.
-
-## Estructura propuesta
+Diagrama de diseño de Publicidad y planes; **no se desarrolla código**. Define entidades y puertos para periodo gratuito y anuncios con mayor alcance. Los nombres no fijan lenguaje ni framework.
 
 ```mermaid
 classDiagram
-	class RecomendarPaqueteController {
-		+recomendar(request) Response
-	}
-	class RecomendarPaquete {
-		+ejecutar(criterios) Paquete
-	}
-	class CriteriosPaquete {
-		+dias: int
-		+presupuesto: decimal
-		+sitioId: Id
-	}
-	class Paquete {
-		+movilidad: Proveedor
-		+hospedaje: Proveedor
-		+restaurante: Proveedor
-		+enlaceEntrada: EnlaceVenta
-	}
-	class Proveedor {
-		+id: Id
-		+tipo: TipoProveedor
-		+estado: EstadoVerificacion
-		+estaAprobado() bool
-	}
-	class EnlaceVenta {
-		+url: URL
-		+verificado: bool
-		+puedeRedirigir() bool
-	}
-	class RepositorioProveedores {
-		<<interface>>
-		+buscarAprobados(criterios) List~Proveedor~
-	}
-	class RepositorioSitios {
-		<<interface>>
-		+buscarPorId(id) Sitio
-	}
-	class Sitio {
-		+id: Id
-		+nombre: string
-		+puntosVenta: List~EnlaceVenta~
-		+enlaceVentaVerificado() EnlaceVenta
-	}
-	class ServicioMapas {
-		<<interface>>
-		+calcularCercania(origen, destino) Distancia
-	}
-	class ProveedorRepositoryAdapter {
-		+buscarAprobados(criterios) List~Proveedor~
-	}
-	class SitioRepositoryAdapter {
-		+buscarPorId(id) Sitio
-	}
-	class MapasAdapter {
-		+calcularCercania(origen, destino) Distancia
-	}
-
-	RecomendarPaqueteController --> RecomendarPaquete
-	RecomendarPaquete --> CriteriosPaquete
-	RecomendarPaquete --> RepositorioProveedores
-	RecomendarPaquete --> RepositorioSitios
-	RecomendarPaquete --> ServicioMapas
-	RecomendarPaquete --> Paquete
-	Paquete --> Proveedor
-	Paquete --> EnlaceVenta
-	Sitio --> EnlaceVenta
-	ProveedorRepositoryAdapter ..|> RepositorioProveedores
-	SitioRepositoryAdapter ..|> RepositorioSitios
-	MapasAdapter ..|> ServicioMapas
+    class PoliticaGratuita {
+        version
+        habilitada
+        duracion
+        unidad
+        condiciones
+    }
+    class BeneficioInicial {
+        negocioId
+        versionPolitica
+        inicio
+        fin
+        estado
+    }
+    class PlanPublicidad {
+        precio
+        moneda
+        duracion
+        cuota
+        frecuenciaMaxima
+        prioridadPatrocinada
+    }
+    class Contratacion {
+        condicionesCopiadas
+        inicio
+        fin
+    }
+    class Campaña {
+        negocioId
+        objetivoTipo
+        objetivoId
+        estado
+        inicio
+        fin
+    }
+    class Pago {
+        referenciaUnica
+        monto
+        moneda
+        estado
+    }
+    class AsignarBeneficioInicial
+    class SeleccionarAnuncios
+    class ConsultaElegibilidad {
+        <<interface>>
+    }
+    class RepositorioPublicidad {
+        <<interface>>
+    }
+    class ConsultaObjetivoEvento {
+        <<interface>>
+    }
+    class ClienteCatalogo {
+        <<adapter>>
+    }
+    PoliticaGratuita --> BeneficioInicial : condiciones copiadas
+    PlanPublicidad --> Contratacion : condiciones copiadas
+    Contratacion --> Pago
+    Campaña --> BeneficioInicial : alternativa gratuita
+    Campaña --> Contratacion : alternativa pagada
+    AsignarBeneficioInicial --> ConsultaElegibilidad
+    AsignarBeneficioInicial --> RepositorioPublicidad
+    SeleccionarAnuncios --> ConsultaElegibilidad
+    SeleccionarAnuncios --> ConsultaObjetivoEvento
+    SeleccionarAnuncios --> RepositorioPublicidad
+    SeleccionarAnuncios --> Campaña
+    ClienteCatalogo ..|> ConsultaElegibilidad
 ```
 
-## Organización por Clean Architecture
+Aplicación verifica el beneficio único por negocio y la política vigente al asignar; persistencia impone unicidad para evitar duplicados concurrentes. SeleccionarAnuncios aplica compatibilidad, vigencia, beneficio o pago, cuota y frecuencia. Los clientes de Catálogo y Eventos consultan por red al servicio dueño del objetivo; las entidades no conocen HTTP.
 
-| Capa | Elementos del ejemplo | Responsabilidad |
-|---|---|---|
-| Presentación | `RecomendarPaqueteController` | Traducir la petición HTTP, validar formato básico y devolver la respuesta. |
-| Aplicación | `RecomendarPaquete`, `CriteriosPaquete`, interfaces de repositorio y `ServicioMapas` | Orquestar el caso de uso mediante puertos, sin depender de una base de datos o proveedor concreto. |
-| Dominio | `Paquete`, `Proveedor`, `EnlaceVenta`, `Sitio` | Mantener entidades y reglas: proveedor aprobado y enlace de venta verificado. |
-| Infraestructura | `ProveedorRepositoryAdapter`, `SitioRepositoryAdapter`, `MapasAdapter` | Implementar persistencia e integración con servicios externos. |
-
-## Flujo de código principal
-
-1. La aplicación web envía a la API los días, presupuesto y sitio de interés.
-2. `RecomendarPaqueteController` transforma la solicitud en `CriteriosPaquete`.
-3. `RecomendarPaquete` solicita proveedores aprobados mediante `RepositorioProveedores`.
-4. El caso de uso consulta `RepositorioSitios` y obtiene únicamente un `EnlaceVenta` que `puedeRedirigir()`.
-5. `ServicioMapas` calcula cercanía mediante un adaptador, sin acoplar el dominio al proveedor de mapas.
-6. El caso de uso construye `Paquete` y el controlador devuelve sus datos a la aplicación web.
-
-## Otros casos de uso que deben seguir el mismo patrón
-
-| Caso de uso | Componentes principales |
-|---|---|
-| Registrar reseña | `RegistrarResenaController`, `RegistrarResena`, `RepositorioResenas`, `ModeracionContenido` |
-| Publicar contenido | `PublicarContenido`, `RepositorioContenido`, `AlmacenArchivos`, `NotificadorCorreo` |
-| Verificar proveedor | `VerificarProveedor`, `RepositorioProveedores`, `ValidadorDocumentos` |
-| Consultar chatbot | `ConsultarChatbot`, `RepositorioConocimiento`, `ServicioIA` |
-
-La dirección de dependencias debe apuntar hacia el dominio: las entidades y casos de uso no deben importar frameworks, controladores, tablas ni SDK de mapas, IA, correo o almacenamiento.
+Los criterios del servicio Recomendaciones incluyen fechas, adultos/menores, moneda y presupuesto total o individual. Ese servicio calcula opciones compatibles antes de solicitar anuncios. Asistente etiqueta patrocinio y redacta con precios estructurados; no modifica reglas publicitarias.

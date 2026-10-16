@@ -1,88 +1,39 @@
-
 # Nivel 3 - Diagrama de componentes
 
-## Objetivo
-
-Mostrar los componentes principales dentro de la API REST / monolito modular. Todos pertenecen a la misma aplicación, pero se separan por responsabilidad para facilitar mantenimiento, pruebas y una futura extracción de módulos.
+Se detalla el contenedor **Servicio de Publicidad y planes**, dentro de la arquitectura distribuida. Los demás servicios son dependencias externas a este contenedor. Cada uno aplica su propia Clean Architecture.
 
 ```mermaid
-flowchart LR
-	Web["Aplicación web"] --> APIEntry["API REST"]
-
-	subgraph API["API REST / Monolito modular"]
-		Auth["Autenticación y usuarios\nRegistro, sesión y roles"]
-		Sites["Sitios y puntos de venta\nAcceso, ubicación y enlaces verificados"]
-		Providers["Proveedores\nOferta, documentos y verificación"]
-		Reviews["Reseñas y puntuación\nPublicación y consulta moderada"]
-		Experiences["Fotos de experiencias\nCarga, consulta y moderación"]
-		Content["Contenido turístico\nHistorias, fotografías y libros"]
-		Packages["Paquetes y recomendaciones\nPresupuesto, días y proveedores"]
-		Chatbot["Chatbot / asistente IA\nMes, precios y cercanía"]
-		Notifications["Notificaciones\nNuevo contenido por correo"]
-		Ports["Puertos de integración\nMapas, IA, correo y archivos"]
-	end
-
-	DB[("Base de datos")]
-	Files[("Almacén de archivos / CDN")]
-	Maps["Servicio de mapas"]
-	LLM["Servicio de IA"]
-	Mail["Servicio de correo"]
-	Tickets["Sitios de venta"]
-
-	APIEntry --> Auth
-	API --> Sites
-	API --> Providers
-	API --> Reviews
-	API --> Experiences
-	API --> Content
-	API --> Packages
-	API --> Chatbot
-	API --> Notifications
-
-	Auth --> DB
-	Sites --> DB
-	Sites --> Ports
-	Providers --> DB
-	Reviews --> DB
-	Experiences --> DB
-	Experiences --> Ports
-	Content --> DB
-	Content --> Ports
-	Packages --> Sites
-	Packages --> Providers
-	Packages --> Reviews
-	Chatbot --> Packages
-	Chatbot --> Content
-	Chatbot --> Ports
-	Content --> Notifications
-	Notifications --> Ports
-	Ports --> DB
-	Ports --> Files
-	Ports --> Maps
-	Ports --> LLM
-	Ports --> Mail
-	Sites -->|Enlace verificado| Tickets
+flowchart TB
+    Entrada["Entrada API autenticada"] --> Control["Controladores: permisos y propiedad"]
+    subgraph Publicidad["Servicio Publicidad y planes"]
+        Control --> Politicas["Política gratuita y asignación única por negocio"]
+        Control --> Planes["Planes y contratos con condiciones congeladas"]
+        Control --> Campanas["Campañas y revisión manual de pagos"]
+        Control --> Selector["Selección: vigencia, compatibilidad, cuota y frecuencia"]
+        Control --> Metricas["Impresiones, alcance y clics agregados"]
+        Politicas --> Dominio["Reglas de beneficio, pago, campaña y elegibilidad"]
+        Planes --> Dominio
+        Campanas --> Dominio
+        Selector --> Dominio
+        Dominio --> Repos["Puertos de repositorios propios"]
+        Repos --> Persistencia["Adaptadores de persistencia"]
+        Campanas --> Archivos["Puerto de evidencia privada"]
+        Selector --> Consulta["Puerto de elegibilidad del anunciante y objetivo"]
+        Campanas --> Salida["Outbox local"]
+        Politicas --> Salida
+    end
+    Persistencia --> DB[("Datos exclusivos de Publicidad")]
+    Archivos --> Privado["Comprobantes privados"]
+    Consulta --> Catalogo["Servicio Catálogo y proveedores: oferta, paquete y lugar"]
+    Consulta --> Eventos["Servicio Eventos: estado y autorización del organizador"]
+    Salida --> Bus["Transporte de eventos"]
+    Bus --> Consumidor["Inbox: cambios de elegibilidad deduplicados"]
+    Consumidor --> Campanas
+    Recomendaciones["Contexto compatible del servicio Recomendaciones"] --> Selector
 ```
 
-## Componentes y responsabilidades
+Controladores conocen casos de uso; aplicación conoce dominio y puertos; adaptadores implementan contratos. El nodo de reglas resume colaboración interna, sin obligar a una única clase. El beneficio gratuito no requiere pago; el pagado sí requiere confirmación. Ambos requieren anunciante autorizado, objetivo aprobado/vigente y contenido moderado. Los objetivos incluyen ofertas, paquetes, eventos y lugares; cancelar o retirar el objetivo impide nuevas entregas.
 
-| Componente | Responsabilidad | Requisitos |
-|---|---|---|
-| Autenticación y usuarios | Registro, inicio de sesión y autorización para turista, proveedor y administrador. | RF01 |
-| Sitios y puntos de venta | Consultar sitios, acceso, distancias, puntos físicos y enlaces virtuales verificados. | RF02-RF04, RF19 |
-| Proveedores | Registrar oferta y documentos; exponer solo proveedores aprobados en consultas y paquetes. | RF05, RF17, RF18 |
-| Reseñas y puntuación | Registrar y consultar puntuaciones y comentarios asociados a usuarios; gestionar su moderación. | RF06, RF07, RF21 |
-| Fotos de experiencias | Guardar metadatos, almacenar archivos y controlar el estado de moderación. | RF08, RF09, RF21 |
-| Contenido turístico | Gestionar historias, fotografías y libros publicados por el administrador. | RF10-RF12, RF20 |
-| Paquetes y recomendaciones | Armar propuestas de movilidad, hospedaje y restaurantes según días y presupuesto. | RF13 |
-| Chatbot / asistente IA | Consultar contexto turístico y solicitar recomendaciones de paquete, mes y proveedores cercanos. | RF14-RF16 |
-| Notificaciones | Detectar nuevo contenido y solicitar el envío de correos a usuarios suscritos. | RF12 |
-| Puertos de integración | Abstraer persistencia, mapas, IA, correo y almacenamiento de archivos. | ADR-002, ADR-005 |
+La política inicial propone un mes calendario; los cambios generales afectan futuras asignaciones y los ajustes individuales se auditan. Los planes superiores permiten mayor exposición y prioridad patrocinada dentro de compatibilidad y límites. Las métricas separan solicitud, impresión y clic; el proveedor solo ve agregados propios.
 
-## Reglas de interacción
-
-1. Los componentes aplican las reglas del dominio y no exponen directamente tablas o proveedores externos a la aplicación web.
-2. Un proveedor solo puede ser usado por paquetes, búsquedas y chatbot cuando su estado es `APROBADO`.
-3. Un enlace de venta solo puede mostrarse o utilizarse cuando está verificado por el administrador.
-4. Reseñas y fotos de usuarios pasan por moderación antes de hacerse visibles.
-5. El chatbot recibe información de la base de conocimiento y no reemplaza la validación de proveedores ni de enlaces.
+Los componentes de Catálogo, Comunidad, Eventos, Recomendaciones e Identidad se describen en la [vista general de componentes](../docs/02-arquitectura-software/componentes-arquitectonicos.md). Trazabilidad RF30-RF33, RF36-RF45, RF54-RF55 y ADR-013/ADR-016 a ADR-020.

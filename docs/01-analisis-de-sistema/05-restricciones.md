@@ -1,22 +1,24 @@
 # 05 - Restricciones
 
-| ID | Restricción | Descripción |
+| ID | Restricción | Regla |
 |---|---|---|
-| RC01 | Aplicación web | El sistema debe desarrollarse como una aplicación accesible mediante un navegador web (incluido el chatbot). |
-| RC02 | Control de versiones | El código fuente y los documentos deben gestionarse con Git y mantenerse en GitHub. |
-| RC03 | API REST | La comunicación entre el frontend y los servicios del sistema debe realizarse mediante una API REST. |
-| RC04 | Servicio de mapas | El sistema debe integrarse con un servicio de mapas externo para mostrar ubicaciones. |
-| RC05 | Sin venta de entradas | El sistema no vende ni cobra entradas: solo guía y redirige a los sitios de venta presencial o virtual. |
-| RC06 | Enlaces de venta verificados | Solo se deben mostrar puntos y enlaces de venta registrados y verificados por el administrador. |
-| RC07 | Proveedores verificados | Solo pueden integrarse proveedores con documentación vigente (licencia de funcionamiento, RUC habido o registro correspondiente). |
-| RC08 | Modelo de lenguaje | El chatbot debe apoyarse en un modelo de lenguaje conectado a la base de conocimiento propia de LlegueYa. |
-| RC09 | Notificaciones por correo | Las notificaciones de nuevo contenido se envían por correo electrónico (por confirmar). |
-| RC10 | Alcance actual | Por ahora no se implementan los canales WhatsApp ni Telegram; el chatbot es solo web. |
-| RC11 | Derechos de contenido | Las fotografías, historias y libros publicados deben contar con autorización de sus autores o titulares (sugerida). |
-| RC12 | Calendario turístico de referencia | El material inicial sitúa Carnaval entre febrero y marzo, Semana Santa entre marzo y abril y Vilcas Raymi el 28-29 de julio. Las recomendaciones deben consultar las fechas oficiales de cada año; estas referencias no constituyen un calendario vigente verificado. |
-| RC13 | Dependencia de fuentes oficiales | Horarios, distancias y datos de temporada provienen de PromPerú, Mincetur y la DDC, y deben mantenerse actualizados. |
-## Aclaración para el primer entregable
+| RC01 | Aplicación web | Acceso mediante navegador, incluido el asistente. |
+| RC02 | Control de versiones | Documentación y futuro código se gestionan con Git. |
+| RC03 | API REST | Frontend consume contratos REST; servicios propagan cambios mediante eventos durables cuando corresponde. |
+| RC04 | Mapas | Integración externa mediante adaptador. |
+| RC05 | Sin venta de entradas | Solo puntos y enlaces de venta verificados; no cobro de entradas, reservas, QR ni aforo. |
+| RC06 | Enlaces verificados | Solo administración publica enlaces verificados. |
+| RC07 | Requisitos por actividad | Negocios deben cumplir requisitos de publicación/promoción aplicables a su rubro y tener revisión administrativa. |
+| RC08 | IA con contexto propio | La IA usa datos autorizados y estructurados; no inventa precios ni concede verificaciones. |
+| RC09 | Avisos | Bandeja web con preferencias; correo opcional por definir. |
+| RC10 | Canales | Chatbot exclusivamente web; sin WhatsApp/Telegram. |
+| RC11 | Derechos de contenido | Autor declara autorización de fotos y textos; moderación controla publicación y retiro. |
+| RC12 | Calendario confirmado | Fechas específicas por año, fuente y revisión; no se presumen recurrencias variables. |
+| RC13 | Actualización de información | Horarios, precios, condiciones de acceso y fuentes deben revisarse; no se presume integración automática con autoridades. |
+| RC14 | Detalle autenticado | Vistas previas públicas; ficha completa y funciones personales requieren sesión también en API y archivos restringidos. |
+| RC15 | Categorías acreditadas | Estrellas/tenedores se respaldan con evidencia y se separan de reseñas. LlegueYa no otorga categorías oficiales. |
+| RC16 | Aprobación de propuestas | Eventos/lugares/actividades aportados por usuarios no ingresan automáticamente al catálogo ni a publicidad. |
+| RC17 | Publicidad | Beneficio gratuito o pago confirmado no sustituyen elegibilidad, moderación, vigencia y compatibilidad. |
+| RC18 | Privacidad y aislamiento | Datos propios por servicio; no compartir tablas, credenciales ni expedientes con acceso público. |
 
-RC09 permanece por confirmar y RC11 es sugerida. RC12 expresa referencias estacionales del material inicial: Carnaval y Semana Santa tienen fechas variables que se deben confirmar para cada año; no se presupone un calendario fijo vigente. RC13 exige actualización de fuentes, no una integración automática implementada.
-
-Ver [fuentes y pendientes](../fuentes/README.md).
+[Reglas de catálogo y actividades](../04-especificacion-funcional/05-catalogo-eventos-y-actividades.md) y [publicidad](../04-especificacion-funcional/03-publicidad-y-periodo-gratuito.md).

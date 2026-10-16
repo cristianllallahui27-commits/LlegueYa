@@ -1,8 +1,10 @@
 # Principios de diseño de LlegueYa
 
+
+
 ## Objetivo y estado
 
-Definir criterios SOLID aplicados al módulo Proveedores y a sus integraciones, dentro del monolito modular y Clean Architecture ya propuestos. Los ejemplos son **contratos y clases de diseño, no código implementado**; no se afirma cumplimiento mediante pruebas existentes.
+Definir criterios SOLID aplicados al módulo Proveedores y a sus integraciones, dentro de servicios independientes con Clean Architecture. Los ejemplos son **contratos y clases de diseño, no código implementado**; no se afirma cumplimiento mediante pruebas existentes.
 
 ## Aplicación de SOLID
 

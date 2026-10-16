@@ -1,5 +1,7 @@
 # 04 - Atributos de calidad
 
+
+
 Escenario base: en Semana Santa, Carnavales o el Vilcas Raymi, muchos turistas consultan al mismo tiempo sitios, mapas, proveedores, reseñas, fotos y libros, y suben nuevo contenido.
 
 | ID | Atributo de calidad | Escenario de calidad |
@@ -12,8 +14,8 @@ Escenario base: en Semana Santa, Carnavales o el Vilcas Raymi, muchos turistas c
 | AC06 | Usabilidad | El turista, nacional o extranjero, debe poder consultar, ubicarse en el mapa y usar el chatbot de forma sencilla desde el navegador. |
 | AC07 | Mantenibilidad | El sistema debe organizarse en módulos independientes, para poder cambiar una funcionalidad sin afectar a las demás. |
 
-## Aclaración para el primer entregable
+## Escenarios de calidad
 
-Los atributos generales se conservan; sus escenarios verificables y metas propuestas están en [08-escenarios-atributos-calidad.md](08-escenarios-atributos-calidad.md). No hay resultados de pruebas ejecutadas.
+Los escenarios verificables y metas propuestas están en [08-escenarios-atributos-calidad.md](08-escenarios-atributos-calidad.md). No hay resultados de pruebas ejecutadas.
 
 Ver [fuentes y pendientes](../fuentes/README.md).
