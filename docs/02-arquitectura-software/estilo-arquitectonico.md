@@ -19,29 +19,9 @@
 
 [Diagrama editable Draw.io](estilo-arquitectonico.drawio) y [vista HTML](estilo-arquitectonico.html).
 
-```mermaid
-flowchart TB
-    Web["Web y paneles"] --> API["Entrada API"]
-    API --> I["Identidad"]
-    API --> C["Catálogo y proveedores"]
-    API --> M["Comunidad y contenido"]
-    API --> E["Eventos y notificaciones"]
-    API --> P["Publicidad y planes"]
-    API --> R["Recomendaciones y paquetes"]
-    API --> A["Asistente turístico"]
-    A --> R
-    A --> P
-    A --> E
-    R --> C
-    P --> C
-    C --> B["Eventos durables"]
-    M --> B
-    P --> B
-    B --> E
-    B --> R
-    B --> A
-    B --> P
-```
+![C2-A: aplicaciones y bases propias](../../modelo-c4/diagramas/c2a-aplicaciones-datos.svg)
+
+[Modelo C4 completo](../../modelo-c4/README.md), [relaciones de integración](../../modelo-c4/Nivel2-DiagramadeContenedores.md) y [visor gráfico](../../modelo-c4/diagramas/index.html). Las bases lógicas, mensajes y objetos tienen tipo, responsabilidad y relaciones explícitas.
 
 ## Reglas y consecuencias
 
@@ -49,4 +29,4 @@ Cada servicio mantiene sus transacciones y valida permisos. Cambios de estado se
 
 La distribución implica latencia de red, fallos parciales, operación por servicio y consistencia eventual. Los siete servicios se agrupan por capacidad de negocio y exponen contratos versionados.
 
-Detalle: [arquitectura y diseño](../04-especificacion-funcional/02-arquitectura-y-diseno.md). Las vistas Mermaid de los documentos describen el sistema. Stack e infraestructura se definirán al implementar.
+Detalle: [arquitectura y diseño](../04-especificacion-funcional/02-arquitectura-y-diseno.md). Las vistas Mermaid de los documentos describen el sistema. Las tecnologías candidatas y la distribución física se evaluarán y aprobarán en el SDD antes de implementar.

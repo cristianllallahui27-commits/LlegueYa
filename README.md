@@ -12,6 +12,8 @@ Los proveedores publican perfiles, fotos de sus servicios y paquetes propios. La
 
 Siete servicios independientes: Identidad y acceso; Catálogo y proveedores; Comunidad y contenido; Eventos y notificaciones; Publicidad y planes; Recomendaciones y paquetes; Asistente turístico. Cada servicio aplica Clean Architecture, posee sus datos y se comunica mediante REST y eventos durables. Las fotos públicas aprobadas se distribuyen mediante CDN; expedientes y comprobantes son privados.
 
+El [modelo C4](modelo-c4/README.md) presenta contexto, contenedores con sus siete bases lógicas, componentes de Publicidad y clases conceptuales de Selección de anuncios. El [visor gráfico local](modelo-c4/diagramas/index.html) reúne los diagramas ampliables; el [archivo Draw.io](modelo-c4/diagramas/LlegueYa-C4.drawio) permite editarlos. La infraestructura es una vista complementaria y las tecnologías son candidatas pendientes del SDD.
+
 ## Documentación
 
 | Sección | Contenido |
@@ -20,12 +22,12 @@ Siete servicios independientes: Identidad y acceso; Catálogo y proveedores; Com
 | Arquitectura | [Vista general](docs/02-arquitectura-software/arquitectura-inicial.md), [estilo](docs/02-arquitectura-software/estilo-arquitectonico.md), [Clean Architecture](docs/02-arquitectura-software/enfoque-arquitectonico.md) y [componentes](docs/02-arquitectura-software/componentes-arquitectonicos.md). |
 | Diseño | [Servicios y contratos](docs/03-diseño-de-software/diseño-interno/diseño-interno-de-modulos.md), [patrones](docs/03-diseño-de-software/diseño-interno/patrones-de-diseño.md) y [principios](docs/03-diseño-de-software/diseño-interno/principios-de-diseño.md). |
 | Especificación funcional | [Alcance](docs/04-especificacion-funcional/01-analisis-y-alcance.md), [diseño de servicios](docs/04-especificacion-funcional/02-arquitectura-y-diseno.md), [publicidad y gratuidad](docs/04-especificacion-funcional/03-publicidad-y-periodo-gratuito.md), [acceso del turista](docs/04-especificacion-funcional/04-acceso-del-turista.md) y [categorías, fotos, eventos y camping](docs/04-especificacion-funcional/05-catalogo-eventos-y-actividades.md) y [likes, comentarios y respuestas](docs/04-especificacion-funcional/06-interaccion-social.md). |
-| Modelo C4 | [Contexto](modelo-c4/Nivel1-DiagramadeContextodelSistema.md), [contenedores](modelo-c4/Nivel2-DiagramadeContenedores.md), [componentes](modelo-c4/Nivel3-DiagramadeComponentes.md) y [clases conceptuales](modelo-c4/Nivel4-DiagramadeCodigo.md). |
+| Modelo C4 | [Guía de lectura](modelo-c4/README.md), [despliegue e infraestructura](modelo-c4/Despliegue-e-infraestructura.md), [Contexto](modelo-c4/Nivel1-DiagramadeContextodelSistema.md), [contenedores](modelo-c4/Nivel2-DiagramadeContenedores.md), [componentes](modelo-c4/Nivel3-DiagramadeComponentes.md) y [clases conceptuales](modelo-c4/Nivel4-DiagramadeCodigo.md). |
 | Referencias | [Fuentes](docs/fuentes/README.md) y [consideraciones tecnológicas](tecnologia/README.md). |
 
 ## Límites y estado
 
-El repositorio contiene documentación de análisis y diseño; no contiene una aplicación implementada. No se seleccionan lenguaje, framework ni nube. Las metas de calidad son propuestas para validar.
+El repositorio contiene documentación de análisis y diseño; no contiene una aplicación implementada. Las tecnologías de referencia permanecen pendientes de evaluación y aprobación en el SDD; no se selecciona nube. Las metas de calidad son propuestas para validar.
 
 LlegueYa no vende ni cobra entradas, no realiza reservas ni emite QR. Orienta hacia enlaces de venta verificados. Los pagos externos de publicidad se registran y revisan administrativamente; no se incorpora pasarela automática. La bandeja de avisos es web y el canal de correo queda por definir. No se incluyen WhatsApp ni Telegram.
 

@@ -10,6 +10,12 @@
 
 Regla central: las dependencias del código apuntan hacia el interior. El dominio no conoce a ninguna otra capa.
 
+## Alcance y relación con C4
+
+El estilo global es distribuido orientado a servicios de negocio, con siete despliegues independientes. Clean Architecture se aplica **por servicio**. Esta vista ilustra dependencias internas y no constituye un C2: la base propia queda fuera del proceso del servicio pero dentro del sistema LlegueYa. Las pantallas pertenecen al contenedor WEB y sus controladores a la API correspondiente. Las entidades listadas son ejemplos de distintos dominios, no un único módulo compartido.
+
+La [vista C3](../../modelo-c4/Nivel3-DiagramadeComponentes.md) amplía Publicidad y planes; [C4](../../modelo-c4/Nivel4-DiagramadeCodigo.md) muestra puertos y adaptadores. Las dependencias de código apuntan hacia el interior; las relaciones de ejecución con la base o APIs externas se muestran en C2/C3 con otra finalidad.
+
 ## Capas y su contenido en LlegueYa
 
 | Capa | ¿Qué contiene? | Ejemplos de LlegueYa |
@@ -23,7 +29,7 @@ Regla central: las dependencias del código apuntan hacia el interior. El domini
 
 | Puerto (definido en Aplicación/Dominio) | Adaptador (Infraestructura) | Sistema externo |
 |---|---|---|
-| RepositorioSitios, RepositorioProveedores, RepositorioReseñas, RepositorioContenido | Repositorios de base de datos | Base de datos principal |
+| RepositorioSitios, RepositorioProveedores, RepositorioReseñas, RepositorioContenido | Repositorios de base de datos | Base exclusiva del servicio correspondiente |
 | ServicioMapas | Adaptador de mapas | Servicio de mapas |
 | ServicioIA | Adaptador de IA | Servicio de IA (modelo de lenguaje) |
 | NotificadorCorreo | Adaptador de correo | Servicio de correo |
@@ -67,8 +73,8 @@ flowchart LR
         AdArchivos["Adaptador de archivos"]
     end
 
-    subgraph EXT["SISTEMAS EXTERNOS"]
-        BD["Base de datos"]
+    subgraph EXT["RECURSOS FUERA DEL INTERIOR DEL SERVICIO"]
+        BD["Base propia del servicio (DI, DC, DM, DE, DP, DR o DA)"]
         Mapas["Servicio de mapas"]
         IA["Servicio de IA"]
         Correo["Servicio de correo"]

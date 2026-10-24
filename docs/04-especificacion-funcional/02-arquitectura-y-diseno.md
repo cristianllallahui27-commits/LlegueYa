@@ -2,7 +2,7 @@
 
 ## 1. Estilo y responsabilidades
 
-Arquitectura distribuida orientada a servicios de negocio, con despliegues independientes y Clean Architecture dentro de cada servicio. El proyecto documenta diseño; no contiene aplicación ni tecnologías seleccionadas.
+Arquitectura distribuida orientada a servicios de negocio, con despliegues independientes y Clean Architecture dentro de cada servicio. El proyecto documenta diseño; no contiene aplicación. Las tecnologías se presentan como candidatas pendientes del SDD.
 
 | Servicio | Responsabilidades | Propiedad de datos |
 |---|---|---|
@@ -18,49 +18,9 @@ La cuenta habilita detalle y funciones personales, no acceso a expedientes admin
 
 ## 2. Vista lógica
 
-```mermaid
-flowchart TB
-    Web["Web: tarjetas, fichas, muro, calendario y paneles"] --> API["Entrada API y sesión"]
-    API --> I["Identidad y acceso"]
-    API --> C["Catálogo y proveedores"]
-    API --> M["Comunidad y contenido"]
-    API --> E["Eventos y notificaciones"]
-    API --> P["Publicidad y planes"]
-    API --> R["Recomendaciones y paquetes"]
-    API --> A["Asistente turístico"]
-    A --> R
-    A --> E
-    A --> P
-    A --> IA["Proveedor de IA"]
-    R --> C
-    M --> C
-    M -->|Validar fotos de eventos| E
-    P -->|"Validar oferta, lugar y anunciante"| C
-    P -->|"Validar evento y organizador"| E
-    I --> DI[("Datos Identidad")]
-    C --> DC[("Datos Catálogo")]
-    M --> DM[("Datos Comunidad")]
-    E --> DE[("Datos Eventos y avisos")]
-    P --> DP[("Datos Publicidad")]
-    R --> DR[("Datos Recomendaciones")]
-    A --> DA[("Datos Asistente")]
-    C --> B["Eventos durables"]
-    M --> B
-    E --> B
-    P --> B
-    B --> P
-    B --> E
-    B --> R
-    B --> A
-    C --> FC["Archivos Catálogo con políticas de acceso"]
-    M --> FM["Archivos Comunidad con políticas de acceso"]
-    E --> FE["Fotos de eventos con políticas de acceso"]
-    P --> FP["Evidencia publicitaria privada"]
-    FC --> CDN["Entrega de imágenes: públicas o autorizadas"]
-    FM --> CDN
-    FE --> CDN
-    Web --> CDN
-```
+La [vista C2 del proyecto](../../modelo-c4/Nivel2-DiagramadeContenedores.md) es la representación canónica: C2-A identifica WEB, GW, las siete APIs y sus siete bases lógicas; C2-B detalla colaboraciones e integraciones; C2-C muestra mensajería y almacenamiento de fotos/evidencias. Todas declaran límites, tipos, responsabilidades, protocolos y estado tecnológico. El [inventario C4](../../modelo-c4/README.md) explica cómo ampliar cada nivel.
+
+PostgreSQL es una opción de referencia para DI, DC, DM, DE, DP, DR y DA; cada base pertenece exclusivamente a su servicio. OBJ conserva los archivos binarios y las bases guardan sus metadatos. El SDD definirá el despliegue físico, que no se deduce de los contenedores C4.
 
 Las portadas y miniaturas aprobadas de vistas previas son públicas. Galerías de fichas restringidas requieren sesión mediante acceso firmado de corta duración o entrega autorizada, según tecnología por definir. Documentos y comprobantes solo se entregan a actores autorizados; no se convierten en recursos públicos de CDN.
 

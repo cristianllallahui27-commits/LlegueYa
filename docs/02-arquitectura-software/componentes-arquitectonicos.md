@@ -1,8 +1,8 @@
-# Componentes arquitectónicos de LlegueYa
+# Servicios y componentes arquitectónicos de LlegueYa
 
 ![Servicios de negocio de LlegueYa](../img/componentes-arquitectonicos.png)
 
-[Diagrama vectorial](../img/componentes-arquitectonicos.svg).
+[Diagrama vectorial](../img/componentes-arquitectonicos.svg). La imagen presenta contenedores y datos de C2-A, no componentes internos de C3. La tabla siguiente cataloga responsabilidades internas por servicio. [C3 de Publicidad](../../modelo-c4/Nivel3-DiagramadeComponentes.md) amplía un único contenedor.
 
 | Servicio | Componentes principales | RF |
 |---|---|---|
