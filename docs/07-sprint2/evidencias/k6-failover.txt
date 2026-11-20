@@ -1,0 +1,30 @@
+        output: -
+     scenarios: (100.00%) 1 scenario, 100 max VUs, 1m30s max duration (incl. graceful stop):
+              * lectores: 100 looping VUs for 1m0s (exec: lector, gracefulStop: 30s)
+       ✓ catálogo cacheable en CDN
+       ✓ ficha 200
+       ✓ vista previa sin sesión
+     checks.........................: 100.00% 5883 out of 5883
+     data_received..................: 32 MB   507 kB/s
+     data_sent......................: 1.9 MB  30 kB/s
+   ✓ errores........................: 0.00%   0 out of 3922
+     ficha_ms.......................: avg=29.58ms  min=5.01ms  med=15.82ms p(90)=54.38ms p(95)=111.09ms p(99)=217.17ms max=238.82ms
+     group_duration.................: avg=66.45ms  min=10.12ms med=29.02ms p(90)=78.21ms p(95)=247.02ms p(99)=974.65ms max=986.93ms
+     http_req_blocked...............: avg=439.39µs min=587ns   med=3.23µs  p(90)=7.75µs  p(95)=32.25µs  p(99)=19.89ms  max=38.09ms 
+     http_req_connecting............: avg=425.04µs min=0s      med=0s      p(90)=0s      p(95)=0s       p(99)=19.69ms  max=38ms    
+     http_req_duration..............: avg=51.51ms  min=4.16ms  med=19.47ms p(90)=56.19ms p(95)=138.66ms p(99)=931.62ms max=948.88ms
+       { expected_response:true }...: avg=51.51ms  min=4.16ms  med=19.47ms p(90)=56.19ms p(95)=138.66ms p(99)=931.62ms max=948.88ms
+     ✓ { tipo:asistente }...........: avg=0s       min=0s      med=0s      p(90)=0s      p(95)=0s       p(99)=0s       max=0s      
+     ✓ { tipo:lectura }.............: avg=51.51ms  min=4.16ms  med=19.47ms p(90)=56.19ms p(95)=138.66ms p(99)=931.62ms max=948.88ms
+     http_req_failed................: 0.00%   0 out of 11766
+     http_req_receiving.............: avg=4.19ms   min=9.08µs  med=1.06ms  p(90)=5.65ms  p(95)=10.11ms  p(99)=109.42ms max=254.13ms
+     http_req_sending...............: avg=226.29µs min=2.62µs  med=10.97µs p(90)=31.07µs p(95)=109.26µs p(99)=4.36ms   max=31.68ms 
+     http_req_tls_handshaking.......: avg=0s       min=0s      med=0s      p(90)=0s      p(95)=0s       p(99)=0s       max=0s      
+     http_req_waiting...............: avg=47.08ms  min=3.69ms  med=17.84ms p(90)=52.12ms p(95)=131.86ms p(99)=838.95ms max=911.17ms
+     http_reqs......................: 11766   184.567648/s
+     iteration_duration.............: avg=3.13s    min=2.04s   med=3.1s    p(90)=3.94s   p(95)=4.04s    p(99)=4.87s    max=5.27s   
+     iterations.....................: 1961    30.761275/s
+     vus............................: 10      min=10           max=100
+     vus_max........................: 100     min=100          max=100
+>> Salud del borde al final:
+{"origenes":2,"caidos":[1]}

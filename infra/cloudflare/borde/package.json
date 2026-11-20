@@ -1,0 +1,11 @@
+{
+  "name": "llegueya-borde",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "cd ../../.. && npm run test:unidad"
+  },
+  "devDependencies": { "wrangler": "^4" }
+}

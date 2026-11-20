@@ -1,0 +1,14 @@
+{
+  "name": "llegueya",
+  "private": true,
+  "description": "LlegueYa: pruebas de JavaScript con Jest (lógica web, borde Cloudflare y API).",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:unidad": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects unidad",
+    "test:api": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects api",
+    "test:cobertura": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
+  },
+  "devDependencies": {
+    "jest": "^30.0.0"
+  }
+}

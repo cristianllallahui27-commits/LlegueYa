@@ -1,0 +1,114 @@
+{
+  "lectura-1-replica": [
+    {
+      "etapa": "Subida a 200",
+      "usuarios_max": 197,
+      "peticiones": 12450,
+      "rps": 207.5,
+      "p50_ms": 3.1,
+      "p95_ms": 8.5,
+      "errores": 0
+    },
+    {
+      "etapa": "Subida a 500",
+      "usuarios_max": 496,
+      "peticiones": 42270,
+      "rps": 704.5,
+      "p50_ms": 5.0,
+      "p95_ms": 32.4,
+      "errores": 0
+    },
+    {
+      "etapa": "Subida a 1 000",
+      "usuarios_max": 993,
+      "peticiones": 64495,
+      "rps": 1074.9,
+      "p50_ms": 147.1,
+      "p95_ms": 1713.2,
+      "errores": 0
+    },
+    {
+      "etapa": "Subida a 2 000",
+      "usuarios_max": 1987,
+      "peticiones": 50354,
+      "rps": 839.2,
+      "p50_ms": 1537.6,
+      "p95_ms": 5779.2,
+      "errores": 0
+    },
+    {
+      "etapa": "Meseta en 2 000",
+      "usuarios_max": 2000,
+      "peticiones": 99026,
+      "rps": 825.2,
+      "p50_ms": 3422.5,
+      "p95_ms": 7518.6,
+      "errores": 0
+    },
+    {
+      "etapa": "Bajada",
+      "usuarios_max": 2000,
+      "peticiones": 47517,
+      "rps": 792.0,
+      "p50_ms": 628.5,
+      "p95_ms": 5657.6,
+      "errores": 0
+    }
+  ],
+  "lectura-2-replicas": [
+    {
+      "etapa": "Subida a 200",
+      "usuarios_max": 197,
+      "peticiones": 11993,
+      "rps": 199.9,
+      "p50_ms": 3.5,
+      "p95_ms": 44.5,
+      "errores": 0
+    },
+    {
+      "etapa": "Subida a 500",
+      "usuarios_max": 496,
+      "peticiones": 41648,
+      "rps": 694.1,
+      "p50_ms": 5.2,
+      "p95_ms": 45.9,
+      "errores": 0
+    },
+    {
+      "etapa": "Subida a 1 000",
+      "usuarios_max": 994,
+      "peticiones": 81174,
+      "rps": 1352.9,
+      "p50_ms": 43.1,
+      "p95_ms": 464.0,
+      "errores": 0
+    },
+    {
+      "etapa": "Subida a 2 000",
+      "usuarios_max": 1988,
+      "peticiones": 84529,
+      "rps": 1408.8,
+      "p50_ms": 528.9,
+      "p95_ms": 3102.1,
+      "errores": 0
+    },
+    {
+      "etapa": "Meseta en 2 000",
+      "usuarios_max": 2000,
+      "peticiones": 160566,
+      "rps": 1338.0,
+      "p50_ms": 833.5,
+      "p95_ms": 4320.8,
+      "errores": 0
+    },
+    {
+      "etapa": "Bajada",
+      "usuarios_max": 1999,
+      "peticiones": 71310,
+      "rps": 1188.5,
+      "p50_ms": 198.7,
+      "p95_ms": 3001.8,
+      "errores": 0
+    }
+  ]
+}

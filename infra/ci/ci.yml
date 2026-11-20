@@ -1,0 +1,141 @@
+# Integración continua de LlegueYa: cada push y pull request ejecuta las mismas
+# puertas que en local. El despliegue (CD) corre solo en main y si todo pasa.
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Python · unitarias, integración y PostgreSQL
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: solo-ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:solo-ci@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - run: python -m coverage run -m pytest tests -q
+      - run: python -m coverage report
+      - run: python -m coverage json
+      - name: Puerta ≥90 % de líneas y ramas por servicio
+        run: python scripts/comprobar-cobertura.py
+      - name: Contrato OpenAPI al día con el código
+        run: python scripts/exportar-openapi.py --check
+
+  jest:
+    name: Jest · lógica web, borde Cloudflare y reglas de negocio de la API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: pip install -r requirements.txt
+      - run: npm ci
+      - name: Jest con cobertura (umbral 90 %)
+        run: npm run test:cobertura
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cobertura-jest
+          path: reports/jest-coverage
+
+  web:
+    name: Web · End to End (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install -r requirements.txt
+      - name: Servidor de pruebas
+        run: |
+          APP_ORIGIN=http://127.0.0.1:8010 python -m uvicorn tests.servidor_e2e:app --port 8010 &
+          sleep 3
+      - name: End to End (Playwright)
+        run: |
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+          node tests/web-navegador.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: capturas-e2e
+          path: reports/*.png
+
+  carga:
+    name: Carga · k6 (humo en cada cambio)
+    runs-on: ubuntu-latest
+    needs: [backend, jest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - run: |
+          APP_ORIGIN=http://127.0.0.1:8010 python -m uvicorn tests.servidor_e2e:app --port 8010 --workers 1 &
+          sleep 3
+      - uses: grafana/setup-k6-action@v1
+      - run: k6 run -e BASE_URL=http://127.0.0.1:8010 -e PERFIL=humo tests/carga/k6-plataforma.js
+
+  imagen:
+    name: Docker · construir imagen
+    runs-on: ubuntu-latest
+    needs: [backend, jest, web]
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t llegueya:${{ github.sha }} .
+
+  desplegar:
+    name: CD · desplegar
+    runs-on: ubuntu-latest
+    needs: [backend, jest, web, carga, imagen]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: produccion
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Disparar despliegue
+        # Render/Railway/Fly exponen un «deploy hook»: guardarlo como secreto DEPLOY_HOOK_URL.
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_HOOK_URL" ]; then echo "Sin DEPLOY_HOOK_URL: despliegue omitido"; exit 0; fi
+          curl -fsS -X POST "$DEPLOY_HOOK_URL"
+      - name: Publicar el borde en Cloudflare
+        # Secretos: CLOUDFLARE_API_TOKEN (plantilla «Edit Cloudflare Workers») y CLOUDFLARE_ACCOUNT_ID.
+        if: ${{ env.CF_TOKEN != '' }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: infra/cloudflare/borde

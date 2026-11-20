@@ -1,0 +1,67 @@
+{
+  "volumen": {
+    "publicacion": 20000,
+    "like": 60000,
+    "comentario": 10000,
+    "autor": 500,
+    "lugar": 8
+  },
+  "catalogo": {
+    "postgres_directo": {
+      "p50_ms": 5.2593,
+      "p95_ms": 6.6577,
+      "promedio_ms": 5.3951,
+      "muestras": 100
+    },
+    "cache_en_memoria": {
+      "p50_ms": 0.0002,
+      "p95_ms": 0.0003,
+      "promedio_ms": 0.0002,
+      "muestras": 1000
+    },
+    "cache_aciertos": 1000,
+    "cache_fallos": 1
+  },
+  "muro": {
+    "primera_pagina": {
+      "p50_ms": 26.9435,
+      "p95_ms": 30.5385,
+      "promedio_ms": 27.0087,
+      "muestras": 100
+    },
+    "pagina_profunda_desde_5000": {
+      "p50_ms": 30.5936,
+      "p95_ms": 39.8934,
+      "promedio_ms": 31.9465,
+      "muestras": 50
+    }
+  },
+  "planes": {
+    "muro_con_indice": {
+      "plan": "Limit  (cost=0.29..1.76 rows=10 width=49) (actual time=0.017..0.022 rows=10 loops=1)\n  Buffers: shared hit=3\n  ->  Index Scan using publicacion_muro on publicacion  (cost=0.29..2288.67 rows=15499 width=49) (actual time=0.016..0.020 rows=10 loops=1)\n        Index Cond: (estado = 'publicado'::text)\n        Filter: ((estado = 'publicado'::text) OR (autor_id = (NULLIF(current_setting('app.usuario_id'::text, true), ''::text))::uuid) OR (current_setting('app.es_admin'::text, true) = 'true'::text))\n        Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=28\nPlanning Time: 0.167 ms\nExecution Time: 0.039 ms",
+      "ejecucion_ms": 0.039,
+      "usa_indice": true
+    },
+    "likes_con_indice": {
+      "plan": "HashAggregate  (cost=1540.08..1541.07 rows=99 width=24) (actual time=6.302..6.306 rows=10 loops=1)\n  Group Key: \"like\".objetivo_id\n  Batches: 1  Memory Usage: 24kB\n  Buffers: shared hit=374\n  InitPlan 1 (returns $0)\n    ->  Limit  (cost=1325.59..1325.61 rows=10 width=24) (actual time=6.153..6.155 rows=10 loops=1)\n          Buffers: shared hit=345\n          ->  Sort  (cost=1325.59..1369.62 rows=17612 width=24) (actual time=6.151..6.152 rows=10 loops=1)\n                Sort Key: publicacion.creado_en DESC\n                Sort Method: top-N heapsort  Memory: 25kB\n                Buffers: shared hit=345\n                ->  Seq Scan on publicacion  (cost=0.00..945.00 rows=17612 width=24) (actual time=0.007..4.142 rows=17600 loops=1)\n                      Filter: ((estado = 'publicado'::text) OR (autor_id = (NULLIF(current_setting('app.usuario_id'::text, true), ''::text))::uuid) OR (current_setting('app.es_admin'::text, true) = 'true'::text))\n                      Rows Removed by Filter: 2400\n                      Buffers: shared hit=345\n  ->  Index Only Scan using like_objetivo on \"like\"  (cost=0.29..213.96 rows=100 width=16) (actual time=6.222..6.278 rows=100 loops=1)\n        Index Cond: ((objetivo_tipo = 'publicacion'::text) AND (objetivo_id = ANY ($0)))\n        Heap Fetches: 100\n        Buffers: shared hit=374\nPlanning:\n  Buffers: shared hit=3\nPlanning Time: 0.206 ms\nExecution Time: 6.344 ms",
+      "ejecucion_ms": 6.344,
+      "usa_indice": true
+    },
+    "muro_sin_indice": {
+      "plan": "Limit  (cost=1329.93..1329.95 rows=10 width=49) (actual time=4.756..4.758 rows=10 loops=1)\n  Buffers: shared hit=345\n  ->  Sort  (cost=1329.93..1368.68 rows=15499 width=49) (actual time=4.755..4.756 rows=10 loops=1)\n        Sort Key: creado_en DESC\n        Sort Method: top-N heapsort  Memory: 25kB\n        Buffers: shared hit=345\n        ->  Seq Scan on publicacion  (cost=0.00..995.00 rows=15499 width=49) (actual time=0.009..2.753 rows=17600 loops=1)\n              Filter: ((estado = 'publicado'::text) AND ((estado = 'publicado'::text) OR (autor_id = (NULLIF(current_setting('app.usuario_id'::text, true), ''::text))::uuid) OR (current_setting('app.es_admin'::text, true) = 'true'::text)))\n              Rows Removed by Filter: 2400\n              Buffers: shared hit=345\nPlanning:\n  Buffers: shared hit=29\nPlanning Time: 0.232 ms\nExecution Time: 4.782 ms",
+      "ejecucion_ms": 4.782,
+      "usa_indice": false
+    },
+    "likes_sin_indice": {
+      "plan": "GroupAggregate  (cost=3686.94..3688.68 rows=99 width=24) (actual time=11.317..11.331 rows=10 loops=1)\n  Group Key: \"like\".objetivo_id\n  Buffers: shared hit=1203\n  InitPlan 1 (returns $0)\n    ->  Limit  (cost=1325.59..1325.61 rows=10 width=24) (actual time=4.354..4.357 rows=10 loops=1)\n          Buffers: shared hit=345\n          ->  Sort  (cost=1325.59..1369.62 rows=17612 width=24) (actual time=4.353..4.354 rows=10 loops=1)\n                Sort Key: publicacion.creado_en DESC\n                Sort Method: top-N heapsort  Memory: 25kB\n                Buffers: shared hit=345\n                ->  Seq Scan on publicacion  (cost=0.00..945.00 rows=17612 width=24) (actual time=0.004..2.836 rows=17600 loops=1)\n                      Filter: ((estado = 'publicado'::text) OR (autor_id = (NULLIF(current_setting('app.usuario_id'::text, true), ''::text))::uuid) OR (current_setting('app.es_admin'::text, true) = 'true'::text))\n                      Rows Removed by Filter: 2400\n                      Buffers: shared hit=345\n  ->  Sort  (cost=2361.32..2361.57 rows=100 width=16) (actual time=11.308..11.313 rows=100 loops=1)\n        Sort Key: \"like\".objetivo_id\n        Sort Method: quicksort  Memory: 27kB\n        Buffers: shared hit=1203\n        ->  Seq Scan on \"like\"  (cost=0.00..2358.00 rows=100 width=16) (actual time=4.366..11.291 rows=100 loops=1)\n              Filter: ((objetivo_tipo = 'publicacion'::text) AND (objetivo_id = ANY ($0)))\n              Rows Removed by Filter: 59900\n              Buffers: shared hit=1203\nPlanning:\n  Buffers: shared hit=17\nPlanning Time: 0.172 ms\nExecution Time: 11.357 ms",
+      "ejecucion_ms": 11.357,
+      "usa_indice": false
+    }
+  },
+  "rls": {
+    "anonimo_ve": 17600,
+    "autor_ve": 17608,
+    "administracion_ve": 20000,
+    "publicadas_reales": 17600
+  }
+}

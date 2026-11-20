@@ -1,0 +1,3220 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "LlegueYa API",
+    "description": "API REST de **LlegueYa**, red social de turismo de Ayacucho.\n\n**Autenticación:** la sesión viaja en la cookie `ly_session` (HttpOnly, SameSite=Lax), que se obtiene con\n`POST /api/v1/auth/entrar`, `POST /api/v1/auth/registro` o el flujo de Google. Las peticiones que cambian datos\ndeben enviar la cabecera `Origin` del sitio (protección CSRF).\n\n**Errores:** siempre `{\"detail\": \"mensaje en español\"}` con 401 (sin sesión), 403 (sin permiso), 404, 409, 422 o 429.\n",
+    "version": "2.0.0"
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "Identidad"
+        ],
+        "summary": "Estado del servicio y métodos de acceso activos",
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/auth/registro": {
+      "post": {
+        "tags": [
+          "Identidad"
+        ],
+        "summary": "Crear cuenta con correo y clave",
+        "operationId": "registro_api_v1_auth_registro_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistroEntrada"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/auth/entrar": {
+      "post": {
+        "tags": [
+          "Identidad"
+        ],
+        "summary": "Iniciar sesión con correo y clave",
+        "operationId": "entrar_api_v1_auth_entrar_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntradaCorreo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/auth/recuperar": {
+      "post": {
+        "tags": [
+          "Identidad"
+        ],
+        "summary": "Pedir enlace para recuperar la clave",
+        "operationId": "recuperar_api_v1_auth_recuperar_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecuperarEntrada"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/auth/recuperacion": {
+      "get": {
+        "tags": [
+          "Identidad"
+        ],
+        "summary": "Volver del enlace de recuperación (redirección)",
+        "operationId": "recuperacion_api_v1_auth_recuperacion_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/auth/clave": {
+      "post": {
+        "tags": [
+          "Identidad"
+        ],
+        "summary": "Cambiar la clave de la sesión actual",
+        "operationId": "clave_api_v1_auth_clave_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaveEntrada"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/google": {
+      "post": {
+        "tags": [
+          "Identidad"
+        ],
+        "summary": "Iniciar sesión con Google (redirección PKCE)",
+        "operationId": "google_api_v1_auth_google_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/auth/callback": {
+      "get": {
+        "tags": [
+          "Identidad"
+        ],
+        "summary": "Volver de Google o de la confirmación de correo",
+        "operationId": "callback_api_v1_auth_callback_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "Identidad"
+        ],
+        "summary": "Datos de la sesión actual (incluye si es admin)",
+        "operationId": "me_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "Identidad"
+        ],
+        "summary": "Cerrar sesión",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/catalogo/lugares": {
+      "get": {
+        "tags": [
+          "Catálogo"
+        ],
+        "summary": "Buscar lugares (texto, tipo, destino) con paginación",
+        "operationId": "lugares_api_v1_catalogo_lugares_get",
+        "parameters": [
+          {
+            "name": "tipo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tipo"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 80,
+              "default": "",
+              "title": "Q"
+            }
+          },
+          {
+            "name": "destino",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Destino"
+            }
+          },
+          {
+            "name": "desde",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Desde"
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 48,
+              "minimum": 1,
+              "default": 24,
+              "title": "Limite"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/catalogo/lugares/{slug}": {
+      "get": {
+        "tags": [
+          "Catálogo"
+        ],
+        "summary": "Ficha de un lugar: vista previa sin sesión, completa con sesión",
+        "operationId": "lugar_api_v1_catalogo_lugares__slug__get",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/catalogo/mapa": {
+      "get": {
+        "tags": [
+          "Catálogo"
+        ],
+        "summary": "Puntos del mapa",
+        "operationId": "mapa_api_v1_catalogo_mapa_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/catalogo/destinos": {
+      "get": {
+        "tags": [
+          "Catálogo"
+        ],
+        "summary": "Destinos con cantidad de lugares",
+        "operationId": "destinos_api_v1_catalogo_destinos_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/catalogo/favoritos/{slug}": {
+      "put": {
+        "tags": [
+          "Catálogo"
+        ],
+        "summary": "Guardar o quitar un lugar de favoritos",
+        "operationId": "marcar_api_v1_catalogo_favoritos__slug__put",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FavoritoEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/catalogo/favoritos": {
+      "get": {
+        "tags": [
+          "Catálogo"
+        ],
+        "summary": "Mis lugares favoritos",
+        "operationId": "favoritos_api_v1_catalogo_favoritos_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/catalogo/admin/lugares": {
+      "get": {
+        "tags": [
+          "Catálogo"
+        ],
+        "summary": "Todos los lugares, también los retirados",
+        "operationId": "admin_lugares_api_v1_catalogo_admin_lugares_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Catálogo"
+        ],
+        "summary": "Crear un lugar turístico",
+        "operationId": "admin_crear_api_v1_catalogo_admin_lugares_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LugarEntrada"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/catalogo/admin/lugares/{slug}": {
+      "put": {
+        "tags": [
+          "Catálogo"
+        ],
+        "summary": "Editar un lugar turístico",
+        "operationId": "admin_editar_api_v1_catalogo_admin_lugares__slug__put",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LugarEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/catalogo/admin/lugares/{slug}/estado": {
+      "post": {
+        "tags": [
+          "Catálogo"
+        ],
+        "summary": "Retirar o volver a publicar un lugar",
+        "operationId": "admin_estado_api_v1_catalogo_admin_lugares__slug__estado_post",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EstadoEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/comunidad/muro": {
+      "get": {
+        "tags": [
+          "Comunidad"
+        ],
+        "summary": "Muro de publicaciones (paginado)",
+        "operationId": "muro_api_v1_comunidad_muro_get",
+        "parameters": [
+          {
+            "name": "desde",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Desde"
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 30,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limite"
+            }
+          },
+          {
+            "name": "lugar",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Lugar"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/comunidad/publicaciones": {
+      "post": {
+        "tags": [
+          "Comunidad"
+        ],
+        "summary": "Publicar una experiencia con foto opcional",
+        "operationId": "publicar_api_v1_comunidad_publicaciones_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_publicar_api_v1_comunidad_publicaciones_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/comunidad/likes": {
+      "post": {
+        "tags": [
+          "Comunidad"
+        ],
+        "summary": "Dar o quitar me gusta (idempotente)",
+        "operationId": "like_api_v1_comunidad_likes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LikeEntrada"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/comunidad/publicaciones/{pid}/comentarios": {
+      "get": {
+        "tags": [
+          "Comunidad"
+        ],
+        "summary": "Comentarios en hilo de una publicación",
+        "operationId": "hilo_api_v1_comunidad_publicaciones__pid__comentarios_get",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      },
+      "post": {
+        "tags": [
+          "Comunidad"
+        ],
+        "summary": "Comentar o responder",
+        "operationId": "comentar_api_v1_comunidad_publicaciones__pid__comentarios_post",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComentarioEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/comunidad/guardados/{pid}": {
+      "put": {
+        "tags": [
+          "Comunidad"
+        ],
+        "summary": "Guardar una publicación en mi colección",
+        "operationId": "guardar_api_v1_comunidad_guardados__pid__put",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuardadoEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/comunidad/motivos-reporte": {
+      "get": {
+        "tags": [
+          "Comunidad"
+        ],
+        "summary": "Motivos válidos para reportar",
+        "operationId": "motivos_api_v1_comunidad_motivos_reporte_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/comunidad/publicaciones/{pid}/reportes": {
+      "post": {
+        "tags": [
+          "Comunidad"
+        ],
+        "summary": "Reportar una publicación",
+        "operationId": "reportar_api_v1_comunidad_publicaciones__pid__reportes_post",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReporteEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/comunidad/yo": {
+      "get": {
+        "tags": [
+          "Comunidad"
+        ],
+        "summary": "Mis publicaciones y guardados",
+        "operationId": "yo_api_v1_comunidad_yo_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/comunidad/fotos/{fid}": {
+      "get": {
+        "tags": [
+          "Comunidad"
+        ],
+        "summary": "Foto de una publicación visible",
+        "operationId": "foto_api_v1_comunidad_fotos__fid__get",
+        "parameters": [
+          {
+            "name": "fid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Fid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/eventos": {
+      "get": {
+        "tags": [
+          "Eventos"
+        ],
+        "summary": "Próximos eventos y festividades",
+        "operationId": "proximos_api_v1_eventos_get",
+        "parameters": [
+          {
+            "name": "mes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Mes"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/eventos/{eid}/suscripcion": {
+      "put": {
+        "tags": [
+          "Eventos"
+        ],
+        "summary": "Suscribirme o no a un evento",
+        "operationId": "suscribir_api_v1_eventos__eid__suscripcion_put",
+        "parameters": [
+          {
+            "name": "eid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Eid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuscripcionEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/asistente/presentacion": {
+      "get": {
+        "tags": [
+          "Asistente"
+        ],
+        "summary": "Presentación de Willaq Uma",
+        "operationId": "presentacion_api_v1_asistente_presentacion_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/asistente/mensajes": {
+      "post": {
+        "tags": [
+          "Asistente"
+        ],
+        "summary": "Conversar con Willaq Uma (respuestas basadas en la plataforma)",
+        "operationId": "mensaje_api_v1_asistente_mensajes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Mensaje"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/publicidad/rubros": {
+      "get": {
+        "tags": [
+          "Publicidad"
+        ],
+        "summary": "Rubros y requisitos de verificación",
+        "operationId": "rubros_api_v1_publicidad_rubros_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/publicidad/planes": {
+      "get": {
+        "tags": [
+          "Publicidad"
+        ],
+        "summary": "Planes de promoción activos",
+        "operationId": "planes_api_v1_publicidad_planes_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/publicidad/anuncios": {
+      "get": {
+        "tags": [
+          "Publicidad"
+        ],
+        "summary": "Anuncios patrocinados vigentes",
+        "operationId": "anuncios_api_v1_publicidad_anuncios_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/publicidad/directorio": {
+      "get": {
+        "tags": [
+          "Publicidad"
+        ],
+        "summary": "Directorio de servicios y artesanía (contacto solo con sesión)",
+        "operationId": "directorio_api_v1_publicidad_directorio_get",
+        "parameters": [
+          {
+            "name": "rubro",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rubro"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Público.",
+        "security": []
+      }
+    },
+    "/api/v1/publicidad/solicitudes": {
+      "post": {
+        "tags": [
+          "Publicidad"
+        ],
+        "summary": "Registrar mi negocio y pedir promoción",
+        "operationId": "solicitar_api_v1_publicidad_solicitudes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SolicitudEntrada"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/publicidad/mis-solicitudes": {
+      "get": {
+        "tags": [
+          "Publicidad"
+        ],
+        "summary": "Mis solicitudes de negocio",
+        "operationId": "mias_api_v1_publicidad_mis_solicitudes_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/publicidad/admin/solicitudes": {
+      "get": {
+        "tags": [
+          "Publicidad"
+        ],
+        "summary": "Todas las solicitudes de negocios",
+        "operationId": "todas_api_v1_publicidad_admin_solicitudes_get",
+        "parameters": [
+          {
+            "name": "estado",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Estado"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/publicidad/admin/planes": {
+      "post": {
+        "tags": [
+          "Publicidad"
+        ],
+        "summary": "Crear un plan de promoción",
+        "operationId": "nuevo_plan_api_v1_publicidad_admin_planes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/services__publicidad__presentacion__PlanEntrada"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/publicidad/admin/planes/{pid}": {
+      "put": {
+        "tags": [
+          "Publicidad"
+        ],
+        "summary": "Activar o desactivar un plan",
+        "operationId": "activar_api_v1_publicidad_admin_planes__pid__put",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivoEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/publicidad/admin/solicitudes/{sid}/requisitos": {
+      "put": {
+        "tags": [
+          "Publicidad"
+        ],
+        "summary": "Marcar un requisito como cumplido",
+        "operationId": "requisito_api_v1_publicidad_admin_solicitudes__sid__requisitos_put",
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequisitoEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/publicidad/admin/solicitudes/{sid}/pago": {
+      "post": {
+        "tags": [
+          "Publicidad"
+        ],
+        "summary": "Registrar el pago manual",
+        "operationId": "pago_api_v1_publicidad_admin_solicitudes__sid__pago_post",
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PagoEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/publicidad/admin/solicitudes/{sid}/decision": {
+      "post": {
+        "tags": [
+          "Publicidad"
+        ],
+        "summary": "Aprobar o rechazar un negocio",
+        "operationId": "decision_api_v1_publicidad_admin_solicitudes__sid__decision_post",
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/services__publicidad__presentacion__DecisionEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/recomendaciones/viajes": {
+      "get": {
+        "tags": [
+          "Recomendaciones"
+        ],
+        "summary": "Mis viajes aceptados",
+        "operationId": "mis_api_v1_recomendaciones_viajes_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Recomendaciones"
+        ],
+        "summary": "Aceptar el plan de viaje de Willaq Uma",
+        "operationId": "aceptar_api_v1_recomendaciones_viajes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/services__recomendaciones__presentacion__PlanEntrada"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/recomendaciones/viajes/{vid}": {
+      "delete": {
+        "tags": [
+          "Recomendaciones"
+        ],
+        "summary": "Eliminar un viaje",
+        "operationId": "eliminar_api_v1_recomendaciones_viajes__vid__delete",
+        "parameters": [
+          {
+            "name": "vid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Vid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere sesión (401 sin ella).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/resumen": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Cifras del panel de administración",
+        "operationId": "resumen_api_v1_admin_resumen_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Contenido pendiente de revisión",
+        "operationId": "moderacion_api_v1_admin_moderacion_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion/{tipo}/{oid}": {
+      "post": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Aprobar o rechazar una publicación o comentario",
+        "operationId": "decidir_api_v1_admin_moderacion__tipo___oid__post",
+        "parameters": [
+          {
+            "name": "tipo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tipo"
+            }
+          },
+          {
+            "name": "oid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Oid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/services__gateway__administracion__DecisionEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/reportes": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Reportes pendientes",
+        "operationId": "reportes_api_v1_admin_reportes_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/reportes/{rid}": {
+      "post": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Resolver un reporte (retirar, desestimar, suspender autor)",
+        "operationId": "resolver_api_v1_admin_reportes__rid__post",
+        "parameters": [
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Rid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReporteDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/contenido": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Publicaciones visibles para revisar fotos",
+        "operationId": "contenido_api_v1_admin_contenido_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/publicaciones/{pid}/retirar": {
+      "post": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Retirar una publicación",
+        "operationId": "retirar_api_v1_admin_publicaciones__pid__retirar_post",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/publicaciones/{pid}/quitar-foto": {
+      "post": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Quitar la foto de una publicación",
+        "operationId": "quitar_foto_api_v1_admin_publicaciones__pid__quitar_foto_post",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/cuentas/suspension-masiva": {
+      "post": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Suspender varias cuentas a la vez",
+        "operationId": "masiva_api_v1_admin_cuentas_suspension_masiva_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuspensionMasiva"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/cuentas": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Cuentas conocidas y su estado",
+        "operationId": "cuentas_api_v1_admin_cuentas_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/cuentas/{uid}/suspension": {
+      "post": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Suspender o reactivar una cuenta",
+        "operationId": "suspension_api_v1_admin_cuentas__uid__suspension_post",
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Uid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuspensionEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+        "security": [
+          {
+            "sesion": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActivoEntrada": {
+        "properties": {
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "activo"
+        ],
+        "title": "ActivoEntrada"
+      },
+      "Body_publicar_api_v1_comunidad_publicaciones_post": {
+        "properties": {
+          "texto": {
+            "type": "string",
+            "maxLength": 2400,
+            "title": "Texto",
+            "default": ""
+          },
+          "lugar": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lugar"
+          },
+          "foto": {
+            "anyOf": [
+              {
+                "type": "string",
+                "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Foto"
+          }
+        },
+        "type": "object",
+        "title": "Body_publicar_api_v1_comunidad_publicaciones_post"
+      },
+      "ClaveEntrada": {
+        "properties": {
+          "clave": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Clave"
+          }
+        },
+        "type": "object",
+        "required": [
+          "clave"
+        ],
+        "title": "ClaveEntrada"
+      },
+      "ComentarioEntrada": {
+        "properties": {
+          "texto": {
+            "type": "string",
+            "maxLength": 1200,
+            "title": "Texto"
+          },
+          "padre_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Padre Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "texto"
+        ],
+        "title": "ComentarioEntrada"
+      },
+      "EntradaCorreo": {
+        "properties": {
+          "correo": {
+            "type": "string",
+            "maxLength": 254,
+            "title": "Correo"
+          },
+          "clave": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Clave"
+          }
+        },
+        "type": "object",
+        "required": [
+          "correo",
+          "clave"
+        ],
+        "title": "EntradaCorreo"
+      },
+      "EstadoEntrada": {
+        "properties": {
+          "publicado": {
+            "type": "boolean",
+            "title": "Publicado"
+          }
+        },
+        "type": "object",
+        "required": [
+          "publicado"
+        ],
+        "title": "EstadoEntrada"
+      },
+      "FavoritoEntrada": {
+        "properties": {
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "activo"
+        ],
+        "title": "FavoritoEntrada"
+      },
+      "FotoEntrada": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Url"
+          },
+          "autor": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Autor",
+            "default": ""
+          },
+          "licencia": {
+            "type": "string",
+            "maxLength": 80,
+            "title": "Licencia",
+            "default": ""
+          },
+          "fuente_url": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Fuente Url",
+            "default": ""
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Descripcion",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "FotoEntrada"
+      },
+      "GuardadoEntrada": {
+        "properties": {
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "activo"
+        ],
+        "title": "GuardadoEntrada"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LikeEntrada": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "maxLength": 20,
+            "title": "Tipo"
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 40,
+            "title": "Id"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tipo",
+          "id",
+          "activo"
+        ],
+        "title": "LikeEntrada"
+      },
+      "LugarEntrada": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Nombre"
+          },
+          "tipo": {
+            "type": "string",
+            "maxLength": 20,
+            "title": "Tipo"
+          },
+          "destino": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Destino"
+          },
+          "zona": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Zona",
+            "default": ""
+          },
+          "resumen": {
+            "type": "string",
+            "maxLength": 280,
+            "title": "Resumen"
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Descripcion"
+          },
+          "lat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lat"
+          },
+          "lon": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lon"
+          },
+          "altitud_m": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Altitud M"
+          },
+          "como_llegar": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Como Llegar",
+            "default": ""
+          },
+          "recomendaciones": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Recomendaciones"
+          },
+          "fuente_url": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Fuente Url",
+            "default": ""
+          },
+          "fotos": {
+            "items": {
+              "$ref": "#/components/schemas/FotoEntrada"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Fotos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nombre",
+          "tipo",
+          "destino",
+          "resumen",
+          "descripcion"
+        ],
+        "title": "LugarEntrada"
+      },
+      "Mensaje": {
+        "properties": {
+          "texto": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Texto"
+          }
+        },
+        "type": "object",
+        "required": [
+          "texto"
+        ],
+        "title": "Mensaje"
+      },
+      "PagoEntrada": {
+        "properties": {
+          "referencia": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Referencia"
+          }
+        },
+        "type": "object",
+        "required": [
+          "referencia"
+        ],
+        "title": "PagoEntrada"
+      },
+      "RecuperarEntrada": {
+        "properties": {
+          "correo": {
+            "type": "string",
+            "maxLength": 254,
+            "title": "Correo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "correo"
+        ],
+        "title": "RecuperarEntrada"
+      },
+      "RegistroEntrada": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Nombre"
+          },
+          "correo": {
+            "type": "string",
+            "maxLength": 254,
+            "title": "Correo"
+          },
+          "clave": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Clave"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nombre",
+          "correo",
+          "clave"
+        ],
+        "title": "RegistroEntrada"
+      },
+      "ReporteDecision": {
+        "properties": {
+          "retirar": {
+            "type": "boolean",
+            "title": "Retirar"
+          },
+          "decision": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Decision",
+            "default": ""
+          },
+          "suspender_autor": {
+            "type": "boolean",
+            "title": "Suspender Autor",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "retirar"
+        ],
+        "title": "ReporteDecision"
+      },
+      "ReporteEntrada": {
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "maxLength": 80,
+            "title": "Motivo"
+          },
+          "detalle": {
+            "type": "string",
+            "maxLength": 600,
+            "title": "Detalle",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "motivo"
+        ],
+        "title": "ReporteEntrada"
+      },
+      "RequisitoEntrada": {
+        "properties": {
+          "requisito": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Requisito"
+          },
+          "cumple": {
+            "type": "boolean",
+            "title": "Cumple"
+          }
+        },
+        "type": "object",
+        "required": [
+          "requisito",
+          "cumple"
+        ],
+        "title": "RequisitoEntrada"
+      },
+      "SolicitudEntrada": {
+        "properties": {
+          "negocio": {
+            "type": "string",
+            "maxLength": 150,
+            "title": "Negocio"
+          },
+          "rubro": {
+            "type": "string",
+            "maxLength": 20,
+            "title": "Rubro"
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 1200,
+            "title": "Descripcion"
+          },
+          "contacto": {
+            "type": "string",
+            "maxLength": 150,
+            "title": "Contacto"
+          },
+          "plan_id": {
+            "type": "string",
+            "maxLength": 40,
+            "title": "Plan Id"
+          },
+          "enlace": {
+            "type": "string",
+            "maxLength": 220,
+            "title": "Enlace",
+            "default": ""
+          },
+          "lugar_slug": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lugar Slug"
+          },
+          "direccion": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Direccion",
+            "default": ""
+          },
+          "lat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lat"
+          },
+          "lon": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lon"
+          },
+          "ofertas": {
+            "items": {},
+            "type": "array",
+            "maxItems": 20,
+            "title": "Ofertas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "negocio",
+          "rubro",
+          "descripcion",
+          "contacto",
+          "plan_id"
+        ],
+        "title": "SolicitudEntrada"
+      },
+      "SuscripcionEntrada": {
+        "properties": {
+          "activa": {
+            "type": "boolean",
+            "title": "Activa"
+          }
+        },
+        "type": "object",
+        "required": [
+          "activa"
+        ],
+        "title": "SuscripcionEntrada"
+      },
+      "SuspensionEntrada": {
+        "properties": {
+          "suspender": {
+            "type": "boolean",
+            "title": "Suspender"
+          },
+          "motivo": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Motivo",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "suspender"
+        ],
+        "title": "SuspensionEntrada"
+      },
+      "SuspensionMasiva": {
+        "properties": {
+          "ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Ids"
+          },
+          "motivo": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Motivo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ids",
+          "motivo"
+        ],
+        "title": "SuspensionMasiva"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "services__gateway__administracion__DecisionEntrada": {
+        "properties": {
+          "aprobar": {
+            "type": "boolean",
+            "title": "Aprobar"
+          }
+        },
+        "type": "object",
+        "required": [
+          "aprobar"
+        ],
+        "title": "DecisionEntrada"
+      },
+      "services__publicidad__presentacion__DecisionEntrada": {
+        "properties": {
+          "aprobar": {
+            "type": "boolean",
+            "title": "Aprobar"
+          },
+          "motivo": {
+            "type": "string",
+            "maxLength": 320,
+            "title": "Motivo",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "aprobar"
+        ],
+        "title": "DecisionEntrada"
+      },
+      "services__publicidad__presentacion__PlanEntrada": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 80,
+            "title": "Nombre"
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 320,
+            "title": "Descripcion",
+            "default": ""
+          },
+          "precio": {
+            "type": "string",
+            "maxLength": 12,
+            "title": "Precio"
+          },
+          "duracion_dias": {
+            "type": "integer",
+            "maximum": 365.0,
+            "minimum": 1.0,
+            "title": "Duracion Dias"
+          },
+          "destacado": {
+            "type": "boolean",
+            "title": "Destacado",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "nombre",
+          "precio",
+          "duracion_dias"
+        ],
+        "title": "PlanEntrada"
+      },
+      "services__recomendaciones__presentacion__PlanEntrada": {
+        "properties": {
+          "plan": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Plan"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plan"
+        ],
+        "title": "PlanEntrada"
+      }
+    },
+    "securitySchemes": {
+      "sesion": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "ly_session",
+        "description": "Cookie de sesión creada por los endpoints de Identidad."
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Identidad",
+      "description": "Registro e inicio de sesión con correo o Google (Supabase Auth), recuperación de clave y sesión actual."
+    },
+    {
+      "name": "Catálogo",
+      "description": "Destinos, lugares, mapa y favoritos. Vista previa pública; ficha completa con sesión. Gestión de lugares solo para administración."
+    },
+    {
+      "name": "Comunidad",
+      "description": "Muro, publicaciones con foto, comentarios en hilo, me gusta, colecciones y reportes."
+    },
+    {
+      "name": "Eventos",
+      "description": "Calendario de festividades y suscripciones."
+    },
+    {
+      "name": "Publicidad",
+      "description": "Planes, solicitudes de negocios, verificación de requisitos, anuncios y directorio de servicios y artesanía."
+    },
+    {
+      "name": "Recomendaciones",
+      "description": "Planes de viaje propuestos por Willaq Uma y aceptados por el viajero."
+    },
+    {
+      "name": "Asistente",
+      "description": "Willaq Uma: guía basado en el contenido de la plataforma."
+    },
+    {
+      "name": "Administración",
+      "description": "Moderación, reportes, fotos, cuentas y bajas masivas. Requiere un correo de ADMIN_CORREOS."
+    }
+  ]
+}
