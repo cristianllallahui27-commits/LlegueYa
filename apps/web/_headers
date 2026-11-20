@@ -1,0 +1,13 @@
+# Cabeceras de la web cuando la sirve Cloudflare (Workers static assets).
+# Son las mismas que aplica el backend (services/compartido/seguridad.py).
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: blob: https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com https://server.arcgisonline.com https://*.tile.opentopomap.org https://lh3.googleusercontent.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self' https://*.supabase.co https://accounts.google.com
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000
+/vendor/*
+  Cache-Control: public, max-age=2592000
+/fuentes/*
+  Cache-Control: public, max-age=2592000
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate

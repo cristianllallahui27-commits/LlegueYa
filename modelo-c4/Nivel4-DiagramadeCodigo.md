@@ -67,6 +67,6 @@ classDiagram
 3. Si no puede confirmar elegibilidad, omite la campaña. El repositorio reserva cuota de forma atómica e idempotente, usando una clave de solicitud que definirá el SDD.
 4. Devuelve anuncios con etiqueta de patrocinio. La reserva de cuota no equivale a una impresión: la medición de entrega, impresión y clic usa contratos separados.
 
-La implementación SQL accede exclusivamente a DP. ClienteElegibilidadHTTP delega según el tipo de objetivo a Catálogo o Eventos, con tiempos límite. Los casos de uso no importan esos clientes ni SQL. Asistente y Recomendaciones no modifican reglas publicitarias; mantienen alternativas orgánicas y precios estructurados.
+La implementación SQL accede exclusivamente al esquema publicidad de DB (Supabase PostgreSQL). ClienteElegibilidadHTTP delega según el tipo de objetivo a Catálogo o Eventos, con tiempos límite. Los casos de uso no importan esos clientes ni SQL. Asistente y Recomendaciones no modifican reglas publicitarias; mantienen alternativas orgánicas y precios estructurados.
 
 Las políticas, beneficio único, revisión de pagos y contratación pertenecen al componente Gestión comercial de C3 y se especifican en [publicidad y gratuidad](../docs/04-especificacion-funcional/03-publicidad-y-periodo-gratuito.md). No se añade un segundo componente a este acercamiento C4.

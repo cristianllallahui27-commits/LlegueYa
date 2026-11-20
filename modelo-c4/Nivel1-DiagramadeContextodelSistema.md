@@ -12,15 +12,17 @@ flowchart LR
     PR["Proveedor turístico<br/>[Persona]<br/>Ofrece hospedaje, gastronomía, artesanía y actividades"]
     AD["Administrador / propietario<br/>[Persona]<br/>Aprueba contenido y gestiona promoción"]
     LY["LlegueYa<br/>[Sistema de software]<br/>Guía, catálogo, experiencias, eventos y publicidad"]
-    MAP["Servicio de mapas<br/>[Sistema externo]<br/>Ubicaciones y cartografía"]
-    IA["Proveedor de IA<br/>[Sistema externo]<br/>Generación de respuestas del asistente"]
+    MAP["Teselas OpenStreetMap<br/>[Sistema externo]<br/>Cartografía, sin GPS del usuario"]
+    IA["Gemini API<br/>[Sistema externo]<br/>Generación de respuestas del asistente"]
     MAIL["Servicio de correo<br/>[Sistema externo opcional]<br/>Entrega avisos elegidos"]
     TK["Sitio de venta de entradas<br/>[Sistema externo]<br/>Gestiona su propia venta"]
     PAY["Medio de pago externo<br/>[Sistema externo por definir]<br/>Procesa pago fuera de LlegueYa"]
     T -->|"Consulta lugares y bot; comparte experiencias; propone eventos"| LY
     PR -->|"Publica ofertas y fotos; solicita campañas; presenta comprobante"| LY
     AD -->|"Modera; configura gratuidad, tarifas y revisa pagos"| LY
-    LY -->|"Consulta cartografía y ubicaciones / HTTPS"| MAP
+    LY -->|"Carga teselas para mapa interactivo / HTTPS"| MAP
+    SA["Supabase Auth<br/>[Sistema externo gestionado]<br/>Autenticación técnica"]
+    LY -->|"Autentica y renueva sesión / HTTPS"| SA
     LY -->|"Solicita respuesta con contexto autorizado / HTTPS"| IA
     LY -->|"Solicita entrega de aviso / protocolo por definir"| MAIL
     T -->|"Abre enlace verificado mostrado por LlegueYa / HTTPS"| TK
@@ -39,4 +41,6 @@ Turista y visitante son el mismo actor en distintos estados de autenticación. S
 
 LlegueYa no se integra automáticamente con el medio de pago ni vende entradas. El proveedor paga fuera y presenta evidencia privada; el administrador la revisa. La publicidad requiere elegibilidad y moderación, además de beneficio gratuito vigente o pago confirmado. Por defecto, el beneficio inicial dura un mes calendario, configurable por administración. El bot identifica el patrocinio y respeta destino, fechas, grupo y presupuesto.
 
-No se dibuja una API de pago o venta inexistente. [C2](Nivel2-DiagramadeContenedores.md) muestra qué contenedores realizan las integraciones de mapas, IA y correo. Trazabilidad: RF01-RF59, ADR-001 a ADR-022 y [alcance](../docs/04-especificacion-funcional/01-analisis-y-alcance.md).
+No se dibuja una API de pago o venta inexistente. [C2](Nivel2-DiagramadeContenedores.md) muestra qué contenedores realizan las integraciones de mapas, IA y correo. Trazabilidad: RF01-RF65, ADR-001 a ADR-027 y [alcance](../docs/04-especificacion-funcional/01-analisis-y-alcance.md).
+
+La infraestructura gestionada de PostgreSQL/Storage forma parte del despliegue de LlegueYa en C2; no se agrega como una persona o servicio de negocio en C1. Cloudflare es borde de entrega, no capacidad turística.

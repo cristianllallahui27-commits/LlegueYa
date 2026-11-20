@@ -19,3 +19,5 @@ Cada servicio contiene presentación, aplicación, dominio e infraestructura. La
 [Diagrama lógico](../04-especificacion-funcional/02-arquitectura-y-diseno.md#2-vista-lógica), [contenedores C4](../../modelo-c4/Nivel2-DiagramadeContenedores.md) y [componentes de Publicidad](../../modelo-c4/Nivel3-DiagramadeComponentes.md).
 
 Las portadas aprobadas son públicas; galerías del detalle requieren sesión. Expedientes, comprobantes y originales pendientes son privados. Catálogo gestiona evidencia de categorías; Eventos, fotos de sus propuestas; Comunidad, fotos de viajeros. La distribución de archivos respeta esas políticas.
+
+El [diseño detallado por servicio](../05-sdd/03-servicios-capas-y-solid.md) incorpora Perfil en Identidad, movilidad en Catálogo y colecciones en Comunidad, sin agregar servicios independientes.

@@ -63,5 +63,12 @@ LlegueYa reúne orientación turística, comunidad, catálogo visual, calendario
 | RF57 | Un usuario registrado con sesión válida puede dar o retirar un like en un comentario o respuesta aprobados y accesibles, sin duplicados por usuario y objetivo. |
 | RF58 | Un usuario registrado con sesión válida puede comentar fotos y responder a comentarios/respuestas dentro del mismo hilo; cada intervención conserva autoría, fecha y referencia al padre. |
 | RF59 | El sistema verifica sesión y visibilidad en cada interacción, aplica moderación y paginación al hilo, evita ciclos y oculta respuestas/adjuntos cuyo contexto haya sido retirado o deje de ser accesible. |
+| RF60 | El usuario con sesión puede editar nombre visible, biografía, avatar e intereses propios; no puede cambiar roles, estado administrativo o datos de otra cuenta mediante el perfil. |
+| RF61 | El administrador gestiona terminales y puntos de embarque con ubicación pública, fuente, fecha de revisión y vínculo a destinos/operadores; los usuarios pueden proponerlos para revisión. |
+| RF62 | El turista puede consultar movilidad privada y operadores verificados por origen/destino sin adquirir paquetes, con horarios/precios solo cuando estén informados y contacto externo según permisos. |
+| RF63 | El mapa permite desplazamiento, zoom y selección de marcadores de catálogo aprobados, con alternativa en lista y sin solicitar, inferir para personalización ni rastrear la ubicación del usuario. |
+| RF64 | El usuario con sesión puede crear colecciones privadas y guardar lugares/publicaciones accesibles; guardar no concede acceso a contenido retirado o restringido. |
+
+| RF65 | La pantalla de acceso presenta el logo original completo y sin alterar su aspecto, con animación suave del conjunto y alternativa estática para movimiento reducido, sin retrasar el inicio de sesión. |
 
 Especificación: [alcance](../04-especificacion-funcional/01-analisis-y-alcance.md), [publicidad](../04-especificacion-funcional/03-publicidad-y-periodo-gratuito.md), [acceso](../04-especificacion-funcional/04-acceso-del-turista.md), [catálogo, eventos y actividades](../04-especificacion-funcional/05-catalogo-eventos-y-actividades.md) e [interacción social](../04-especificacion-funcional/06-interaccion-social.md).

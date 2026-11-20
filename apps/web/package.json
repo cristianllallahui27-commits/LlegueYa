@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "Interfaz sin compilación (HTML, CSS y módulos ES). Node solo se usa para pruebas."
+}

@@ -24,4 +24,8 @@ Los tres documentos siguientes fueron proporcionados como material de referencia
 | [Comunicando la arquitectura de software con el modelo C4, Luca Mezzalira](<Comunicando la arquitectura de software con el modelo C4 - Luca Mezzalira ES.pdf>) | 8-11, 14-15, 24-32 | Alcances C1-C4; contenedores de datos; nombres, responsabilidades, tecnologías y relaciones; ampliación de un contenedor; C4 selectivo. |
 | [Diagramas C4.pdf](<Diagramas C4.pdf>) | 4-13 | Personas/sistemas en C1, aplicaciones y bases en C2, componentes de una API en C3, clases/interfaces en C4 y convenciones consistentes. |
 
-La documentación de LlegueYa conserva los criterios aplicados y no depende de ejecutar ejemplos de las referencias. Los nombres de tecnologías en los diagramas son candidatos pendientes del SDD. [Índice C4](../../modelo-c4/README.md).
+La documentación de LlegueYa conserva los criterios aplicados y no depende de ejecutar ejemplos de las referencias. El SDD distingue tecnologías elegidas de propuestas técnicas y pendientes externos. [Índice C4](../../modelo-c4/README.md).
+
+## Diseño detallado
+
+El [SDD](../05-sdd/README.md) registra las decisiones de Supabase, Docker, Cloudflare, Gemini y Leaflet. Sus [referencias primarias](../05-sdd/referencias.md) distinguen metodología, capacidades de productos y condiciones de uso.

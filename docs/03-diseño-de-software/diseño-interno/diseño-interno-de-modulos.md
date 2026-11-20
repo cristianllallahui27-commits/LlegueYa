@@ -44,4 +44,5 @@ La publicación se confirma en transacción local con su evento outbox. Los cons
 
 ## Referencias
 
-[Requisitos RF01-RF59](../../01-analisis-de-sistema/03-requisitos-funcionales.md), [catálogo y eventos](../../04-especificacion-funcional/05-catalogo-eventos-y-actividades.md), [patrones](patrones-de-diseño.md) y [principios](principios-de-diseño.md). Son elementos conceptuales de diseño, no clases implementadas.
+[Requisitos RF01-RF65](../../01-analisis-de-sistema/03-requisitos-funcionales.md), [catálogo y eventos](../../04-especificacion-funcional/05-catalogo-eventos-y-actividades.md), [patrones](patrones-de-diseño.md) y [principios](principios-de-diseño.md). Son elementos conceptuales de diseño, no clases implementadas.
+El diseño detallado vigente se encuentra en [SDD: servicios, capas y SOLID](../../05-sdd/03-servicios-capas-y-solid.md) y [datos Supabase](../../05-sdd/04-datos-y-supabase.md). Las responsabilidades anteriores se conservan; los contratos detallados y parámetros tienen una única definición en el SDD.

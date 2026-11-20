@@ -9,7 +9,7 @@
 | Despliegue | Siete servicios independientes detrás de una entrada API estable. |
 | Servicios | Identidad; Catálogo y proveedores; Comunidad y contenido; Eventos y notificaciones; Publicidad y planes; Recomendaciones y paquetes; Asistente turístico. |
 | Diseño interno | Clean Architecture en cada servicio; dominio sin dependencias de red o framework. |
-| Datos | Propiedad exclusiva por servicio; bases/esquemas y credenciales aislados, sin acceso a tablas ajenas. |
+| Datos | Propiedad exclusiva por servicio; esquemas y credenciales aislados en Supabase, sin acceso a tablas ajenas. |
 | Comunicación | REST con autorización para consultas; eventos durables con outbox e idempotencia para cambios. |
 | Lecturas y fotos | Vistas previas públicas, detalle autenticado, paginación y entrega de imágenes según permisos. |
 | Escalamiento | Cada servicio puede replicarse según su demanda, sin desplegar todos los demás. |
@@ -21,7 +21,7 @@
 
 ![C2-A: aplicaciones y bases propias](../../modelo-c4/diagramas/c2a-aplicaciones-datos.svg)
 
-[Modelo C4 completo](../../modelo-c4/README.md), [relaciones de integración](../../modelo-c4/Nivel2-DiagramadeContenedores.md) y [visor gráfico](../../modelo-c4/diagramas/index.html). Las bases lógicas, mensajes y objetos tienen tipo, responsabilidad y relaciones explícitas.
+[Modelo C4 completo](../../modelo-c4/README.md), [relaciones de integración](../../modelo-c4/Nivel2-DiagramadeContenedores.md) y [visor gráfico](../../modelo-c4/diagramas/index.html). El contenedor DB, sus esquemas, mensajes y objetos tienen tipo, responsabilidad y relaciones explícitas.
 
 ## Reglas y consecuencias
 
@@ -29,4 +29,4 @@ Cada servicio mantiene sus transacciones y valida permisos. Cambios de estado se
 
 La distribución implica latencia de red, fallos parciales, operación por servicio y consistencia eventual. Los siete servicios se agrupan por capacidad de negocio y exponen contratos versionados.
 
-Detalle: [arquitectura y diseño](../04-especificacion-funcional/02-arquitectura-y-diseno.md). Las vistas Mermaid de los documentos describen el sistema. Las tecnologías candidatas y la distribución física se evaluarán y aprobarán en el SDD antes de implementar.
+Detalle: [arquitectura y diseño](../04-especificacion-funcional/02-arquitectura-y-diseno.md). Las vistas Mermaid de los documentos describen el sistema. El [SDD](../05-sdd/README.md) precisa la base Supabase por esquemas, Docker, Cloudflare y Gemini, con hosting/versiones pendientes.

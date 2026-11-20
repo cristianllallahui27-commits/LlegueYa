@@ -42,3 +42,5 @@ Los patrones se seleccionan por su utilidad para el caso de uso. La composición
 | Decorator | Misma información pública válida con/sin caché; proveedor suspendido excluido después del cambio e invalidación. |
 
 Son verificaciones previstas, **no pruebas ejecutadas**. Ver [diseño del módulo](diseño-interno-de-modulos.md), [SOLID](principios-de-diseño.md) y [ADR](../../01-analisis-de-sistema/07-decisiones-arquitectonicas.md).
+
+El diseño detallado vigente se encuentra en [SDD: servicios, capas y SOLID](../../05-sdd/03-servicios-capas-y-solid.md) y [datos Supabase](../../05-sdd/04-datos-y-supabase.md). Las responsabilidades anteriores se conservan; los contratos detallados y parámetros tienen una única definición en el SDD.

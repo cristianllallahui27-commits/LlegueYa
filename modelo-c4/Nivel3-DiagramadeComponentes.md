@@ -4,7 +4,7 @@
 
 [Diagramas ampliables en navegador](diagramas/index.html) · [Archivo editable Draw.io](diagramas/LlegueYa-C4.drawio)
 
-**Alcance:** solo el contenedor P de C2. **Público:** desarrollo. **Estado:** componentes conceptuales, no código. Tecnología candidata: Python/FastAPI*. La base DP, BUS, OBJ y las otras APIs son contenedores externos a P, aunque pertenezcan a LlegueYa.
+**Alcance:** solo el contenedor P de C2. **Público:** desarrollo. **Estado:** componentes conceptuales, no código. Tecnología candidata: Python/FastAPI*. La esquema publicidad en DB, BUS, OBJ y las otras APIs son contenedores externos a P, aunque pertenezcan a LlegueYa.
 
 ```mermaid
 flowchart TB
@@ -29,10 +29,10 @@ flowchart TB
       MSG -->|"Lee outbox y registra inbox / puerto de repositorio"| REP
       MSG -->|"Aplica suspensión o vencimiento / llamada interna"| GEST
     end
-    DP[("DP · BD Publicidad<br/>[Contenedor de datos: PostgreSQL*]<br/>Políticas, beneficios, pagos, campañas, cuotas, outbox/inbox")]
+    DP[("DB · Supabase PostgreSQL<br/>[Contenedor de datos: esquema publicidad]<br/>Políticas, beneficios, pagos, campañas, cuotas, outbox/inbox")]
     C["C · Catálogo y proveedores<br/>[Contenedor API: Python/FastAPI*]<br/>Estado de negocio, oferta, paquete y lugar"]
     E["E · Eventos y notificaciones<br/>[Contenedor API: Python/FastAPI*]<br/>Estado del evento y autorización del organizador"]
-    OBJ[("OBJ · Almacén de objetos<br/>[Contenedor de datos: por definir]<br/>Ámbito privado de comprobantes")]
+    OBJ[("OBJ · Supabase Storage<br/>[Contenedor de archivos gestionado]<br/>Ámbito privado de comprobantes")]
     BUS["BUS · Mensajería durable<br/>[Contenedor: RabbitMQ*]<br/>Cambios versionados"]
     GW -->|"Enruta operación / HTTPS JSON"| CTRL
     R -->|"Pide anuncios compatibles / HTTPS JSON"| CTRL
@@ -60,6 +60,8 @@ El gráfico C3 muestra **colaboración en ejecución**. Los casos de uso definen
 
 El dominio no es un componente intermediario por el que pasan todas las llamadas a base de datos. Los componentes de aplicación colaboran con entidades y reglas del dominio. [C4](Nivel4-DiagramadeCodigo.md) amplía el componente Selección de anuncios y muestra las dependencias de código.
 
-El beneficio inicial se asigna una sola vez por negocio, un mes calendario por defecto, con política y fechas copiadas. Los planes pagados necesitan confirmación administrativa. Toda entrega exige anunciante autorizado y objetivo aprobado/vigente; cuota y frecuencia se reservan atómicamente en DP. La cancelación del objetivo impide nuevas autorizaciones y dispara invalidaciones. El pago o una categoría acreditada no sustituyen aprobación ni compatibilidad.
+El beneficio inicial se asigna una sola vez por negocio, un mes calendario por defecto, con política y fechas copiadas. Los planes pagados necesitan confirmación administrativa. Toda entrega exige anunciante autorizado y objetivo aprobado/vigente; cuota y frecuencia se reservan atómicamente en el esquema publicidad de DB. La cancelación del objetivo impide nuevas autorizaciones y dispara invalidaciones. El pago o una categoría acreditada no sustituyen aprobación ni compatibilidad.
 
 Trazabilidad: RF30-RF33, RF36-RF45, RF54-RF55; ADR-013, ADR-016 a ADR-020. Los demás servicios conservan su estructura de componentes en la [vista general](../docs/02-arquitectura-software/componentes-arquitectonicos.md).
+
+Los identificadores de partición heredados no representan bases independientes. El diseño de datos y RLS pertenece al [SDD](../docs/05-sdd/04-datos-y-supabase.md).

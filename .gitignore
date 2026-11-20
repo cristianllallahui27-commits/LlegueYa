@@ -16,3 +16,53 @@ Thumbs.db
 # Material de trabajo local; no forma parte del entregable
 /tmp/
 /respaldo-pull-*/
+
+
+# Credenciales y datos privados
+.env
+.env.*
+!.env.example
+!.env.*.example
+**/secrets/
+**/.secrets/
+**/credentials/
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.dump
+*.sql.gz
+*.sqlite
+*.sqlite3
+*.db
+*.log
+backups/
+private/
+service-account*.json
+**/*service-account*.json
+
+# Derivados locales de lectura y compilación
+docs/05-sdd/.build/
+
+# Resultados reproducibles de pruebas locales
+/reports/
+/node_modules/
+.coverage
+htmlcov/
+.pytest_cache/
+__pycache__/
+
+.venv/
+.env
+
+
+# Plataforma social: fotos subidas en desarrollo y pruebas
+data/
+tmp/fotos-e2e/
+reports/e2e-foto.jpg
+reports/coverage-servicios.json
+
+# Dependencias y reportes generados
+node_modules/
+reports/jest-coverage/

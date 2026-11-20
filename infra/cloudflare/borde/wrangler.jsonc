@@ -1,0 +1,22 @@
+// Worker «llegueya-borde»: web estática + balanceo/caché de /api hacia los backends.
+// Desplegar:  npx wrangler deploy      (desde infra/cloudflare/borde)
+// Secreto:    npx wrangler secret put BORDE_CLAVE   (el mismo valor que BORDE_CLAVE del backend)
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "llegueya-borde",
+  "main": "src/borde.js",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "../../../apps/web",
+    "binding": "ASSETS",
+    // Solo /api y la salud del borde ejecutan el Worker; el resto son estáticos gratuitos.
+    "run_worker_first": ["/api/*", "/__borde/*"]
+  },
+  "vars": {
+    // Backends separados por coma (sin barra final). Cambia por tus URLs reales.
+    "ORIGENES": "https://llegueya-api-1.onrender.com,https://llegueya-api-2.onrender.com"
+  },
+  "observability": { "enabled": true }
+  // Con dominio propio en Cloudflare, descomenta y ajusta:
+  // ,"routes": [{ "pattern": "app.tudominio.pe", "custom_domain": true }]
+}

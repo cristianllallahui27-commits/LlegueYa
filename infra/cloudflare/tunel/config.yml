@@ -1,0 +1,14 @@
+# Cloudflare Tunnel: publica un backend de LlegueYa sin abrir puertos (PC o VPS).
+#   cloudflared tunnel login
+#   cloudflared tunnel create llegueya-api-pc        → crea el archivo de credenciales
+#   cloudflared tunnel route dns llegueya-api-pc api-pc.tudominio.pe
+#   cloudflared tunnel run llegueya-api-pc
+# Luego agrega https://api-pc.tudominio.pe a ORIGENES en infra/cloudflare/borde/wrangler.jsonc.
+# El archivo de credenciales (*.json) NO se sube a Git.
+tunnel: llegueya-api-pc
+credentials-file: C:\Users\<usuario>\.cloudflared\<id-del-tunel>.json
+
+ingress:
+  - hostname: api-pc.tudominio.pe
+    service: http://127.0.0.1:8000
+  - service: http_status:404

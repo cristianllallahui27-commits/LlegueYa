@@ -1,0 +1,209 @@
+"""API de Publicidad: planes públicos, solicitudes del negocio y panel administrativo."""
+from typing import Optional
+from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
+from services.compartido.sesion import VerificadorSesion
+from .aplicacion import Publicidad
+from .dominio import REQUISITOS, RUBROS, NoEncontrada, ReglaPublicidad
+
+SESION = {'detail': 'Inicia sesión para continuar.', 'requiere_sesion': True}
+SOLO_ADMIN = {'detail': 'Solo administración puede hacer esto.'}
+
+
+def plan_json(p):
+    return {'id': p.id, 'nombre': p.nombre, 'descripcion': p.descripcion, 'precio': str(p.precio), 'moneda': 'PEN',
+            'duracion_dias': p.duracion_dias, 'destacado': p.destacado, 'activo': p.activo,
+            'gratuidad_inicial': p.gratuidad_inicial}
+
+
+def solicitud_json(s, pub, admin=False):
+    data = {'id': s.id, 'negocio': s.negocio, 'rubro': s.rubro, 'rubro_nombre': RUBROS[s.rubro],
+            'descripcion': s.descripcion, 'contacto': s.contacto, 'enlace': s.enlace, 'lugar_slug': s.lugar_slug,
+            'direccion': s.direccion, 'lat': s.lat, 'lon': s.lon, 'ofertas': [oferta_json(o) for o in s.ofertas],
+            'plan': plan_json(pub.plan_de(s)), 'estado': s.estado, 'pago': s.pago, 'monto': str(s.monto),
+            'requisitos': s.requisitos, 'motivo': s.motivo, 'creada_en': s.creada_en.isoformat(),
+            'inicio': s.inicio.isoformat() if s.inicio else None, 'fin': s.fin.isoformat() if s.fin else None}
+    if admin:
+        data.update({'solicitante': s.solicitante, 'usuario_id': s.usuario_id, 'referencia_pago': s.referencia_pago})
+    return data
+
+
+def oferta_json(o):
+    return {'nombre': o['nombre'], 'precio_desde': str(o['precio_desde']) if o['precio_desde'] is not None else None,
+            'detalle': o['detalle']}
+
+
+def negocio_json(s, pub, con_sesion):
+    """Ficha pública del directorio. El contacto se muestra solo con sesión (SDD)."""
+    return {'id': s.id, 'negocio': s.negocio, 'rubro': s.rubro, 'rubro_nombre': RUBROS[s.rubro],
+            'descripcion': s.descripcion, 'direccion': s.direccion, 'lat': s.lat, 'lon': s.lon,
+            'ofertas': [oferta_json(o) for o in s.ofertas], 'lugar_slug': s.lugar_slug,
+            'patrocinado': s.vigente(pub.reloj()), 'verificado': True,
+            'contacto': s.contacto if con_sesion else None, 'enlace': s.enlace if con_sesion else None,
+            'requiere_sesion': not con_sesion}
+
+
+def anuncio_json(s, pub):
+    return {'id': s.id, 'negocio': s.negocio, 'rubro': RUBROS[s.rubro], 'descripcion': s.descripcion,
+            'contacto': s.contacto, 'enlace': s.enlace, 'lugar_slug': s.lugar_slug,
+            'destacado': pub.plan_de(s).destacado, 'verificado': True}
+
+
+class SolicitudEntrada(BaseModel):
+    negocio: str = Field(max_length=150)
+    rubro: str = Field(max_length=20)
+    descripcion: str = Field(max_length=1200)
+    contacto: str = Field(max_length=150)
+    plan_id: str = Field(max_length=40)
+    enlace: str = Field(default='', max_length=220)
+    lugar_slug: Optional[str] = Field(default=None, max_length=80)
+    direccion: str = Field(default='', max_length=200)
+    lat: Optional[float] = None
+    lon: Optional[float] = None
+    ofertas: list = Field(default_factory=list, max_length=20)
+
+
+class PlanEntrada(BaseModel):
+    nombre: str = Field(max_length=80)
+    descripcion: str = Field(default='', max_length=320)
+    precio: str = Field(max_length=12)
+    duracion_dias: int = Field(ge=1, le=365)
+    destacado: bool = False
+
+
+class ActivoEntrada(BaseModel):
+    activo: bool
+
+
+class RequisitoEntrada(BaseModel):
+    requisito: str = Field(max_length=120)
+    cumple: bool
+
+
+class PagoEntrada(BaseModel):
+    referencia: str = Field(max_length=100)
+
+
+class DecisionEntrada(BaseModel):
+    aprobar: bool
+    motivo: str = Field(default='', max_length=320)
+
+
+def crear_router(pub: Publicidad, verificar: VerificadorSesion) -> APIRouter:
+    router = APIRouter(prefix='/api/v1/publicidad')
+
+    def error(e):
+        if isinstance(e, NoEncontrada):
+            return JSONResponse({'detail': 'No encontramos ese registro.'}, status_code=404)
+        return JSONResponse({'detail': str(e)}, status_code=422)
+
+    async def admin(request):
+        u = await verificar(request)
+        if u is None:
+            return None, JSONResponse(SESION, status_code=401)
+        if not u.admin:
+            return None, JSONResponse(SOLO_ADMIN, status_code=403)
+        return u, None
+
+    @router.get('/rubros')
+    def rubros():
+        return {'rubros': [{'id': k, 'nombre': v, 'requisitos': list(REQUISITOS[k])} for k, v in RUBROS.items()]}
+
+    @router.get('/planes')
+    def planes():
+        return {'planes': [plan_json(p) for p in pub.planes()]}
+
+    @router.get('/anuncios')
+    def anuncios():
+        return {'anuncios': [anuncio_json(s, pub) for s in pub.anuncios()]}
+
+    @router.get('/directorio')
+    async def directorio(request: Request, rubro: Optional[str] = None):
+        u = await verificar(request)
+        try:
+            items = pub.directorio(rubro)
+        except ReglaPublicidad as ex:
+            return error(ex)
+        return JSONResponse({'items': [negocio_json(s, pub, u is not None) for s in items]},
+                            headers={'Cache-Control': 'private, no-store', 'Vary': 'Cookie'})
+
+    @router.post('/solicitudes')
+    async def solicitar(request: Request, e: SolicitudEntrada):
+        u = await verificar(request)
+        if u is None:
+            return JSONResponse(SESION, status_code=401)
+        try:
+            s = pub.solicitar(u.id, u.nombre, e.negocio, e.rubro, e.descripcion, e.contacto, e.plan_id, e.enlace,
+                              e.lugar_slug, e.direccion, e.lat, e.lon, e.ofertas)
+        except (ReglaPublicidad, NoEncontrada) as ex:
+            return error(ex)
+        return JSONResponse(solicitud_json(s, pub), status_code=201)
+
+    @router.get('/mis-solicitudes')
+    async def mias(request: Request):
+        u = await verificar(request)
+        if u is None:
+            return JSONResponse(SESION, status_code=401)
+        return {'items': [solicitud_json(s, pub) for s in pub.mis_solicitudes(u.id)]}
+
+    # --- administración --------------------------------------------------
+    @router.get('/admin/solicitudes')
+    async def todas(request: Request, estado: Optional[str] = None):
+        _, r = await admin(request)
+        if r:
+            return r
+        return {'items': [solicitud_json(s, pub, admin=True) for s in pub.solicitudes(estado)],
+                'planes': [plan_json(p) for p in pub.planes(solo_activos=False)]}
+
+    @router.post('/admin/planes')
+    async def nuevo_plan(request: Request, e: PlanEntrada):
+        _, r = await admin(request)
+        if r:
+            return r
+        try:
+            return JSONResponse(plan_json(pub.crear_plan(e.nombre, e.descripcion, e.precio, e.duracion_dias, e.destacado)), status_code=201)
+        except ReglaPublicidad as ex:
+            return error(ex)
+
+    @router.put('/admin/planes/{pid}')
+    async def activar(pid: str, request: Request, e: ActivoEntrada):
+        _, r = await admin(request)
+        if r:
+            return r
+        try:
+            return plan_json(pub.activar_plan(pid[:40], e.activo))
+        except NoEncontrada as ex:
+            return error(ex)
+
+    @router.put('/admin/solicitudes/{sid}/requisitos')
+    async def requisito(sid: str, request: Request, e: RequisitoEntrada):
+        _, r = await admin(request)
+        if r:
+            return r
+        try:
+            return solicitud_json(pub.marcar_requisito(sid[:40], e.requisito, e.cumple), pub, admin=True)
+        except (ReglaPublicidad, NoEncontrada) as ex:
+            return error(ex)
+
+    @router.post('/admin/solicitudes/{sid}/pago')
+    async def pago(sid: str, request: Request, e: PagoEntrada):
+        _, r = await admin(request)
+        if r:
+            return r
+        try:
+            return solicitud_json(pub.registrar_pago(sid[:40], e.referencia), pub, admin=True)
+        except (ReglaPublicidad, NoEncontrada) as ex:
+            return error(ex)
+
+    @router.post('/admin/solicitudes/{sid}/decision')
+    async def decision(sid: str, request: Request, e: DecisionEntrada):
+        _, r = await admin(request)
+        if r:
+            return r
+        try:
+            return solicitud_json(pub.decidir(sid[:40], e.aprobar, e.motivo), pub, admin=True)
+        except (ReglaPublicidad, NoEncontrada) as ex:
+            return error(ex)
+
+    return router

@@ -47,3 +47,5 @@ Estas reglas responden a DA04 y DA10. No justifican una jerarquía de herencia i
 | Regla única de elegibilidad | S: un lugar responsable del criterio. | ADR-007; EQ-05. |
 
 Fuentes: [diseño interno](diseño-interno-de-modulos.md), [patrones](patrones-de-diseño.md), [ADR](../../01-analisis-de-sistema/07-decisiones-arquitectonicas.md), [escenarios](../../01-analisis-de-sistema/08-escenarios-atributos-calidad.md) y [Guía 04](../../fuentes/GUIA-004-ASF.pdf), pp. 3-5 y 12.
+
+El diseño detallado vigente se encuentra en [SDD: servicios, capas y SOLID](../../05-sdd/03-servicios-capas-y-solid.md) y [datos Supabase](../../05-sdd/04-datos-y-supabase.md). Las responsabilidades anteriores se conservan; los contratos detallados y parámetros tienen una única definición en el SDD.

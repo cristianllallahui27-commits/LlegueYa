@@ -26,6 +26,11 @@ Registro de decisiones de diseño de LlegueYa. No acredita implementación ni de
 | ADR-020 | Propuestas comunitarias de eventos y lugares | Usuarios registrados aportan fotos/ubicación; administrador publica; promoción consulta el estado del objetivo en su servicio dueño. |
 | ADR-021 | Descubrimiento público y detalle autenticado | Tarjetas públicas; fichas completas y galerías requieren sesión. API y acceso a archivos cumplen la misma política. |
 | ADR-022 | Interacción social autenticada en Comunidad | Likes únicos por usuario/objetivo y comentarios con respuestas en hilos sin ciclos. Comunidad valida visibilidad con el dueño de la foto; moderación y retiro de padres ocultan hijos. |
+| ADR-023 | Supabase con separación por esquemas | Un proyecto PostgreSQL gestionado y siete esquemas privados, cuentas técnicas mínimas, Auth y Storage separados. No equivale a siete bases físicas y concentra disponibilidad. Diseño detallado en SDD 02/04/08. |
+| ADR-024 | Docker y Cloudflare | APIs independientes con entornos reproducibles; borde HTTPS/CDN público y protección según plan, sin cachear datos personales. Hosting de contenedores se elige aparte. |
+| ADR-025 | Gemini detrás de un puerto | Asistente usa Gemini desde servidor, contexto autorizado y validación de fuentes/cifras. Modelo exacto se evaluará; sin claves en navegador. |
+| ADR-026 | Mapa interactivo sin ubicación del usuario | Leaflet y teselas OSM para piloto sujeto a política; proveedor intercambiable, sin GPS/geocodificación/rutas. Lista alternativa ante fallo. |
+| ADR-027 | Perfil, lectura y movilidad independiente | Perfil propio editable, colecciones privadas y terminales/embarques en Catálogo. No reservas/pasajes, mensajería privada ni nuevo servicio por entidad. |
 
 ## Alternativas consideradas
 
@@ -35,4 +40,5 @@ El patrocinio sin etiquetas, las categorías autodeclaradas como acreditadas y l
 
 ## Trazabilidad
 
-[Drivers](06-drivers-arquitectonicos.md), [RF01-RF59](03-requisitos-funcionales.md), [diseño de servicios](../04-especificacion-funcional/02-arquitectura-y-diseno.md) y [catálogo/eventos](../04-especificacion-funcional/05-catalogo-eventos-y-actividades.md).
+[Drivers](06-drivers-arquitectonicos.md), [RF01-RF65](03-requisitos-funcionales.md), [diseño de servicios](../04-especificacion-funcional/02-arquitectura-y-diseno.md) y [catálogo/eventos](../04-especificacion-funcional/05-catalogo-eventos-y-actividades.md).
+[Diseño detallado y trazabilidad](../05-sdd/README.md).

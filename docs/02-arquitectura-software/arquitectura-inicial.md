@@ -16,4 +16,5 @@ Cada servicio aplica Clean Architecture y posee datos y transacciones. Las consu
 
 ## Límites
 
-Sin venta/cobro de entradas ni reservas; el navegador abre enlaces verificados. La publicidad puede usar beneficio gratuito o pago externo revisado. Los documentos privados y galerías autenticadas no se entregan como archivos públicos. Las tecnologías candidatas y el despliegue se evaluarán y aprobarán en el SDD antes de implementar. La vista C2 explicita siete bases lógicas, mensajería y almacenamiento de objetos; Clean Architecture organiza cada servicio, no la distribución física.
+Sin venta/cobro de entradas ni reservas; el navegador abre enlaces verificados. La publicidad puede usar beneficio gratuito o pago externo revisado. Los documentos privados y galerías autenticadas no se entregan como archivos públicos. El SDD define Supabase, Docker, Cloudflare, Gemini y sus límites. La vista C2 explicita una base PostgreSQL gestionada con siete esquemas, mensajería y Storage; Clean Architecture organiza cada servicio, no la distribución física.
+[Diseño detallado del software](../05-sdd/README.md).

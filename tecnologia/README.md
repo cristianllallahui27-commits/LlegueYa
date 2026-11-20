@@ -1,18 +1,17 @@
-# Tecnologías de referencia para LlegueYa
+# Plataforma tecnológica de LlegueYa
 
-La arquitectura define siete servicios independientes, propiedad de datos por servicio, REST y eventos durables. **El stack está pendiente de evaluación y aprobación en el SDD.** Las siguientes opciones son referencias adecuadas al diseño propuesto, no herramientas implementadas ni decisiones cerradas. Se excluyen PHP y Node.js de esta propuesta por la preferencia expresada para el proyecto.
+El [capítulo 02 del SDD](../docs/05-sdd/02-arquitectura-y-decisiones.md) es la definición principal de tecnología y alternativas. Este directorio ofrece su resumen de navegación; versiones exactas se fijarán tras comprobar compatibilidad y capacidad.
 
-| Capa o recurso C4 | Opción candidata | Adecuación al proyecto | Por resolver en el SDD |
-|---|---|---|---|
-| WEB | HTML, CSS y JavaScript de navegador | Interfaz de catálogo, galerías, muro y calendario adaptable. | Framework de interfaz, accesibilidad y pruebas. JavaScript en navegador no exige Node.js como servidor. |
-| APIs I, C, M, E, P, R, A | Python y FastAPI | Contratos HTTP y adaptación del asistente dentro de servicios separados. | Versiones, concurrencia, autenticación, validación y dependencias. |
-| DI, DC, DM, DE, DP, DR, DA | PostgreSQL | Datos relacionales, transacciones locales y restricciones únicas para likes, beneficios y cuotas. | Instancias, índices, extensiones justificadas, migraciones, copias y restauración. |
-| BUS | RabbitMQ | Transporte durable de cambios, reintentos y consumidores separados. | Topología, confirmaciones, retención, permisos y fallos persistentes. La idempotencia pertenece también a la aplicación. |
-| GW | Nginx | Entrada HTTP, enrutamiento y publicación web. | TLS, límites, cabeceras y política de despliegue. |
-| Empaquetado | Docker, opcional | Aislamiento y despliegue repetible de procesos. | Recursos, operación y necesidad real de orquestador. Un contenedor C4 no equivale a Docker. |
-| OBJ y CDN | Almacén de objetos y distribución contratada, proveedor por definir | Binarios fuera de tablas, derivados públicos y acceso autorizado a galerías. | URLs temporales, revocación, retención y costos. |
-| Integraciones | IA, mapas y correo opcional, proveedores por definir | Respuestas del bot, ubicaciones y avisos elegidos. | Calidad, privacidad, tiempos límite, costos y degradación. |
+| Función | Tecnología y estado |
+|---|---|
+| Datos, autenticación y archivos | Supabase PostgreSQL, Auth y Storage, elegidos para el diseño. Una base con siete esquemas privados, no siete bases físicas. |
+| Chatbot | Gemini desde servidor; modelo concreto configurable y por evaluar. |
+| Ejecución | Docker y Compose, elegidos; hosting y dimensionamiento pendientes. |
+| Borde | Cloudflare para DNS, HTTPS/proxy, CDN público y protección según plan. No cachea datos privados. |
+| APIs | Python/FastAPI, propuesta técnica del SDD. |
+| Interfaz | HTML/CSS/JavaScript modular, propuesta sin backend PHP o Node.js. |
+| Mapa | Leaflet y proveedor de teselas OSM para piloto sujeto a política; sin geolocalización. |
+| Integración durable | RabbitMQ, propuesta junto a outbox/inbox e idempotencia. |
+| Entrada al origen | Nginx, propuesta para WEB y enrutamiento de APIs. |
 
-La propuesta muestra siete bases lógicas, con credenciales exclusivas y sin acceso directo entre servicios. El SDD decidirá si comparten una instancia física. Las fotos y documentos binarios pertenecen a OBJ; PostgreSQL conserva metadatos y vínculos. No se selecciona una base vectorial adicional sin justificarla con necesidades y pruebas del asistente.
-
-No hay implementación ni resultados de rendimiento. Evaluar estas opciones con los [drivers](../docs/01-analisis-de-sistema/06-drivers-arquitectonicos.md), [escenarios](../docs/01-analisis-de-sistema/08-escenarios-atributos-calidad.md) y [C2](../modelo-c4/Nivel2-DiagramadeContenedores.md). El SDD deberá fijar versiones, contratos, esquema de cada servicio, pruebas, seguridad y operación antes de implementar.
+[Datos y permisos](../docs/05-sdd/04-datos-y-supabase.md), [seguridad](../docs/05-sdd/08-seguridad.md), [operación](../docs/05-sdd/09-despliegue-y-operacion.md) y [fuentes oficiales](../docs/05-sdd/referencias.md). No hay aplicación desplegada ni cuentas externas configuradas por esta entrega. Ningún archivo de documentación contiene credenciales funcionales.

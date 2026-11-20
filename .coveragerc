@@ -1,0 +1,9 @@
+[run]
+branch = True
+source = services
+omit = services/*/__init__.py
+[report]
+show_missing = True
+fail_under = 90
+[json]
+output = reports/coverage-servicios.json

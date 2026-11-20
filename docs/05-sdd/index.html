@@ -1,0 +1,2314 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LlegueYa · SDD</title><link rel="stylesheet" href="assets/lector.css"></head><body><aside><img src="assets/logo-llegueya.png" alt="Logo original de LlegueYa"><h2>LlegueYa</h2><p>Diseño de software<br>Línea base 1.0 · 28 octubre 2026</p><nav aria-label="Capítulos del SDD"><a href="#sdd">Portada e índice</a><a href="#01">01 · Alcance y reglas del diseño</a><a href="#02">02 · Arquitectura y decisiones técnicas</a><a href="#03">03 · Diseño de servicios, capas y SOLID</a><a href="#04">04 · Modelo de datos y Supabase</a><a href="#05">05 · Contratos de API e integraciones</a><a href="#06">06 · Comportamiento, secuencias y estados</a><a href="#07">07 · Interfaz y experiencia de lectura</a><a href="#08">08 · Seguridad, privacidad y credenciales</a><a href="#09">09 · Despliegue y operación</a><a href="#10">10 · Trazabilidad, validación y pendientes</a><a href="#11">11 · Plan de pruebas y puertas de calidad</a><a href="#referencias">Referencias y correspondencia metodológica</a></nav><button class="print" onclick="window.print()">Imprimir o guardar PDF</button></aside><main><p class="masthead">Turismo de Ayacucho · documentación de diseño</p><a class="preview" href="vista-previa-acceso.html">Ver diseño de acceso y logo animado</a><section id="sdd" class="chapter"><h1>LlegueYa · Descripción del diseño de software</h1>
+<blockquote>
+<p>Estado de implementación (29/10/2026): existe una primera capacidad de Identidad con Google y pruebas locales. Consultar <a href="../06-desarrollo/README.md">estado real y ejecución</a>. Las descripciones de producto y pruebas futuras de esta línea base no acreditan que todos los servicios estén implementados.</p>
+</blockquote>
+<p><strong>SDD 1.0 · Línea base de diseño · 28 de octubre de 2026</strong></p>
+<p>Plataforma social de turismo de Ayacucho, centrada en lectura, fotografías y planificación. Este SDD especifica el diseño que orientará la implementación. No acredita una aplicación desplegada, recursos contratados ni pruebas ejecutadas. Los valores operativos propuestos se distinguen de las reglas aprobadas.</p>
+<p><a href="index.html">Leer el documento con navegación</a> · <a href="../README.md">Índice general de documentación</a> · <a href="../../modelo-c4/README.md">Modelo C4</a></p>
+<h2>Lectura del documento</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Capítulo</th>
+<th>Contenido y resultado</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="#01">01 · Alcance</a></td>
+<td>Límites, actores, términos y reglas que gobiernan el diseño.</td>
+</tr>
+<tr>
+<td><a href="#02">02 · Arquitectura y decisiones</a></td>
+<td>Servicios, tecnologías, alternativas, Supabase y relación con C4.</td>
+</tr>
+<tr>
+<td><a href="#03">03 · Servicios, capas y SOLID</a></td>
+<td>Componentes, contratos interiores, responsabilidades y dependencias.</td>
+</tr>
+<tr>
+<td><a href="#04">04 · Datos y Supabase</a></td>
+<td>Diccionario lógico, relaciones, invariantes, esquemas, archivos y acceso.</td>
+</tr>
+<tr>
+<td><a href="#05">05 · Contratos e integraciones</a></td>
+<td>Operaciones API, DTO, errores, mensajes, Gemini y mapa.</td>
+</tr>
+<tr>
+<td><a href="#06">06 · Flujos y estados</a></td>
+<td>Secuencias, estados y comportamiento ante concurrencia o fallos.</td>
+</tr>
+<tr>
+<td><a href="#07">07 · Interfaz y experiencia</a></td>
+<td>Navegación, lectura, perfil, muro, mapa y criterios de interacción.</td>
+</tr>
+<tr>
+<td><a href="#08">08 · Seguridad</a></td>
+<td>Autenticación, permisos, privacidad, secretos y revisión previa al commit.</td>
+</tr>
+<tr>
+<td><a href="#09">09 · Despliegue y operación</a></td>
+<td>Docker, Cloudflare, datos gestionados, recuperación y observabilidad.</td>
+</tr>
+<tr>
+<td><a href="#10">10 · Trazabilidad y validación</a></td>
+<td>Cobertura de requisitos, escenarios de aceptación, riesgos y pendientes.</td>
+</tr>
+<tr>
+<td><a href="#11">11 · Pruebas y calidad</a></td>
+<td>Integración, seguridad, E2E, calidad y puertas de cobertura mínima del 90 %.</td>
+</tr>
+<tr>
+<td><a href="#referencias">Referencias</a></td>
+<td>Fuentes primarias y criterios metodológicos aplicados.</td>
+</tr>
+</tbody></table></div>
+<h2>Control documental</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Sistema</td>
+<td>LlegueYa.</td>
+</tr>
+<tr>
+<td>Equipo</td>
+<td>Cristian Mier Llallahui Gomez y Yordi Ajeo Atao Huaman.</td>
+</tr>
+<tr>
+<td>Curso</td>
+<td>Arquitectura de Software, IS-488, UNSCH.</td>
+</tr>
+<tr>
+<td>Línea base funcional</td>
+<td>RF01–RF65 y HU01–HU46.</td>
+</tr>
+<tr>
+<td>Diseño aprobado por alcance</td>
+<td>Supabase, Docker, Cloudflare, Gemini; mapa interactivo sin geolocalización.</td>
+</tr>
+<tr>
+<td>Diseño propuesto por el equipo</td>
+<td>Python/FastAPI, frontend HTML/CSS/JavaScript, Leaflet y mensajería RabbitMQ.</td>
+</tr>
+<tr>
+<td>Pendientes de ejecución</td>
+<td>Implementar, fijar versiones exactas tras compatibilidad, contratar alojamiento y ejecutar validaciones.</td>
+</tr>
+<tr>
+<td>Control de cambios</td>
+<td>Git conserva el historial. Este documento no contiene secretos y no requiere cuentas reales para leerlo.</td>
+</tr>
+</tbody></table></div>
+<h2>Propiedad de la información</h2>
+<p>Los requisitos pertenecen al análisis y a la especificación funcional; las decisiones generales al registro ADR; los diagramas C4 a <code>modelo-c4/</code>. Este SDD es la fuente del diseño detallado de datos, contratos, estados e interfaz. El resumen de tecnología enlaza al capítulo 02. Los gráficos derivados y el lector HTML se generan desde las fuentes de documentación, sin duplicar decisiones editables.</p>
+<p>La estructura se inspira en descripción de diseño y vistas de arquitectura, adaptadas al curso. No se afirma certificación formal IEEE. La <a href="#referencias">matriz metodológica</a> explica su correspondencia.</p>
+<p><strong>Convención:</strong> «debe» identifica una obligación del diseño; «propuesto» identifica un valor que requiere validación; «pendiente» marca una decisión externa o una tarea aún no ejecutada. Los ejemplos usan identificadores ficticios. No hay código de aplicación en esta entrega.</p>
+<p class="back"><a href="#sdd">Volver al índice</a> · <a href="README.md">Fuente Markdown</a></p></section><section id="01" class="chapter"><h1>01 · Alcance y reglas del diseño</h1>
+<p><a href="#sdd">Índice</a> · <a href="#02">Siguiente: arquitectura</a></p>
+<h2>1.1 Propósito y lectores</h2>
+<p>El SDD traduce requisitos y decisiones de LlegueYa en responsabilidades, datos, contratos y comportamiento verificable. Sirve al equipo de desarrollo, responsable de operación, administrador del producto y docente. Los requisitos funcionales completos permanecen en <a href="../01-analisis-de-sistema/03-requisitos-funcionales.md">RF01–RF65</a>; no se renumeran los requisitos previos.</p>
+<p>LlegueYa permite descubrir Ayacucho, leer experiencias, comparar servicios y planificar tanto un viaje independiente como uno basado en paquetes comerciales. El modelo de publicidad ayuda a difundir negocios elegibles y se presenta separado de opiniones y categorías acreditadas.</p>
+<h2>1.2 Capacidades incluidas</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Capacidad</th>
+<th>Diseño previsto</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Descubrimiento</td>
+<td>Tarjetas públicas, búsqueda por destino/rubro y fichas completas con sesión.</td>
+</tr>
+<tr>
+<td>Catálogo</td>
+<td>Lugares, camping, actividades, hospedajes, restaurantes, artesanos y movilidad.</td>
+</tr>
+<tr>
+<td>Comunidad</td>
+<td>Experiencias, fotografías, reseñas, comentarios con fotos, respuestas, likes y reportes.</td>
+</tr>
+<tr>
+<td>Perfil</td>
+<td>Nombre visible, biografía, avatar, intereses y preferencias editables por el titular.</td>
+</tr>
+<tr>
+<td>Lectura personal</td>
+<td>Favoritos y colecciones privadas para guardar lugares y experiencias.</td>
+</tr>
+<tr>
+<td>Movilidad independiente</td>
+<td>Terminales y puntos de embarque, operadores y ofertas de traslado, sin obligación de comprar paquete.</td>
+</tr>
+<tr>
+<td>Mapa</td>
+<td>Arrastre, zoom, marcadores y selección de fichas. Coordenadas del catálogo revisadas.</td>
+</tr>
+<tr>
+<td>Calendario</td>
+<td>Eventos por mes/año/destino, propuestas y aprobación administrativa.</td>
+</tr>
+<tr>
+<td>Publicidad</td>
+<td>Un mes calendario gratuito inicial por defecto, configurable; planes y pagos externos revisados.</td>
+</tr>
+<tr>
+<td>Asistente</td>
+<td>Gemini con contexto autorizado, planificación estructurada y patrocinio identificado.</td>
+</tr>
+<tr>
+<td>Operación</td>
+<td>Siete servicios por negocio, Supabase, Docker y Cloudflare.</td>
+</tr>
+</tbody></table></div>
+<h2>1.3 Actores y visibilidad</h2>
+<p>Turista y visitante son el mismo actor. Sin sesión puede leer vistas previas, mapa con datos públicos y orientación general. Con sesión accede al detalle, galería completa, contacto, planificación, publicaciones e interacción. Proveedor es una cuenta con permisos sobre negocios propios; Administrador es un rol controlado que no puede autoconcederse al editar el perfil.</p>
+<p>La portada del mapa no debe revelar direcciones privadas, números de contacto o campos restringidos. Los marcadores públicos muestran la posición pública aprobada de lugares o negocios abiertos al público y un resumen. La ficha detallada y los datos de contacto siguen exigiendo sesión. Las alertas de cancelación y la etiqueta «Patrocinado» permanecen visibles en la vista previa.</p>
+<h2>1.4 Reglas estables</h2>
+<ol>
+<li>Un registro no concede acceso a expedientes, pagos o conversaciones de otros usuarios.</li>
+<li>Solo contenido aprobado participa en muro, catálogo, calendario o contexto del bot. Una edición sustancial vuelve a revisión; la versión modificada no reemplaza silenciosamente lo aprobado.</li>
+<li>Likes y respuestas requieren sesión, objetivo visible y unicidad por usuario/objetivo. Una respuesta conserva raíz y padre; no se permite moverla de hilo.</li>
+<li>La acreditación de estrellas o tenedores requiere evidencia y no se deriva de likes, reseñas o pago.</li>
+<li>Publicidad valida anunciante, objetivo, vigencia, compatibilidad, beneficio/pago, cuota y frecuencia. Los planes no garantizan ventas o audiencia inexistente.</li>
+<li>La gratuidad es única por negocio; empieza con la primera activación aprobada. Un mes se calcula como mes calendario en America/Lima, no treinta días.</li>
+<li>El presupuesto se calcula con precios estructurados y moneda/unidad explícitas antes de solicitar texto a Gemini. Un precio ausente se comunica, no se completa por inferencia.</li>
+<li>El mapa no usa GPS, <code>navigator.geolocation</code>, ubicación en segundo plano ni permisos de localización. No hay geocodificación ni cálculo de rutas en esta línea base.</li>
+</ol>
+<h2>1.5 Límites</h2>
+<p>No se implementan reservas, compra de entradas/pasajes, cobros a turistas, seguimiento de vehículos, navegación GPS, mensajería privada, video, WhatsApp o Telegram. Los contactos y enlaces externos verificados permiten continuar fuera de LlegueYa. El pago de publicidad ocurre fuera y administración revisa el comprobante.</p>
+<p>La experiencia se inspira en lectura y fotografía de redes sociales, sin reproducir su infraestructura o prometer su escala. Se priorizan legibilidad, relevancia, control de avisos y navegación predecible. La retención de usuarios se evalúa por utilidad y facilidad, sin obligar a desplazamiento infinito o notificaciones invasivas.</p>
+<h2>1.6 Glosario de dominio</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Destino</td>
+<td>Zona de Ayacucho que agrupa lugares y actividades.</td>
+</tr>
+<tr>
+<td>Oferta</td>
+<td>Servicio comercial de un negocio, con precio/unidad/vigencia cuando se conocen.</td>
+</tr>
+<tr>
+<td>Paquete comercial</td>
+<td>Oferta agrupada de un proveedor.</td>
+</tr>
+<tr>
+<td>Propuesta de viaje</td>
+<td>Combinación estimada calculada para un usuario; no representa reserva.</td>
+</tr>
+<tr>
+<td>Punto de movilidad</td>
+<td>Terminal o lugar de embarque aprobado, vinculado a operadores y destinos atendidos.</td>
+</tr>
+<tr>
+<td>Esquema de datos</td>
+<td>Espacio de nombres y permisos dentro de PostgreSQL; no servidor ni base físicamente separada.</td>
+</tr>
+<tr>
+<td>Patrocinio</td>
+<td>Exposición comercial identificada y condicionada a elegibilidad.</td>
+</tr>
+<tr>
+<td>Evidencia</td>
+<td>Documento privado de verificación o pago, distinto de una foto pública.</td>
+</tr>
+</tbody></table></div>
+<p class="back"><a href="#sdd">Volver al índice</a> · <a href="01-alcance.md">Fuente Markdown</a></p></section><section id="02" class="chapter"><h1>02 · Arquitectura y decisiones técnicas</h1>
+<p><a href="#sdd">Índice</a> · <a href="#01">Anterior</a> · <a href="#03">Siguiente</a></p>
+<h2>2.1 Estilo global y organización interna</h2>
+<p>El estilo es <strong>distribuido orientado a servicios de negocio</strong>. Identidad (I), Catálogo (C), Comunidad (M), Eventos (E), Publicidad (P), Recomendaciones (R) y Asistente (A) son aplicaciones desplegables independientes. Cada una organiza su interior por capas con Clean Architecture. La distribución añade comunicación por red y fallos parciales; las capas controlan dependencias de código. SOLID guía el diseño de componentes y contratos, no obliga a crear servicios nuevos.</p>
+<p><a href="../../modelo-c4/Nivel1-DiagramadeContextodelSistema.md">C1</a> fija contexto, <a href="../../modelo-c4/Nivel2-DiagramadeContenedores.md">C2</a> identifica aplicaciones y datos, <a href="../../modelo-c4/Nivel3-DiagramadeComponentes.md">C3</a> amplía Publicidad, y <a href="../../modelo-c4/Nivel4-DiagramadeCodigo.md">C4</a> detalla Selección de anuncios. El despliegue es una vista complementaria. Esas vistas siguen siendo su ubicación principal.</p>
+<h2>2.2 Tecnologías y límites de la decisión</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Recurso</th>
+<th>Elección de diseño</th>
+<th>Justificación y condición</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Frontend WEB</td>
+<td>HTML semántico, CSS y JavaScript modular de navegador.</td>
+<td>Interfaz centrada en lectura, sin servidor Node.js. Reutilización mediante componentes de interfaz. Framework adicional fuera de esta línea base.</td>
+</tr>
+<tr>
+<td>APIs I–A</td>
+<td>Python/FastAPI, propuesta técnica del SDD.</td>
+<td>Contratos tipados y puertos/adaptadores. No se incorporan PHP o Node.js como backend.</td>
+</tr>
+<tr>
+<td>Datos</td>
+<td>Supabase gestionado sobre PostgreSQL.</td>
+<td>Servicio elegido para datos, con siete esquemas de negocio y cuentas técnicas separadas.</td>
+</tr>
+<tr>
+<td>Identidad técnica</td>
+<td>Supabase Auth, detrás del servicio Identidad.</td>
+<td>Autenticación y recuperación gestionadas; roles y perfil de negocio pertenecen a I.</td>
+</tr>
+<tr>
+<td>Archivos</td>
+<td>Supabase Storage, mediante adaptadores de cada dueño.</td>
+<td>Buckets privados para originales, galería y evidencia; derivados públicos separados.</td>
+</tr>
+<tr>
+<td>IA</td>
+<td>Gemini API desde A.</td>
+<td>Proveedor solicitado. Modelo concreto configurable y seleccionado mediante evaluación, sin fijar un nombre comercial no validado.</td>
+</tr>
+<tr>
+<td>Mapa</td>
+<td>Leaflet y cartografía basada en OpenStreetMap.</td>
+<td>Biblioteca libre para arrastre, zoom y marcadores. Proveedor de teselas intercambiable.</td>
+</tr>
+<tr>
+<td>Borde</td>
+<td>Cloudflare DNS/proxy HTTPS, CDN y reglas de protección disponibles en el plan elegido.</td>
+<td>Acelera recursos públicos y filtra tráfico. No reemplaza permisos de aplicación.</td>
+</tr>
+<tr>
+<td>Entrada/origen</td>
+<td>Nginx, propuesta técnica.</td>
+<td>Sirve WEB y enruta APIs en un origen lógico. No contiene reglas de negocio.</td>
+</tr>
+<tr>
+<td>Mensajería</td>
+<td>RabbitMQ, propuesta técnica.</td>
+<td>Entrega durable de cambios con outbox/inbox de aplicación. No reemplaza bases ni ejecuta reglas publicitarias.</td>
+</tr>
+<tr>
+<td>Ejecución</td>
+<td>Docker y Docker Compose.</td>
+<td>Entornos reproducibles y servicios separados. Versiones exactas/digests se fijarán tras prueba de compatibilidad antes de implementar.</td>
+</tr>
+</tbody></table></div>
+<p>La selección no implica gratuidad de toda la solución. Supabase, Gemini, Cloudflare y alojamiento tienen límites y condiciones que se evaluarán sin inventar precios ni garantías. Se usan fuentes oficiales en <a href="#referencias">referencias</a>.</p>
+<h2>2.3 Una base gestionada y siete esquemas</h2>
+<p>La línea base utiliza <strong>un proyecto Supabase, una base PostgreSQL y siete esquemas privados</strong>: <code>identidad</code>, <code>catalogo</code>, <code>comunidad</code>, <code>eventos</code>, <code>publicidad</code>, <code>recomendaciones</code> y <code>asistente</code>. Los identificadores previos DI–DA representan ahora particiones de propiedad, no siete contenedores de base distintos. En C2 el contenedor de datos DB describe PostgreSQL gestionado y sus esquemas. Auth y Storage tienen componentes gestionados propios.</p>
+<p>Cada servicio usa un rol técnico de ejecución limitado a su esquema; el rol de migración es distinto. No hay joins, claves foráneas, triggers de negocio ni transacciones entre esquemas de servicios. Las referencias remotas se validan por contratos API. La infraestructura administrada de Supabase puede tener sus propios esquemas y relaciones, sin convertirlos en tablas de negocio compartidas.</p>
+<p>La base compartida reduce operación inicial y permite transacciones por dominio, pero comparte disponibilidad, conexiones y recursos. No constituye aislamiento físico ni un microservicio plenamente autónomo de persistencia. Si la operación exige independencia física, se evaluarán proyectos/bases separados con migración por servicio. Se conserva esa posibilidad mediante puertos y contratos; no se promete que la migración sea gratuita o automática.</p>
+<h2>2.4 Mapa sin geolocalización</h2>
+<p>WEB carga la biblioteca Leaflet empaquetada como activo estático y solicita teselas al proveedor configurado. C devuelve marcadores con coordenadas revisadas; la base no calcula dónde está el turista. El centro inicial es el destino elegido o la vista regional de Ayacucho. El viewport del mapa solo indica la región explorada, no la ubicación del usuario.</p>
+<p>Para el piloto de bajo volumen se contempla <code>tile.openstreetmap.org</code>, sujeto a su política: atribución visible, Referer válido, respeto de caché y ausencia de descarga masiva o precarga offline. Es un servicio de mejor esfuerzo, con capacidad limitada y sin SLA; no se presenta como alojamiento gratuito ilimitado. El proveedor se configura y puede cambiar sin alterar los marcadores ni el dominio. Una salida pública con mayor tráfico exige revisar política y seleccionar proveedor adecuado antes de liberar.</p>
+<p>No se añaden Google Maps, geocodificación, Places o Routes. Si las teselas fallan, siguen disponibles las tarjetas y ubicación textual. El servicio de mapas no participa en aprobación de proveedores ni publicidad.</p>
+<h2>2.5 Comunicación y degradación</h2>
+<p>Las consultas usan HTTPS/JSON y autorización. C, M, E y P publican cambios versionados mediante outbox local. E, P, R y A consumen con inbox y proyecciones propias. El broker no es una autorización: P revalida Catálogo/Eventos antes de entregar publicidad. Los límites de tiempo evitan esperas indefinidas. Si Gemini falla, A devuelve orientación estructurada disponible; si P falla, se omiten anuncios. Una caída de I impide nuevas operaciones autenticadas que no puedan validar el estado de cuenta; las vistas públicas independientes continúan.</p>
+<h2>2.6 Registro y alternativas</h2>
+<p>ADR-023 documenta Supabase y el aislamiento por esquemas, ADR-024 Docker/Cloudflare, ADR-025 Gemini, ADR-026 el mapa y ADR-027 perfil/lectura/movilidad en el <a href="../01-analisis-de-sistema/07-decisiones-arquitectonicas.md">registro general</a>. PostgreSQL propio aumenta operación; una base NoSQL no aporta una necesidad demostrada para reglas relacionales. Un monolito reduce complejidad operativa, pero no es la distribución elegida. Siete proyectos Supabase aumentarían aislamiento y carga de gestión; se difieren hasta demostrar necesidad.</p>
+<p>Los modelos de datos, permisos y APIs aquí descritos no dependen de que Gemini, Maps o el proveedor del borde se conviertan en lógica de dominio. Cada integración se encapsula en un adaptador.</p>
+<p class="back"><a href="#sdd">Volver al índice</a> · <a href="02-arquitectura-y-decisiones.md">Fuente Markdown</a></p></section><section id="03" class="chapter"><h1>03 · Diseño de servicios, capas y SOLID</h1>
+<p><a href="#sdd">Índice</a> · <a href="#02">Anterior</a> · <a href="#04">Siguiente</a></p>
+<h2>3.1 Componentes por capacidad</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Servicio</th>
+<th>Componentes de aplicación</th>
+<th>Puertos necesarios</th>
+<th>Adaptadores e información propia</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>I · Identidad</td>
+<td>Sesión, Perfil, Preferencias y Autorización.</td>
+<td>Autenticador, RepositorioPerfil, ConsultaPermisos, AlmacenAvatar.</td>
+<td>Cliente Supabase Auth, SQL <code>identidad</code>, Storage de avatar.</td>
+</tr>
+<tr>
+<td>C · Catálogo</td>
+<td>Consulta de tarjetas/fichas, Gestión de ofertas, Revisión, Categorías, Movilidad y Favoritos.</td>
+<td>ConsultaCatalogo, RepositorioCatalogo, AlmacenEvidencia, AlmacenGalerias, PublicadorEventos.</td>
+<td>SQL <code>catalogo</code>, Storage, proyección GeoJSON de coordenadas propias.</td>
+</tr>
+<tr>
+<td>M · Comunidad</td>
+<td>Publicaciones, Hilos, Likes, Reseñas, Reportes, Moderación y Colecciones de lectura.</td>
+<td>RepositorioContenido, ConsultaObjetivoVisible, AlmacenAdjuntos, PublicadorEventos.</td>
+<td>SQL <code>comunidad</code>, clientes C/E, Storage.</td>
+</tr>
+<tr>
+<td>E · Eventos</td>
+<td>Propuestas y revisión, Calendario, Suscripciones, Bandeja y Ejecutor de recordatorios.</td>
+<td>RepositorioEventos, Reloj, Notificador, PublicadorEventos.</td>
+<td>SQL <code>eventos</code>, Storage, broker y correo opcional.</td>
+</tr>
+<tr>
+<td>P · Publicidad</td>
+<td>Gestión comercial, Selección de anuncios, Métricas e Integración/vencimientos.</td>
+<td>RepositorioCampanias, ConsultaElegibilidad, AlmacenComprobantes, Reloj.</td>
+<td>SQL <code>publicidad</code>, clientes C/E, Storage y broker.</td>
+</tr>
+<tr>
+<td>R · Recomendaciones</td>
+<td>Compatibilidad, Cálculo de presupuesto y Viajes guardados.</td>
+<td>ConsultaOfertas, ConsultaPatrocinio, RepositorioViajes.</td>
+<td>SQL <code>recomendaciones</code>, API C y P.</td>
+</tr>
+<tr>
+<td>A · Asistente</td>
+<td>Sesión conversacional, Recuperación autorizada, Orquestación y Validación de respuesta.</td>
+<td>GeneradorRespuesta, ConsultaGuia, ConsultaRecomendaciones, RepositorioConversaciones.</td>
+<td>SQL <code>asistente</code>, Gemini, API C/E/R/P.</td>
+</tr>
+</tbody></table></div>
+<p>Los controladores y adaptadores son componentes internos; no crean nuevos microservicios por cada entidad. Las tareas persistidas viven dentro de E y P y coordinan réplicas. No se agregan chat privado ni servicio de seguimiento vehicular.</p>
+<h2>3.2 Organización por capas</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Capa</th>
+<th>Contenido</th>
+<th>Dependencias permitidas</th>
+<th>Prohibiciones</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Dominio</td>
+<td>Entidades, objetos de valor, estados y reglas.</td>
+<td>Su propio dominio.</td>
+<td>SQL, HTTP, SDK de Supabase/Gemini, framework web.</td>
+</tr>
+<tr>
+<td>Aplicación</td>
+<td>Casos de uso, autorización contextual y puertos.</td>
+<td>Dominio y contratos internos.</td>
+<td>Importar adaptadores concretos o leer tablas de otros servicios.</td>
+</tr>
+<tr>
+<td>Presentación</td>
+<td>Controladores, DTO de entrada/salida y traducción de errores.</td>
+<td>Aplicación.</td>
+<td>Decidir elegibilidad comercial o ejecutar SQL.</td>
+</tr>
+<tr>
+<td>Infraestructura</td>
+<td>Repositorios SQL, clientes HTTP, archivos y mensajes.</td>
+<td>Puertos de Aplicación/Dominio que implementa.</td>
+<td>Redefinir reglas de gratuidad o presupuesto.</td>
+</tr>
+<tr>
+<td>Composición</td>
+<td>Ensamblaje de adaptadores, configuración y ciclo de vida.</td>
+<td>Capas que conecta.</td>
+<td>Acumular reglas del negocio.</td>
+</tr>
+</tbody></table></div>
+<p>La futura estructura de un servicio separará <code>dominio/</code>, <code>aplicacion/</code>, <code>presentacion/</code>, <code>infraestructura/</code> y <code>composicion/</code>. Es una convención de diseño, no carpetas de aplicación creadas en esta entrega. El <a href="../../modelo-c4/diagramas/clean-por-servicio.svg">gráfico de Clean Architecture</a> muestra la dirección de dependencias.</p>
+<h2>3.3 SOLID aplicado y comprobable</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Principio</th>
+<th>Decisión concreta</th>
+<th>Comprobación de diseño/implementación futura</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S · Responsabilidad única</td>
+<td>PublicarExperiencia coordina publicación; ValidadorImagen valida binarios; ModerarContenido decide visibilidad; repositorio persiste.</td>
+<td>Cambiar tamaño de imagen no exige editar selección publicitaria. El controlador no contiene SQL.</td>
+</tr>
+<tr>
+<td>O · Abierto/cerrado</td>
+<td>ProveedorTeselas y GeneradorRespuesta tienen adaptadores configurables; estrategias de rotación publicitaria respetan una interfaz.</td>
+<td>Sustituir Gemini por un doble de pruebas no cambia los casos de uso ni criterios de presupuesto.</td>
+</tr>
+<tr>
+<td>L · Sustitución</td>
+<td>SQL y repositorio de prueba conservan ausencia, errores de concurrencia y unicidad; proveedores IA devuelven un resultado validable o un error tipado.</td>
+<td>La misma batería de contratos se aplica a cada adaptador. No se considera sustitución válida cambiar una ausencia por un anuncio inventado.</td>
+</tr>
+<tr>
+<td>I · Segregación de interfaces</td>
+<td>ConsultaCatalogoPublico no permite moderar; ConsultaElegibilidad no permite cambiar tarifas; AlmacenComprobantes no expone galerías públicas.</td>
+<td>Cada consumidor recibe operaciones mínimas. Ninguna API pública devuelve documentos por reutilizar un DTO administrativo.</td>
+</tr>
+<tr>
+<td>D · Inversión de dependencias</td>
+<td>RecomendarViaje depende de ConsultaOfertas; ResponderConsulta de GeneradorRespuesta; los SDK se conectan en composición.</td>
+<td>Regla verificable de imports: Dominio/Aplicación no importan SDK, ORM, HTTP ni módulos de Infraestructura.</td>
+</tr>
+</tbody></table></div>
+<p>SOLID no requiere una interfaz por clase ni herencias innecesarias. Cada abstracción responde a una dependencia intercambiable o a una separación de permisos identificada.</p>
+<h2>3.4 Contratos interiores representativos</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Puerto</th>
+<th>Entrada</th>
+<th>Salida/errores</th>
+<th>Obligación</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ConsultaObjetivoVisible</td>
+<td>Usuario validado, tipo, id y operación.</td>
+<td>Estado/visibilidad, no disponible o dependencia no verificable.</td>
+<td>No confundir conocer un id con tener acceso.</td>
+</tr>
+<tr>
+<td>RepositorioCampanias</td>
+<td>Criterios, instante y clave de solicitud.</td>
+<td>Candidatas / reserva atómica / conflicto.</td>
+<td>Conservar cuota, deduplicación y condiciones copiadas.</td>
+</tr>
+<tr>
+<td>GeneradorRespuesta</td>
+<td>Pregunta, contexto filtrado e instrucciones del sistema.</td>
+<td>Respuesta estructurada o error tipado.</td>
+<td>No entregar autoridad de aprobación ni acceder a secretos.</td>
+</tr>
+<tr>
+<td>ProveedorTeselas</td>
+<td>Plantilla URL y atribución de configuración.</td>
+<td>Capa visual del mapa.</td>
+<td>No solicitar GPS ni ocultar atribución.</td>
+</tr>
+<tr>
+<td>Reloj</td>
+<td>Ninguna entrada de negocio.</td>
+<td>Instante UTC.</td>
+<td>Permitir pruebas deterministas de fechas y vencimiento.</td>
+</tr>
+<tr>
+<td>PublicadorEventos</td>
+<td>Evento de outbox y versión.</td>
+<td>Confirmación técnica o error reintentable.</td>
+<td>No borrar outbox antes de confirmación.</td>
+</tr>
+</tbody></table></div>
+<h2>3.5 Concurrencia y consistencia</h2>
+<p>Se usa bloqueo optimista <code>version</code> para ediciones y revisiones. Una edición con versión antigua devuelve conflicto y no pisa otra decisión. La unicidad de likes/beneficio y la reserva de cuota se refuerzan en PostgreSQL. Retirar un padre conserva auditoría y oculta descendientes en consulta, incluso si una proyección aún no se actualiza.</p>
+<p>Cada servicio confirma cambios y outbox en su transacción. Los consumidores mantienen inbox local; un duplicado devuelve éxito técnico sin repetir efectos. Se prevén reintentos acotados y cola de fallos. Los contratos externos se versionan; ningún consumidor realiza migraciones de tablas ajenas.</p>
+<h2>3.6 Secuencia de dependencias del asistente</h2>
+<p>El usuario aporta destino, fechas, grupo y presupuesto. A valida sesión cuando el pedido necesita detalle; consulta C/E/R y solicita a P solo candidatos compatibles. R realiza aritmética decimal y conserva fuente/precio/unidad. A envía a Gemini un contexto mínimo con identificadores de fuente. La respuesta se valida y se renderiza como texto seguro. El modelo no ejecuta SQL, fija tarifas, aprueba publicaciones ni genera URLs firmadas.</p>
+<p class="back"><a href="#sdd">Volver al índice</a> · <a href="03-servicios-capas-y-solid.md">Fuente Markdown</a></p></section><section id="04" class="chapter"><h1>04 · Modelo de datos y Supabase</h1>
+<p><a href="#sdd">Índice</a> · <a href="#03">Anterior</a> · <a href="#05">Siguiente</a></p>
+<p><img src="diagramas/datos-catalogo-movilidad.svg" alt="Datos de Catálogo · movilidad independiente"></p>
+<p><img src="diagramas/datos-comunidad.svg" alt="Datos de Comunidad · lectura e interacción"></p>
+<h2>4.1 Convenciones y propiedad</h2>
+<p>Una base PostgreSQL gestionada por Supabase contiene siete esquemas privados de negocio. Se usan UUID para identificadores; <code>timestamptz</code> para instantes UTC; <code>date</code> para fecha civil; importes <code>numeric(12,2)</code> y moneda ISO; coordenadas WGS84 <code>numeric(9,6)</code>; estados con valores cerrados; <code>version bigint</code> para concurrencia. Una referencia <code>usuario_id</code> o <code>negocio_id</code> remota es un UUID sin FK entre esquemas. Dentro del mismo esquema se usan FK y restricciones locales. Los campos enumerados constituyen el diccionario lógico inicial; longitudes y validaciones de entrada están en <a href="#05">contratos</a>.</p>
+<p>En tablas mutables: <code>id</code>, <code>creado_en</code>, <code>actualizado_en</code>, <code>version</code> y, cuando corresponda, <code>retirado_en</code>. Los identificadores de auditoría y autoría son inmutables. No se elimina una evidencia de auditoría al retirar contenido público; se aplican retenciones por clase de dato.</p>
+<h2>4.2 Diccionario por servicio</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Esquema / tabla lógica</th>
+<th>Campos de dominio y tipos</th>
+<th>Relaciones y restricciones</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>identidad.perfil</td>
+<td>usuario_id UUID PK, nombre_visible varchar(80), biografia varchar(300), avatar_id UUID nullable, estado enum</td>
+<td>usuario_id coincide con el sujeto de Auth, sin copiar contraseña ni token; estado activo/suspendido/cerrado.</td>
+</tr>
+<tr>
+<td>identidad.asignacion_rol</td>
+<td>usuario_id UUID, rol enum, otorgado_por UUID, otorgado_en timestamp</td>
+<td>PK usuario_id+rol; solo operación administrativa asigna proveedor/administrador.</td>
+</tr>
+<tr>
+<td>identidad.preferencia</td>
+<td>usuario_id UUID, idioma varchar(10), intereses JSONB, perfil_visible bool</td>
+<td>Una por usuario; intereses usa ids de categorías/destinos, nunca GPS.</td>
+</tr>
+<tr>
+<td>identidad.sesion_refresh</td>
+<td>id UUID, usuario_id UUID, secreto_cifrado text, vence_en timestamp, revocada_en nullable</td>
+<td>Refresh gestionado solo por I; referencia opaca en cookie y cifrado con clave externa. No se guarda access token en logs.</td>
+</tr>
+<tr>
+<td>catalogo.destino</td>
+<td>nombre varchar(120), descripcion text, estado enum</td>
+<td>Nombre y zona normalizados para revisión de duplicados.</td>
+</tr>
+<tr>
+<td>catalogo.lugar</td>
+<td>destino_id UUID FK, tipo enum, nombre, descripcion, lat, lon, estado, fuente_url nullable, revisado_en</td>
+<td>Latitud [-90,90], longitud [-180,180]; publicado requiere revisión. Camping guarda condiciones confirmadas y desconocidas.</td>
+</tr>
+<tr>
+<td>catalogo.negocio</td>
+<td>propietario_id UUID remoto, rubro enum, nombre, estado, contacto JSONB privado</td>
+<td>Titular validado en I; revisión de requisitos por rubro, no identidad por nombre comercial únicamente.</td>
+</tr>
+<tr>
+<td>catalogo.oferta</td>
+<td>negocio_id UUID FK, tipo enum, descripcion, precio nullable, moneda, unidad, vigencia_inicio/fin</td>
+<td>Importe no negativo y unidad explícita: persona/noche/tramo/grupo/paquete. Precio desconocido es NULL, no cero.</td>
+</tr>
+<tr>
+<td>catalogo.categoria_acreditada</td>
+<td>negocio_id FK, clase, categoria, autoridad, evidencia_id FK, estado, revisado_en, vigente_hasta nullable</td>
+<td>Estrellas y tenedores solo con estado verificado y evidencia. No se calcula con reseñas.</td>
+</tr>
+<tr>
+<td>catalogo.requisito_rubro</td>
+<td>rubro, nombre, obligatorio bool, version_politica</td>
+<td>Reglas configuradas por administrador; no autoaprobar negocio por cargar archivo.</td>
+</tr>
+<tr>
+<td>catalogo.evidencia</td>
+<td>negocio_id FK, requisito_id FK nullable, objeto_id FK, estado, motivo_revision</td>
+<td>Binario privado, revisado por administración; permisos del propietario para sus expedientes.</td>
+</tr>
+<tr>
+<td>catalogo.punto_movilidad</td>
+<td>destino_id FK, lugar_id FK nullable, tipo enum, nombre, direccion_publica, lat, lon, fuente, revisado_en, estado</td>
+<td>Tipos terminal/punto_embarque; sin posición de turista, vehículo ni tracking.</td>
+</tr>
+<tr>
+<td>catalogo.tramo_movilidad</td>
+<td>oferta_id FK, origen_id FK punto_movilidad, destino_lugar_id FK nullable, destino_texto, horario_texto, verificado_en</td>
+<td>Destino existente o descripción confirmada; capacidad/horario son informados, no disponibilidad en tiempo real.</td>
+</tr>
+<tr>
+<td>catalogo.propuesta_lugar</td>
+<td>autor_id remoto, datos JSONB, estado, revisor_id nullable, motivo</td>
+<td>Conserva datos aportados y revisión; aprobación crea o actualiza lugar en transacción local.</td>
+</tr>
+<tr>
+<td>catalogo.favorito</td>
+<td>usuario_id remoto, objetivo_tipo, objetivo_id</td>
+<td>Unique(usuario_id,tipo,id); objetivo de Catálogo existente y visible.</td>
+</tr>
+<tr>
+<td>comunidad.publicacion</td>
+<td>autor_id remoto, destino_id remoto nullable, objetivo_tipo/id nullable, texto, estado, publicado_en nullable</td>
+<td>Texto o foto vinculada; edición sustancial vuelve a revisión. Feed ordena publicado_en+id.</td>
+</tr>
+<tr>
+<td>comunidad.comentario</td>
+<td>autor_id remoto, objetivo_tipo/id, padre_id FK nullable, raiz_id FK nullable, texto, estado</td>
+<td>Padre y raíz del mismo hilo y objetivo; profundidad propuesta máxima 5, paginación de hijos.</td>
+</tr>
+<tr>
+<td>comunidad.like</td>
+<td>usuario_id remoto, objetivo_tipo enum, objetivo_id UUID</td>
+<td>Unique(usuario_id,tipo,id); foto/comentario/respuesta aprobados. No FK a tablas remotas.</td>
+</tr>
+<tr>
+<td>comunidad.resena</td>
+<td>usuario_id remoto, negocio_id remoto, puntuacion smallint, texto, estado</td>
+<td>Puntuación 1–5; una reseña activa por usuario/negocio, editable con revisión. No cambia categoría oficial.</td>
+</tr>
+<tr>
+<td>comunidad.reporte</td>
+<td>autor_id remoto, objetivo_tipo/id, motivo, estado, decision_administrativa</td>
+<td>Reportar no garantiza retiro automático; evita exponer identidad del reportante a denunciado.</td>
+</tr>
+<tr>
+<td>comunidad.contenido_cultural</td>
+<td>tipo enum, titulo, cuerpo/referencia, autor_fuente, destino_id remoto, estado</td>
+<td>Historia/fotografía/libro con derechos o referencia autorizada; no copiar obras sin permiso.</td>
+</tr>
+<tr>
+<td>comunidad.coleccion</td>
+<td>propietario_id remoto, nombre varchar(80), descripcion nullable</td>
+<td>Privada en la línea base.</td>
+</tr>
+<tr>
+<td>comunidad.elemento_coleccion</td>
+<td>coleccion_id FK, objetivo_tipo/id remoto, agregado_en</td>
+<td>Unique(coleccion_id,tipo,id); valida acceso vigente al consultar. Guardar no copia contenido retirado.</td>
+</tr>
+<tr>
+<td>eventos.propuesta</td>
+<td>autor_id remoto, organizador, lugar_id remoto, inicio/fin, zona_horaria, fuente, estado, motivo</td>
+<td>Inicio &lt; fin; aprobación administrativa antes de calendario.</td>
+</tr>
+<tr>
+<td>eventos.evento</td>
+<td>propuesta_id FK nullable, titulo, lugar_id remoto, inicio/fin, zona, estado, version_publica, organizador</td>
+<td>Ocurrencias por año; no inferir recurrencias cambiantes.</td>
+</tr>
+<tr>
+<td>eventos.suscripcion</td>
+<td>usuario_id remoto, tipo_objetivo, objetivo_id, recordatorio_config JSONB, activa bool</td>
+<td>Unique(usuario_id,tipo,id); permite desactivar avisos futuros.</td>
+</tr>
+<tr>
+<td>eventos.tarea_recordatorio</td>
+<td>usuario_id, objetivo_tipo/id, version_objetivo, ejecutar_en, estado, lease_hasta nullable</td>
+<td>Clave única de usuario+objetivo+tipo+versión; ejecutores coordinados por lease.</td>
+</tr>
+<tr>
+<td>eventos.notificacion</td>
+<td>usuario_id, tipo, objetivo_tipo/id, version_objetivo, texto_resumen, leida_en nullable</td>
+<td>Una notificación lógica por clave; detalle protegido como el recurso original.</td>
+</tr>
+<tr>
+<td>eventos.entrega</td>
+<td>notificacion_id FK, canal, intento, estado, error_tipado nullable</td>
+<td>Intentos separados del aviso lógico; sin duplicar bandeja por reintento.</td>
+</tr>
+<tr>
+<td>publicidad.politica_gratuita</td>
+<td>version_politica, habilitada, duracion, unidad, condiciones JSONB, aplica_desde</td>
+<td>Duración positiva y cambios versionados.</td>
+</tr>
+<tr>
+<td>publicidad.beneficio</td>
+<td>negocio_id remoto UNIQUE, politica_version, condiciones_copiadas JSONB, inicio/fin, estado</td>
+<td>Un beneficio inicial por negocio, con fin exacto y zona aplicada.</td>
+</tr>
+<tr>
+<td>publicidad.plan</td>
+<td>nombre, tarifa, moneda, duracion, cuota, frecuencia, peso_rotacion, activo</td>
+<td>Valores comerciales definidos por administración; no precios inventados en el SDD.</td>
+</tr>
+<tr>
+<td>publicidad.contratacion</td>
+<td>negocio_id, plan_id FK, condiciones_copiadas JSONB, inicio/fin, estado</td>
+<td>Congela tarifa/cuotas; cambio del plan no altera contrato anterior.</td>
+</tr>
+<tr>
+<td>publicidad.pago</td>
+<td>contratacion_id FK, referencia_normalizada UNIQUE, monto, moneda, objeto_id FK, estado, revisor_id, motivo</td>
+<td>Pendiente/confirmado/rechazado; evidencia privada y auditoría de revisión.</td>
+</tr>
+<tr>
+<td>publicidad.campania</td>
+<td>negocio_id remoto, objetivo_tipo/id remoto, beneficio_id FK nullable, contratacion_id FK nullable, estado, inicio/fin, creatividad_version</td>
+<td>Fuente gratuita o pagada identificada y consistente. Requiere elegibilidad actual del objetivo.</td>
+</tr>
+<tr>
+<td>publicidad.reserva_cuota</td>
+<td>campania_id FK, solicitud_id UUID, usuario_medicion nullable, ventana_frecuencia, vence_en, estado</td>
+<td>Unique(campania_id,solicitud_id); reserva atómica y contabilización separada de impresión.</td>
+</tr>
+<tr>
+<td>publicidad.medicion</td>
+<td>entrega_id UUID, campania_id FK, canal, evento_tipo, sujeto_seudonimo nullable, instante</td>
+<td>Unique(entrega_id,evento_tipo); solicitud/entrega/impresión/clic separados; métricas agregadas al proveedor.</td>
+</tr>
+<tr>
+<td>recomendaciones.viaje</td>
+<td>propietario_id remoto, criterios JSONB, desglose JSONB, total_estimado, moneda, generado_en</td>
+<td>No equivale a reserva; precio conserva fuente y vigencia.</td>
+</tr>
+<tr>
+<td>recomendaciones.proyeccion_oferta</td>
+<td>oferta_id remoto UNIQUE, version_fuente, resumen JSONB, actualizada_en</td>
+<td>Solo lectura derivada; no autoriza anuncio ni reemplaza validación de fuente.</td>
+</tr>
+<tr>
+<td>asistente.conversacion</td>
+<td>propietario_id remoto, titulo, estado, creada_en, vence_retencion</td>
+<td>Historial únicamente de cuentas; consulta pública sin persistencia personal.</td>
+</tr>
+<tr>
+<td>asistente.mensaje</td>
+<td>conversacion_id FK, rol enum, texto, fuentes JSONB, modelo, creado_en</td>
+<td>Texto saneado y sin tokens. No almacena expedientes como contexto.</td>
+</tr>
+<tr>
+<td>asistente.documento_conocimiento</td>
+<td>fuente_tipo/id, version_fuente, visibilidad, contenido_reducido, estado</td>
+<td>Solo fuente aprobada. Recuperación inicial por filtros y búsqueda textual; embeddings adicionales requieren decisión.</td>
+</tr>
+</tbody></table></div>
+<h2>4.3 Tablas técnicas locales</h2>
+<p>Los esquemas productores C/M/E/P incluyen <code>outbox(id, tipo, aggregate_id, aggregate_version, schema_version, payload, ocurrido_en, publicado_en, intentos)</code>. Los consumidores C/M/E/P/R/A incluyen <code>inbox(evento_id PK, recibido_en, procesado_en)</code> y estado de proyección. Cada servicio conserva <code>auditoria(id, actor_id, accion, objetivo_id, campos_afectados, motivo, instante, request_id)</code> sin contraseñas, tokens o binarios.</p>
+<p>C/M/E/P y el avatar de I conservan <code>objeto(id, propietario_id, bucket, clave_aleatoria, mime_validado, bytes, hash_integridad, estado, visibilidad, padre_tipo/id)</code>. Un objeto pertenece a un único padre/servicio. Un hash verifica integridad; no sustituye derechos de autor ni moderación. Los nombres originales no se usan como rutas públicas.</p>
+<h2>4.4 Relaciones de referencia</h2>
+<details class="source"><summary>Ver fuente editable Mermaid del diagrama</summary><pre><code>erDiagram
+    CATALOGO_NEGOCIO ||--o{ CATALOGO_OFERTA : posee
+    CATALOGO_NEGOCIO ||--o{ CATALOGO_EVIDENCIA : presenta
+    CATALOGO_OFERTA ||--o{ CATALOGO_TRAMO : describe
+    CATALOGO_PUNTO_MOVILIDAD ||--o{ CATALOGO_TRAMO : origen
+    COMUNIDAD_PUBLICACION ||--o{ COMUNIDAD_OBJETO : adjunta
+    COMUNIDAD_COMENTARIO o|--o{ COMUNIDAD_COMENTARIO : padre
+    COMUNIDAD_COLECCION ||--o{ COMUNIDAD_ELEMENTO : agrupa
+    EVENTOS_EVENTO ||--o{ EVENTOS_TAREA : referencia
+    EVENTOS_NOTIFICACION ||--o{ EVENTOS_ENTREGA : registra
+    PUBLICIDAD_PLAN ||--o{ PUBLICIDAD_CONTRATACION : origina
+    PUBLICIDAD_CONTRATACION ||--o{ PUBLICIDAD_PAGO : recibe
+    PUBLICIDAD_BENEFICIO o|--o{ PUBLICIDAD_CAMPANIA : financia
+    PUBLICIDAD_CONTRATACION o|--o{ PUBLICIDAD_CAMPANIA : financia
+    PUBLICIDAD_CAMPANIA ||--o{ PUBLICIDAD_RESERVA : limita
+    ASISTENTE_CONVERSACION ||--o{ ASISTENTE_MENSAJE : contiene
+</code></pre></details>
+<p>Los prefijos indican el esquema propietario. El gráfico muestra relaciones locales representativas. Las referencias entre dominios son ids remotos y no se dibujan como claves foráneas. El diccionario es la definición lógica. La línea base DDL está en <a href="../../supabase/README.md">supabase/migrations</a>, con 64 tablas; su aplicación remota se verifica por separado.</p>
+<h2>4.5 Acceso a PostgreSQL y RLS</h2>
+<p>Los esquemas de negocio no se exponen a la Data API pública de Supabase en esta línea base. El navegador usa las APIs de LlegueYa. Los roles <code>svc_identidad</code>, <code>svc_catalogo</code>, etc., tienen USAGE y permisos mínimos exclusivamente en su esquema y no son propietarios, superusuarios ni BYPASSRLS. El rol de migración es distinto y no se usa para tráfico normal.</p>
+<p>Las APIs validan JWT y permisos; para tablas personales con RLS, establecen contexto de usuario validado a nivel <strong>transacción</strong>, nunca desde campos enviados por el cliente. El contexto se limpia al devolver conexiones al pool. Las políticas verifican propietario/estado; las tareas internas utilizan un rol específico y alcance explícito. Se probarán accesos con todos los roles y con contexto ausente. RLS no reemplaza autorización de negocio ni protege automáticamente a un rol que pueda omitirla.</p>
+<h2>4.6 Archivos y ciclo de vida</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Clase</th>
+<th>Almacenamiento y entrega</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Original pendiente</td>
+<td>Bucket privado, solo autor autorizado y moderación.</td>
+</tr>
+<tr>
+<td>Portada/miniatura aprobada</td>
+<td>Derivado sin metadatos sensibles; puede distribuirse públicamente con clave versionada.</td>
+</tr>
+<tr>
+<td>Galería completa</td>
+<td>Bucket privado; entrega mediante servicio dueño tras validar sesión y visibilidad.</td>
+</tr>
+<tr>
+<td>Categoría/comprobante</td>
+<td>Bucket privado separado; propietario y administrador según propósito, nunca CDN pública.</td>
+</tr>
+<tr>
+<td>Avatar</td>
+<td>Original privado; derivado aprobado público solo si el perfil es visible.</td>
+</tr>
+</tbody></table></div>
+<p>La carga usa autorización temporal para una clave concreta, validación de contenido real, tamaño y vínculo al padre. El cliente no decide bucket ni ruta libremente. La aprobación genera derivados, elimina EXIF sensible y confirma publicación. La retirada revoca accesos futuros y elimina o invalida derivados públicos. La galería privada se sirve por la API autorizada para permitir revocación al confirmar; una URL firmada ya emitida, si se adopta posteriormente, conserva validez hasta su expiración y exige documentar ese límite.</p>
+<h2>4.7 Índices, retención y migración</h2>
+<p>Índices iniciales: publicación <code>(estado, publicado_en DESC, id DESC)</code>; comentario <code>(objetivo_tipo,objetivo_id,raiz_id,creado_en,id)</code>; evento <code>(estado,inicio,lugar_id)</code>; lugar <code>(estado,destino_id,tipo)</code> y coordenadas según consulta de viewport; oferta <code>(negocio_id,estado)</code>; tarea <code>(estado,ejecutar_en)</code>; campaña <code>(estado,inicio,fin)</code>; outbox pendientes e inbox PK. Se añade búsqueda textual solo sobre campos públicos o autorizados, nunca mezclando expedientes en un índice público.</p>
+<p>Retenciones propuestas para validación: cargas huérfanas 24 horas, historial conversacional 90 días configurable por titular, logs operativos 30 días con datos mínimos, reservas de cuota expiradas conciliadas y medición seudónima 90 días antes de agregado. Evidencia administrativa conserva la retención que defina el propietario conforme a sus obligaciones; no se inventa un plazo legal. Solicitudes de eliminación coordinan servicios mediante eventos y mantienen solo lo justificado.</p>
+<p>Las migraciones son versionadas por servicio y siguen expansión, adaptación y retirada. Cada cambio se prueba con datos ficticios, copia de seguridad y recuperación. Un dump real de producción nunca se incorpora al repositorio.</p>
+<p class="back"><a href="#sdd">Volver al índice</a> · <a href="04-datos-y-supabase.md">Fuente Markdown</a></p></section><section id="05" class="chapter"><h1>05 · Contratos de API e integraciones</h1>
+<p><a href="#sdd">Índice</a> · <a href="#04">Anterior</a> · <a href="#06">Siguiente</a></p>
+<h2>5.1 Convenciones comunes</h2>
+<p>Base lógica <code>/api/v1</code>. JSON UTF-8, fechas ISO 8601 con zona, UUID y moneda/unidad explícitas. Las listas devuelven <code>items</code>, <code>next_cursor</code> y <code>has_more</code>; límite propuesto 20, máximo 50. Cursor opaco derivado de fecha/id evita duplicaciones al insertar nuevos elementos. Toda respuesta incluye <code>request_id</code>. Se validan campos permitidos y se rechazan propiedades administrativas en DTO de perfil o publicación.</p>
+<p>Autenticación: access JWT en <code>Authorization: Bearer ...</code>, obtenido de I; el token real nunca aparece en ejemplos. I conserva refresh cifrado en el servidor y entrega cookie opaca HttpOnly/Secure/SameSite con ruta de autenticación. El access token se mantiene en memoria de WEB; al recargar se recupera mediante refresh autorizado. No se guarda en URL ni en almacenamiento persistente del navegador. Las operaciones con cookie exigen comprobación de Origin y defensa CSRF.</p>
+<p>Las APIs validan firma/issuer/audience/expiración del JWT con la configuración de Auth y comprueban estado/permisos actuales con I para datos autenticados. Una cuenta suspendida no conserva permisos por tener un JWT aún válido. Las llamadas internas transportan identidad validada y credencial de servicio de alcance mínimo. Los endpoints <code>/internal/</code> no son accesibles desde el proxy público.</p>
+<h2>5.2 Catálogo de operaciones</h2>
+<p>Público = vista previa. Titular = sesión y propiedad. Admin = autorización administrativa actual. El servicio dueño realiza la comprobación, aunque GW haya admitido la solicitud.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Servicio</th>
+<th>Método y recurso</th>
+<th>Permiso</th>
+<th>Entrada/salida y efecto</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>I</td>
+<td>POST <code>/auth/registro</code>, <code>/auth/sesion</code></td>
+<td>Público con controles de abuso</td>
+<td>Datos de cuenta hacia Supabase Auth; no permite rol administrativo. Registro puede requerir confirmación.</td>
+</tr>
+<tr>
+<td>I</td>
+<td>POST <code>/auth/refresh</code>, <code>/auth/salir</code></td>
+<td>Cookie válida y CSRF</td>
+<td>Renueva o revoca sesión; no expone refresh al frontend.</td>
+</tr>
+<tr>
+<td>I</td>
+<td>POST <code>/auth/recuperacion</code></td>
+<td>Público limitado</td>
+<td>Respuesta uniforme para evitar enumerar correos.</td>
+</tr>
+<tr>
+<td>I</td>
+<td>GET/PATCH <code>/perfil</code></td>
+<td>Titular</td>
+<td>Perfil propio; solo nombre, biografía, avatar autorizado e intereses permitidos.</td>
+</tr>
+<tr>
+<td>I</td>
+<td>PATCH <code>/preferencias</code></td>
+<td>Titular</td>
+<td>Idioma y visibilidad; notificaciones se coordinan con E, sin escribir sus tablas.</td>
+</tr>
+<tr>
+<td>I</td>
+<td>GET <code>/internal/contexto</code></td>
+<td>Servicio autorizado</td>
+<td>Cuenta activa y permisos vigentes para el sujeto validado.</td>
+</tr>
+<tr>
+<td>C</td>
+<td>GET <code>/catalogo/tarjetas</code></td>
+<td>Público</td>
+<td>Filtros destino, tipo, categoría y cursor; devuelve solo campos de vista previa.</td>
+</tr>
+<tr>
+<td>C</td>
+<td>GET <code>/catalogo/fichas/{id}</code></td>
+<td>Sesión</td>
+<td>Detalle según tipo, galería autorizada, acceso y contacto.</td>
+</tr>
+<tr>
+<td>C</td>
+<td>GET <code>/catalogo/mapa</code></td>
+<td>Público</td>
+<td><code>bbox=west,south,east,north</code>, zoom, tipo/destino; GeoJSON limitado de puntos públicos aprobados.</td>
+</tr>
+<tr>
+<td>C</td>
+<td>GET <code>/movilidad/puntos</code>, <code>/movilidad/ofertas</code></td>
+<td>Público para tarjeta; detalle con sesión</td>
+<td>Terminal, embarque y traslados por origen/destino sin exigir paquete.</td>
+</tr>
+<tr>
+<td>C</td>
+<td>POST/PATCH <code>/negocios</code>, <code>/ofertas/{id}</code></td>
+<td>Proveedor titular</td>
+<td>Datos comerciales y evidencia; revisión según estado.</td>
+</tr>
+<tr>
+<td>C</td>
+<td>POST <code>/propuestas/lugares</code></td>
+<td>Sesión</td>
+<td>Datos/fotos de lugar o camping, fuente y condiciones; queda pendiente.</td>
+</tr>
+<tr>
+<td>C</td>
+<td>POST <code>/admin/revisiones/{id}</code></td>
+<td>Admin</td>
+<td>Decisión, motivo y versión; publica o solicita información.</td>
+</tr>
+<tr>
+<td>C</td>
+<td>PUT/DELETE <code>/favoritos/{tipo}/{id}</code></td>
+<td>Titular</td>
+<td>Agrega o retira favorito de forma idempotente.</td>
+</tr>
+<tr>
+<td>C</td>
+<td>GET <code>/internal/elegibilidad/{tipo}/{id}</code></td>
+<td>Servicio autorizado</td>
+<td>Estado actual, anunciante autorizado y versión de fuente.</td>
+</tr>
+<tr>
+<td>M</td>
+<td>GET <code>/comunidad/muro</code></td>
+<td>Público/resumen o sesión</td>
+<td>Publicaciones aprobadas, destino/servicio, orden reciente, cursor.</td>
+</tr>
+<tr>
+<td>M</td>
+<td>GET <code>/comunidad/publicaciones/{id}</code></td>
+<td>Sesión para detalle</td>
+<td>Contenido e hilos visibles sin expedientes.</td>
+</tr>
+<tr>
+<td>M</td>
+<td>POST/PATCH/DELETE <code>/comunidad/publicaciones/{id}</code></td>
+<td>Titular</td>
+<td>Crear, editar con revisión o retirar; POST usa recurso colección sin id.</td>
+</tr>
+<tr>
+<td>M</td>
+<td>GET/POST <code>/comunidad/objetivos/{tipo}/{id}/comentarios</code></td>
+<td>Sesión</td>
+<td>Texto/fotos, padre opcional y raíz; valida acceso del objetivo.</td>
+</tr>
+<tr>
+<td>M</td>
+<td>PUT/DELETE <code>/comunidad/objetivos/{tipo}/{id}/like</code></td>
+<td>Sesión</td>
+<td>Un like activo por sujeto; repetir no duplica ni produce error artificial.</td>
+</tr>
+<tr>
+<td>M</td>
+<td>PUT <code>/comunidad/negocios/{id}/resena</code></td>
+<td>Sesión</td>
+<td>Puntuación y texto propios, con moderación.</td>
+</tr>
+<tr>
+<td>M</td>
+<td>POST <code>/comunidad/reportes</code></td>
+<td>Sesión</td>
+<td>Motivo y objetivo visible; identidad del reportante protegida.</td>
+</tr>
+<tr>
+<td>M</td>
+<td>POST/PATCH <code>/colecciones</code>, <code>/colecciones/{id}</code></td>
+<td>Titular</td>
+<td>Colecciones privadas y nombre/descripcion.</td>
+</tr>
+<tr>
+<td>M</td>
+<td>PUT/DELETE <code>/colecciones/{id}/elementos/{tipo}/{objetivo}</code></td>
+<td>Titular</td>
+<td>Guardado idempotente con validación de acceso.</td>
+</tr>
+<tr>
+<td>M</td>
+<td>POST <code>/admin/contenido-cultural</code>, <code>/admin/moderacion/{id}</code></td>
+<td>Admin</td>
+<td>Publicar historia/foto/libro o revisar contenido con motivo y versión.</td>
+</tr>
+<tr>
+<td>E</td>
+<td>GET <code>/eventos/calendario</code></td>
+<td>Público/resumen</td>
+<td>Mes, año y destino; fechas concretas, estado y fuente.</td>
+</tr>
+<tr>
+<td>E</td>
+<td>POST <code>/eventos/propuestas</code></td>
+<td>Sesión</td>
+<td>Título, organizador, lugar, inicio/fin, fuente y foto.</td>
+</tr>
+<tr>
+<td>E</td>
+<td>POST <code>/admin/eventos/{id}/decision</code></td>
+<td>Admin</td>
+<td>Aprobar, rechazar, pedir cambios o cancelar con versión y motivo.</td>
+</tr>
+<tr>
+<td>E</td>
+<td>PUT/DELETE <code>/suscripciones/{tipo}/{id}</code></td>
+<td>Titular</td>
+<td>Activa/desactiva preferencia y recordatorio.</td>
+</tr>
+<tr>
+<td>E</td>
+<td>GET <code>/notificaciones</code>; PATCH <code>/notificaciones/{id}</code></td>
+<td>Titular</td>
+<td>Bandeja y leído; propiedad del destinatario.</td>
+</tr>
+<tr>
+<td>E</td>
+<td>GET <code>/internal/eventos/{id}/elegibilidad</code></td>
+<td>Servicio autorizado</td>
+<td>Estado, fecha, organizador y versión vigentes.</td>
+</tr>
+<tr>
+<td>P</td>
+<td>GET/POST/PATCH <code>/admin/planes</code>, <code>/admin/politica-gratuita</code></td>
+<td>Admin</td>
+<td>Configura precio, cuota, duración y versión de aplicación.</td>
+</tr>
+<tr>
+<td>P</td>
+<td>POST <code>/campanias</code>; PATCH <code>/campanias/{id}</code></td>
+<td>Proveedor autorizado</td>
+<td>Objetivo, creatividad y fuente de financiación; edición reabre revisión.</td>
+</tr>
+<tr>
+<td>P</td>
+<td>POST <code>/contrataciones</code>; POST <code>/pagos/evidencias</code></td>
+<td>Titular</td>
+<td>Contrato congelado y comprobante privado; no cobra una tarjeta.</td>
+</tr>
+<tr>
+<td>P</td>
+<td>POST <code>/admin/pagos/{id}/revision</code></td>
+<td>Admin</td>
+<td>Confirmación/rechazo con monto/referencia verificados y motivo.</td>
+</tr>
+<tr>
+<td>P</td>
+<td>GET <code>/campanias/{id}/metricas</code></td>
+<td>Titular/Admin</td>
+<td>Agregados propios por periodo/canal; no lista identidades de turistas.</td>
+</tr>
+<tr>
+<td>P</td>
+<td>POST <code>/internal/anuncios/seleccion</code></td>
+<td>Servicio autorizado</td>
+<td>Candidatos/contexto e idempotencia; devuelve anuncios autorizados y entrega_id.</td>
+</tr>
+<tr>
+<td>P</td>
+<td>POST <code>/anuncios/{entrega_id}/mediciones</code></td>
+<td>Contexto de entrega validado</td>
+<td>Impresión/clic deduplicados, sin confiar en identidad arbitraria del cuerpo.</td>
+</tr>
+<tr>
+<td>R</td>
+<td>POST <code>/recomendaciones/viajes</code></td>
+<td>Sesión</td>
+<td>Grupo, fechas, destino y presupuesto; devuelve desglose compatible, estimado y fuentes.</td>
+</tr>
+<tr>
+<td>R</td>
+<td>GET/POST <code>/viajes-guardados</code></td>
+<td>Titular</td>
+<td>Guardar/consultar propuesta propia; no reserva.</td>
+</tr>
+<tr>
+<td>A</td>
+<td>POST <code>/asistente/consultas</code></td>
+<td>Público general; sesión para detalle</td>
+<td>Pregunta y contexto limitado; respuesta validada con fuentes o solicitud de inicio de sesión.</td>
+</tr>
+<tr>
+<td>A</td>
+<td>GET/DELETE <code>/asistente/conversaciones/{id}</code></td>
+<td>Titular</td>
+<td>Historial propio y solicitud de eliminación según retención.</td>
+</tr>
+<tr>
+<td>Dueño</td>
+<td>POST <code>/archivos/solicitudes</code>; POST <code>/archivos/{id}/confirmacion</code></td>
+<td>Sesión/propiedad</td>
+<td>Autoriza carga concreta y confirma vínculo, formato, tamaño y estado. La ruta se enruta según tipo de padre.</td>
+</tr>
+<tr>
+<td>Dueño</td>
+<td>GET <code>/archivos/{id}/contenido</code></td>
+<td>Según visibilidad actual</td>
+<td>Sirve binario autorizado con <code>private, no-store</code> para galería/evidencia.</td>
+</tr>
+</tbody></table></div>
+<p>Las rutas con varios verbos son familias de contrato, no una implementación existente. El OpenAPI ejecutable se elaborará al implementar las APIs y deberá conservar esta semántica y su trazabilidad.</p>
+<h2>5.3 DTO y validaciones</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Contrato</th>
+<th>Campos y condiciones</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PerfilEditable</td>
+<td>nombre_visible 2–80, biografia 0–300, avatar_id propio aprobado o pendiente, intereses ids válidos. <code>rol</code>, <code>estado</code> y <code>usuario_id</code> ajenos rechazados.</td>
+</tr>
+<tr>
+<td>PublicacionEntrada</td>
+<td>texto 0–5000, foto_ids propios hasta 10, referencia opcional; exige texto o foto. Límites propuestos configurables.</td>
+</tr>
+<tr>
+<td>ComentarioEntrada</td>
+<td>texto 0–1500, foto_ids hasta 3, padre_id opcional inmutable; mismo objetivo/raíz, profundidad máxima propuesta 5.</td>
+</tr>
+<tr>
+<td>MapaFiltro</td>
+<td>bbox válida, zoom acotado, categorías existentes. Máximo propuesto 200 puntos; <code>truncated=true</code> obliga a refinar vista o filtro. No recibe posición de usuario.</td>
+</tr>
+<tr>
+<td>MovilidadDetalle</td>
+<td>punto, operador, destinos, horarios y precio/unidad si confirmados, revisado_en y fuente. Diferencia desconocido de no disponible.</td>
+</tr>
+<tr>
+<td>CriteriosViaje</td>
+<td>destino, fechas válidas, adultos &gt;=1, menores &gt;=0, presupuesto positivo, moneda, modalidad total/por_persona, días y preferencias.</td>
+</tr>
+<tr>
+<td>EventoEntrada</td>
+<td>inicio &lt; fin, zona IANA, organizador, fuente y objeto_foto válido. Proponer no acredita autorización comercial del organizador.</td>
+</tr>
+<tr>
+<td>SeleccionAnuncios</td>
+<td>solicitud_id, usuario/contexto validado, objetivo/candidatos, canal, instante servidor. No acepta cuotas o elegibilidad decididas por cliente.</td>
+</tr>
+<tr>
+<td>ArchivoEntrada</td>
+<td>foto JPEG/PNG/WebP hasta 8 MiB propuesta; evidencia PDF hasta 10 MiB propuesta. Extensión no sustituye detección de formato. Rechazar SVG/HTML activos en cargas de usuario.</td>
+</tr>
+</tbody></table></div>
+<p>Éxitos: 200 consulta/actualización, 201 creación, 202 trabajo pendiente, 204 retirada idempotente. Errores: 400 formato, 401 sesión ausente/expirada, 403 sin permiso, 404 recurso no visible o inexistente, 409 versión/unicidad conflictiva, 413 tamaño, 415 formato, 422 validación, 429 límite y 503 dependencia necesaria no verificable. La respuesta usa <code>error.codigo</code>, <code>mensaje</code>, <code>campos</code> opcionales y <code>request_id</code>, sin SQL ni secretos.</p>
+<p>Las escrituras de creación/revisión usan <code>Idempotency-Key</code> con ámbito sujeto+ruta y hash del cuerpo. Misma clave y cuerpo devuelve resultado previo; misma clave con otro cuerpo devuelve 409. Ediciones/revisiones usan versión esperada o If-Match. Una reserva fallida no genera impresión.</p>
+<h2>5.4 Eventos y conciliación</h2>
+<p>Envelope: <code>event_id</code>, <code>event_type</code>, <code>schema_version</code>, <code>aggregate_id</code>, <code>aggregate_version</code>, <code>occurred_at</code>, <code>producer</code>, <code>correlation_id</code>, <code>payload</code>. El payload contiene ids/estado/versiones mínimos, no contraseñas, comprobantes o conversaciones. El tipo del evento es estable; un cambio incompatible incrementa versión de esquema.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Productor</th>
+<th>Evento</th>
+<th>Consumidores y efecto</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C</td>
+<td>CatalogoPublicado, ObjetivoRetirado, NegocioSuspendido</td>
+<td>P invalida elegibilidad; R actualiza proyección; A retira conocimiento; E genera aviso solo a suscritos pertinentes.</td>
+</tr>
+<tr>
+<td>M</td>
+<td>ContenidoAprobado, ContenidoRetirado</td>
+<td>E avisa según suscripción; A actualiza solo material autorizado; contadores y derivados se invalidan.</td>
+</tr>
+<tr>
+<td>E</td>
+<td>EventoPublicado, EventoModificado, EventoCancelado</td>
+<td>P impide nuevas entregas; R/A actualizan información; E invalida/reprograma recordatorios locales.</td>
+</tr>
+<tr>
+<td>P</td>
+<td>CampaniaActivada, CampaniaSuspendida, BeneficioPorVencer</td>
+<td>E avisa al negocio autorizado; R/A invalidan proyecciones publicitarias que mantengan.</td>
+</tr>
+<tr>
+<td>I</td>
+<td>PerfilActualizado, CuentaSuspendida, CuentaCerrada</td>
+<td>Consumidores autorizados actualizan proyecciones de autor público y coordinan retención; permisos se revalidan en I, no solo por evento.</td>
+</tr>
+</tbody></table></div>
+<p>El procesamiento confirma broker después de transacción local con inbox. Duplicados no repiten efectos; versiones viejas no pisan nuevas. Reintentos propuestos 5 con retroceso y jitter; fallo persistente pasa a cola de revisión. La conciliación compara versiones y pendientes sin reclamar entrega exactamente una vez.</p>
+<h2>5.5 Gemini y presupuesto</h2>
+<p>A llama a Gemini mediante GeneradorRespuesta exclusivamente desde servidor. <code>GEMINI_MODEL</code> es configurable; se seleccionará un modelo disponible mediante evaluación de respuestas en español, latencia, límites y costo. La clave se inyecta como secreto. Contexto: extractos permitidos, referencias de fuente y precios calculados; no se envían credenciales, expediente, correo, comprobante ni historial completo innecesario.</p>
+<p>Salida lógica exigida: <code>texto</code>, <code>fuentes[{tipo,id,version}]</code>, <code>opciones[{objetivo_id,costo_estimado,moneda,patrocinado}]</code>, <code>datos_no_confirmados</code> y <code>requiere_sesion</code>. Se valida estructura y que cada id/precio provenga del contexto. No se acepta un total distinto al calculado por R. Una respuesta inválida se descarta y se devuelve una plantilla con datos estructurados. El texto se escapa antes de renderizar; instrucciones dentro de relatos no modifican las reglas del sistema.</p>
+<p>Límites propuestos: pregunta 2000 caracteres, contexto acotado por configuración, 15 segundos por llamada y reintento solo cuando no duplique una operación de negocio. Un fallo no bloquea catálogo ni movilidad. No se habilitan herramientas arbitrarias, ejecución de código ni acceso a base de datos por el modelo.</p>
+<h2>5.6 Mapa y Cloudflare</h2>
+<p>La API de mapa devuelve GeoJSON <code>FeatureCollection</code>, con <code>geometry</code> Point <code>[lon,lat]</code> y propiedades públicas <code>id</code>, <code>tipo</code>, <code>titulo</code>, <code>resumen</code>, <code>ficha_path</code>. Seleccionar un marcador abre tarjeta; detalle exige sesión. El cliente descarta resultados de viewport anteriores para no reemplazar una consulta más reciente. HTML de terceros no se inyecta en popups.</p>
+<p>Cloudflare entrega recursos estáticos y derivados públicos definidos por reglas explícitas. Se omite caché compartida para <code>/api/</code>, sesiones, perfil, conversaciones y contenido privado. El origen valida HTTPS, host y encabezados de proxy confiables. La CDN propia no se usa para replicar las teselas de OpenStreetMap sin permiso y política compatible.</p>
+<p class="back"><a href="#sdd">Volver al índice</a> · <a href="05-contratos-e-integraciones.md">Fuente Markdown</a></p></section><section id="06" class="chapter"><h1>06 · Comportamiento, secuencias y estados</h1>
+<p><a href="#sdd">Índice</a> · <a href="#05">Anterior</a> · <a href="#07">Siguiente</a></p>
+<p><img src="diagramas/flujo-publicacion.svg" alt="Publicación y moderación · estados"></p>
+<p><img src="diagramas/flujo-asistente.svg" alt="Asistente turístico · control del contexto y Gemini"></p>
+<h2>6.1 Registro, sesión y perfil</h2>
+<details class="source"><summary>Ver fuente editable Mermaid del diagrama</summary><pre><code>sequenceDiagram
+    actor U as Turista
+    participant W as WEB
+    participant I as Identidad
+    participant S as Supabase Auth
+    participant D as PostgreSQL: identidad
+    U-&gt;&gt;W: Inicia sesión
+    W-&gt;&gt;I: Credenciales por HTTPS
+    I-&gt;&gt;S: Autenticar
+    S--&gt;&gt;I: Tokens gestionados o error
+    I-&gt;&gt;D: Comprobar cuenta y almacenar refresh cifrado
+    I--&gt;&gt;W: Access token y cookie opaca HttpOnly
+    U-&gt;&gt;W: Edita nombre y biografía
+    W-&gt;&gt;I: PATCH perfil con sesión y versión
+    I-&gt;&gt;D: Actualizar campos permitidos y auditoría
+    I--&gt;&gt;W: Perfil actualizado
+</code></pre></details>
+<p>No se copia contraseña al esquema <code>identidad</code>. Un fallo de persistencia al crear perfil se concilia con Auth mediante operación idempotente; una cuenta incompleta no obtiene permisos comerciales. Cambios de correo/contraseña pasan por flujos gestionados con reautenticación; editar perfil no los reemplaza. Roles se modifican en operación administrativa separada.</p>
+<h2>6.2 Publicación y carga de fotos</h2>
+<ol>
+<li>M valida sesión y objetivo visible, registra borrador y autoriza una carga privada limitada.</li>
+<li>WEB carga el binario al destino autorizado; M confirma formato real, tamaño, propiedad y vínculo. Un archivo no confirmado no forma parte de la publicación.</li>
+<li>El autor envía a revisión. Administración aprueba/rechaza con motivo y versión. Aprobación confirma metadatos y outbox, y genera derivados aprobados mediante tarea idempotente.</li>
+<li>El muro solo entrega la versión aprobada. Las galerías completas se sirven por la API dueña con autorización actual. Editar cambia versión y suspende difusión de la versión modificada hasta revisión.</li>
+<li>Retirar el padre revoca acceso e interacción, oculta descendientes y programa invalidación/borrado de derivados. Cargas huérfanas se limpian por tarea.</li>
+</ol>
+<details class="source"><summary>Ver fuente editable Mermaid del diagrama</summary><pre><code>stateDiagram-v2
+    [*] --&gt; Borrador
+    Borrador --&gt; EnRevision: enviar
+    EnRevision --&gt; Publicado: aprobar y preparar derivados
+    EnRevision --&gt; Rechazado: rechazar con motivo
+    Rechazado --&gt; Borrador: corregir
+    Publicado --&gt; EnRevision: editar contenido sustancial
+    Publicado --&gt; Retirado: autor o moderación
+    EnRevision --&gt; Retirado: retirar
+    Retirado --&gt; [*]
+</code></pre></details>
+<p>Una aprobación no publica un archivo que aún no esté saneado. El proceso conserva un estado técnico de derivados pendientes; la tarjeta se publica al completar los requisitos de su versión. Un reintento no duplica fotos ni eventos.</p>
+<h2>6.3 Like y respuesta concurrentes</h2>
+<p>La API autentica y valida visibilidad con el dueño del objetivo. PUT de like ejecuta inserción con restricción única; una repetición confirma el mismo estado. DELETE es idempotente. Responder exige padre visible del mismo objetivo, raíz consistente y profundidad admitida; la transacción local impide mover padre/raíz. Las consultas comprueban visibilidad actual, aunque una notificación de retiro se retrase. Un fallo de validación remota rechaza una interacción nueva.</p>
+<h2>6.4 Calendario, movilidad y propuestas</h2>
+<p>Una propuesta de evento/lugar/punto de movilidad conserva autor, foto, coordenadas, fuente y versión. Administración puede pedir información o aprobar/rechazar. Solo aprobación publica. Para movilidad se separa punto físico de oferta de operador y tramo servido: un terminal no garantiza que un operador esté verificado ni que existan asientos disponibles.</p>
+<details class="source"><summary>Ver fuente editable Mermaid del diagrama</summary><pre><code>stateDiagram-v2
+    [*] --&gt; EnRevision
+    EnRevision --&gt; RequiereInformacion: pedir datos
+    RequiereInformacion --&gt; EnRevision: completar
+    EnRevision --&gt; Publicado: aprobar
+    EnRevision --&gt; Rechazado: rechazar
+    Publicado --&gt; EnRevision: cambio sustancial
+    Publicado --&gt; Cancelado: cancelar evento
+    Publicado --&gt; Retirado: retirar lugar o servicio
+</code></pre></details>
+<p>Cancelar evento guarda estado y versión junto a outbox. El ejecutor de E invalida tareas anteriores y comprueba estado/preferencia inmediatamente antes de emitir avisos. P recibe invalidación y revalida E en cada nueva autorización publicitaria. No se promete borrar retrospectivamente contenido que el turista ya vio. El correo opcional no condiciona la bandeja.</p>
+<h2>6.5 Gratuidad, pago y entrega de anuncios</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Entidad</th>
+<th>Estados y transiciones válidas</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Beneficio</td>
+<td>Disponible → Activo al aprobar primera activación; Activo → Vencido por reloj; Activo → Suspendido/Revocado por decisión auditada. Una suspensión no extiende fin automáticamente.</td>
+</tr>
+<tr>
+<td>Pago</td>
+<td>Pendiente → Confirmado o Rechazado mediante revisión administrativa. Corrección conserva historial; no sustituye el pago anterior sin rastro.</td>
+</tr>
+<tr>
+<td>Campaña</td>
+<td>Borrador → EnRevision → Activa, o Rechazada; Activa → Suspendida/Vencida/Retirada. Reanudar requiere revalidación y condiciones vigentes.</td>
+</tr>
+<tr>
+<td>Reserva de cuota</td>
+<td>Reservada → ImpresionConfirmada o Expirada/Cancelada. Un clic se vincula a una entrega válida.</td>
+</tr>
+</tbody></table></div>
+<p>Al activar se valida negocio y objetivo, se asigna beneficio mediante unicidad local o se comprueba contratación/pago y se copian condiciones. Dos solicitudes simultáneas para un negocio no generan dos beneficios. Los meses se calculan en America/Lima y se persiste fin UTC; el 31 se ajusta al último día del mes destino cuando corresponde.</p>
+<p>Selección: comprobar compatibilidad y estados actuales, reservar cuota/frecuencia atómicamente, emitir entrega_id, presentar etiqueta de patrocinio y medir impresión solo tras visibilidad. Umbral propuesto: al menos 50 % del aviso visible por 1 segundo. No es una medición implementada ni una garantía comercial. Para usuarios sin cuenta se usa límite por contexto/sesión temporal y métricas estimadas sin fingerprinting; no se anuncia alcance único exacto de personas anónimas.</p>
+<h2>6.6 Planificación independiente y Gemini</h2>
+<details class="source"><summary>Ver fuente editable Mermaid del diagrama</summary><pre><code>sequenceDiagram
+    actor U as Turista con sesión
+    participant A as Asistente
+    participant R as Recomendaciones
+    participant C as Catálogo
+    participant P as Publicidad
+    participant G as Gemini
+    U-&gt;&gt;A: Destino, grupo, fechas y presupuesto
+    A-&gt;&gt;R: Calcular alternativas
+    R-&gt;&gt;C: Ofertas verificadas y movilidad independiente
+    C--&gt;&gt;R: Precios, unidades, vigencia y fuentes
+    R--&gt;&gt;A: Desglose calculado y datos faltantes
+    A-&gt;&gt;P: Solicitar anuncios compatibles
+    P--&gt;&gt;A: Patrocinados autorizados o ninguno
+    A-&gt;&gt;G: Contexto mínimo autorizado
+    G--&gt;&gt;A: Respuesta estructurada
+    A-&gt;&gt;A: Validar fuentes, cifras y visibilidad
+    A--&gt;&gt;U: Orientación con etiquetas y alternativas orgánicas
+</code></pre></details>
+<p>El usuario puede pedir solo terminales y traslados sin paquete. Sin sesión, A ofrece orientación general y conserva un destino de retorno interno seguro al solicitar ingreso. Si Gemini inventa una cifra o id, se descarta la salida y se muestra el resultado determinista disponible.</p>
+<h2>6.7 Mapa interactivo</h2>
+<p>WEB inicializa la región elegida, carga teselas y consulta marcadores para la vista. Arrastrar o hacer zoom actualiza el viewport con espera breve propuesta de 250 ms y cancela resultados antiguos. Seleccionar marcador muestra tarjeta pública; abrir detalle valida sesión. Nunca se invoca geolocalización ni se almacena un recorrido. Las coordenadas se incorporan mediante revisión del catálogo, no por un permiso de GPS del turista.</p>
+<p class="back"><a href="#sdd">Volver al índice</a> · <a href="06-flujos-y-estados.md">Fuente Markdown</a></p></section><section id="07" class="chapter"><h1>07 · Interfaz y experiencia de lectura</h1>
+<p><a href="#sdd">Índice</a> · <a href="#06">Anterior</a> · <a href="#08">Siguiente</a></p>
+<h2>7.1 Objetivo de experiencia</h2>
+<p>La plataforma combina descubrimiento visual con lectura tranquila. La fotografía explica el lugar y el texto aporta experiencia, contexto y consejos. Se toman patrones conocidos de redes sociales sin copiar marcas, identidades gráficas ni mecanismos de presión. La utilidad, la claridad de precios y la confianza tienen prioridad sobre prolongar la sesión.</p>
+<h2>7.2 Arquitectura de información</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Sección</th>
+<th>Contenido y acción principal</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Inicio</td>
+<td>Muro reciente, filtros de destino/servicio y experiencias aprobadas.</td>
+</tr>
+<tr>
+<td>Explorar</td>
+<td>Lugares, camping, servicios y categorías verificadas; alterna tarjetas y mapa.</td>
+</tr>
+<tr>
+<td>Movilidad</td>
+<td>Terminales, embarques y traslados, filtro origen/destino y acceso independiente de paquetes.</td>
+</tr>
+<tr>
+<td>Calendario</td>
+<td>Actividades por mes/año y destino, estado de evento y suscripción.</td>
+</tr>
+<tr>
+<td>Asistente</td>
+<td>Conversación contextual, opciones desglosadas y fuentes.</td>
+</tr>
+<tr>
+<td>Mi espacio</td>
+<td>Perfil editable, favoritos, colecciones, viajes guardados, historial y preferencias.</td>
+</tr>
+<tr>
+<td>Panel de proveedor</td>
+<td>Negocios propios, ofertas, galerías, evidencia, campañas y métricas agregadas.</td>
+</tr>
+<tr>
+<td>Administración</td>
+<td>Colas de revisión, catálogo, acreditaciones, calendario, planes, pagos y auditoría.</td>
+</tr>
+</tbody></table></div>
+<p>En móvil, navegación principal de cinco accesos: Inicio, Explorar, Calendario, Asistente y Mi espacio. Movilidad se encuentra en Explorar y tiene acceso visible en la planificación. Paneles comerciales se muestran según rol, sin ocupar navegación de todo turista.</p>
+<h2>7.3 Composición visual propuesta</h2>
+<p>Paleta: verde profundo <code>#173F38</code> para identidad, marfil <code>#F7F5EF</code> para lectura, terracota <code>#A84B34</code> como acento y texto <code>#20312D</code>. La validación final comprobará contraste en todas las combinaciones; no se supone que toda combinación de la paleta sea accesible. Tipografía de sistema legible, cuerpo base propuesto de 16–18 px, interlineado aproximado 1.5 y ancho de texto de 65–75 caracteres.</p>
+<p>Las tarjetas mantienen proporción fotográfica consistente, título, zona y resumen. Autor/fecha y acciones tienen jerarquía secundaria. Las acreditaciones, reseñas y publicidad usan etiquetas textuales distintas, sin depender solo de color. Se reserva espacio a imágenes para evitar saltos de diseño; las miniaturas cargan progresivamente y los originales solo al solicitarlos.</p>
+<h2>7.4 Pantallas y estados</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Pantalla</th>
+<th>Comportamiento previsto</th>
+<th>Estados que deben diseñarse</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Muro</td>
+<td>Publicación con foto/relato, autor, destino, guardar, likes y comentarios según sesión. Botón «Cargar más» y conservación de posición al volver.</td>
+<td>Cargando, vacío por filtro, error con reintento, contenido retirado, sesión requerida.</td>
+</tr>
+<tr>
+<td>Ficha de lugar/servicio</td>
+<td>Portada, datos verificables, galería, categoría y reseñas separadas, precio/unidad y fuente.</td>
+<td>Pendiente no visible, sin precio confirmado, suspendido, eliminado, acceso restringido.</td>
+</tr>
+<tr>
+<td>Perfil</td>
+<td>Avatar, nombre y biografía con edición propia; vista previa antes de guardar. Intereses y preferencias en controles separados.</td>
+<td>Guardando, validación, conflicto de versión, avatar en revisión, sesión expirada.</td>
+</tr>
+<tr>
+<td>Movilidad</td>
+<td>Tarjetas de puntos y operadores, horario informado, destino y fecha de revisión. Acción de contacto externo verificado.</td>
+<td>Sin trayecto confirmado, información antigua advertida, operador suspendido.</td>
+</tr>
+<tr>
+<td>Mapa</td>
+<td>Arrastre, zoom, marcadores seleccionables y alternativa en lista. Conserva filtros al cambiar de vista.</td>
+<td>Teselas no disponibles, marcadores cargando, demasiados puntos, destino sin datos.</td>
+</tr>
+<tr>
+<td>Calendario</td>
+<td>Vista mensual y lista accesible, detalles, cancelación y gestión de suscripción.</td>
+<td>Mes sin eventos, evento modificado/cancelado, aviso desactivado.</td>
+</tr>
+<tr>
+<td>Asistente</td>
+<td>Mensajes legibles, fuentes, coste desglosado, patrocinio identificado y opciones para guardar.</td>
+<td>Respondiendo, datos incompletos, autenticación requerida, proveedor IA no disponible.</td>
+</tr>
+<tr>
+<td>Campaña</td>
+<td>Condiciones copiadas, tiempo de gratuidad, revisión de pago y métricas separadas.</td>
+<td>En revisión, activa, vencida, suspendida y motivo.</td>
+</tr>
+</tbody></table></div>
+<h2>7.5 Acceso sin fricción y participación</h2>
+<p>La vista pública explica qué hay en un lugar. Al pedir detalle, publicar o interactuar, aparece una invitación clara a ingresar y se conserva un destino de retorno interno válido. No se pierde el borrador de texto durante la transición cuando pueda conservarse de forma segura, sin guardar expedientes o tokens en el navegador.</p>
+<p>Un like ofrece respuesta visual y estado reversible; si falla, se revierte y comunica. El contador no se inventa para animar actividad. Las respuestas muestran contexto y niveles acotados para lectura móvil. Guardar en colección es privado; no se presupone una red de seguidores personales o mensajes privados.</p>
+<h2>7.6 Accesibilidad y control</h2>
+<p>Se buscará nivel WCAG 2.2 AA en implementación, mediante criterios comprobables: teclado, foco visible, etiquetas de formulario, texto alternativo, contraste y errores identificables. Se evitan acciones dependientes solo de hover, animación obligatoria y reproducción automática. Se respeta preferencia de movimiento reducido. El mapa tiene controles accesibles y alternativa textual completa.</p>
+<p>El usuario elige suscripciones y puede silenciar avisos. No se crean notificaciones falsas ni se exige mantener la aplicación abierta. La segmentación usa intereses declarados y contexto de viaje, sin pedir geolocalización ni inferir la ubicación actual por IP para personalización.</p>
+<h2>7.7 Validación futura de usabilidad</h2>
+<p>Tareas de evaluación: encontrar movilidad sin paquete, guardar un lugar, editar perfil, identificar un anuncio, comentar una foto y desactivar recordatorios. Registrar éxito, errores y comprensión con participantes; no afirmar resultados de pruebas aún no realizadas. Los bocetos y diagramas de esta entrega representan decisiones de diseño, no pantallas implementadas.</p>
+<h2>7.8 Identidad y animación de acceso</h2>
+<p>El logo aportado por el propietario se conserva como <a href="assets/logo-llegueya.png">PNG original</a>, sin editar sus píxeles, colores, tipografía, proporciones o transparencias. Se muestra completo mediante ajuste <code>contain</code>, sin recorte, recoloración ni deformación. La <a href="vista-previa-acceso.html">vista previa del acceso</a> permite revisar el comportamiento visual sin recoger credenciales ni realizar autenticación.</p>
+<p>La entrada propuesta dura aproximadamente 800 ms con aparición y desplazamiento suave. Un movimiento leve de flotación aplica traslación y escala uniforme al logo completo; un halo exterior respira detrás sin modificar la imagen. No se separan sus elementos para redibujarlos. No hay destellos, sonido ni espera obligatoria. Durante el acceso real, el formulario permanece utilizable y el éxito detiene el efecto y continúa al destino solicitado.</p>
+<p>Se respeta <code>prefers-reduced-motion</code>: logo estático y transiciones sin movimiento. El estado de carga de autenticación tiene mensaje textual separado y no depende solo de animación. El boceto HTML es documentación interactiva, no la aplicación implementada ni una pantalla conectada a Supabase. El archivo de imagen mantiene el mismo SHA-256 que el original recibido.</p>
+<p class="back"><a href="#sdd">Volver al índice</a> · <a href="07-interfaz-y-experiencia.md">Fuente Markdown</a></p></section><section id="08" class="chapter"><h1>08 · Seguridad, privacidad y credenciales</h1>
+<p><a href="#sdd">Índice</a> · <a href="#07">Anterior</a> · <a href="#09">Siguiente</a></p>
+<h2>8.1 Límites de confianza</h2>
+<p>El navegador es un cliente no confiable. GW limita tráfico y enruta; las APIs verifican autenticación y permisos. Supabase Auth valida identidad técnica; I posee perfil, estado y roles del negocio. PostgreSQL tiene roles por esquema y políticas pertinentes. Cloudflare reduce exposición al tráfico, pero no decide propiedad de recursos. Gemini recibe únicamente datos filtrados y no constituye una autoridad del sistema.</p>
+<p>La sesión se valida en cada operación protegida. Los identificadores enviados por cliente no acreditan propiedad. El administrador necesita rol vigente y MFA antes de operaciones de pagos, acreditaciones o asignación de permisos. Las cuentas de servicio no se usan como cuentas humanas.</p>
+<h2>8.2 Matriz de autorización</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Recurso/acción</th>
+<th>Sin sesión</th>
+<th>Turista</th>
+<th>Proveedor</th>
+<th>Administrador</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Tarjetas, mapa público y calendario/resumen</td>
+<td>Sí</td>
+<td>Sí</td>
+<td>Sí</td>
+<td>Sí</td>
+</tr>
+<tr>
+<td>Fichas y galerías completas aprobadas</td>
+<td>No</td>
+<td>Sí</td>
+<td>Sí</td>
+<td>Sí</td>
+</tr>
+<tr>
+<td>Perfil, colecciones, viajes e historial</td>
+<td>No</td>
+<td>Solo propios</td>
+<td>Solo propios</td>
+<td>Sin acceso general al historial por ser admin; acceso excepcional requiere propósito y auditoría.</td>
+</tr>
+<tr>
+<td>Publicar, comentar, responder y dar likes</td>
+<td>No</td>
+<td>Con objetivo visible</td>
+<td>Con objetivo visible</td>
+<td>Con objetivo visible.</td>
+</tr>
+<tr>
+<td>Oferta/negocio comercial</td>
+<td>No</td>
+<td>No, salvo alta de rol conforme al flujo</td>
+<td>Solo de su negocio</td>
+<td>Revisión y gestión autorizada.</td>
+</tr>
+<tr>
+<td>Propuesta de evento/lugar</td>
+<td>No</td>
+<td>Propia</td>
+<td>Propia</td>
+<td>Revisión con motivo.</td>
+</tr>
+<tr>
+<td>Evidencia de negocio o pago</td>
+<td>No</td>
+<td>No</td>
+<td>Solo propia</td>
+<td>Revisión por función.</td>
+</tr>
+<tr>
+<td>Roles, política gratuita y planes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Operación separada con auditoría.</td>
+</tr>
+</tbody></table></div>
+<p>Una cuenta suspendida pierde operaciones protegidas aunque el token no haya vencido. Recuperación de cuenta, cambio de correo y cierre usan confirmación gestionada y reautenticación apropiada. La API de perfil rechaza cambios a rol, propietario, estado y atributos de acreditación.</p>
+<h2>8.3 Tratamiento de secretos</h2>
+<p>No se solicitan ni incorporan claves reales para redactar el SDD. Las credenciales se guardarán fuera del repositorio, en configuración local ignorada o secretos del entorno. <code>.env.example</code> contiene solo nombres y valores vacíos/ficticios. <code>.gitignore</code> y <code>.dockerignore</code> excluyen archivos privados, dumps y llaves, pero no borran secretos ya rastreados o presentes en el historial.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Secreto o configuración</th>
+<th>Ubicación y alcance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Clave Gemini</td>
+<td>Solo A, inyectada al iniciar; nunca frontend ni URL.</td>
+</tr>
+<tr>
+<td>Contraseña/DSN PostgreSQL</td>
+<td>Una por servicio y entorno, sin privilegios de migración.</td>
+</tr>
+<tr>
+<td>Credenciales privilegiadas de Supabase</td>
+<td>Solo adaptador que las necesite, con alcance mínimo disponible. No se usa una clave administrativa universal en todas las APIs.</td>
+</tr>
+<tr>
+<td>Clave de cifrado de refresh</td>
+<td>Solo I, separada de la base; rotación y versionado de cifrado.</td>
+</tr>
+<tr>
+<td>Token Cloudflare</td>
+<td>Solo operación de despliegue/purga con permisos mínimos; no en WEB.</td>
+</tr>
+<tr>
+<td>Token de broker</td>
+<td>Solo productores/consumidores autorizados, sin consola pública.</td>
+</tr>
+<tr>
+<td>URL de Supabase y configuración del mapa</td>
+<td>Configuración identificable, no una contraseña. No se confunde una clave publicable con autorización suficiente.</td>
+</tr>
+</tbody></table></div>
+<p>En Docker no se usan secretos en Dockerfile, argumentos de compilación ni capas de imagen. Los secretos se montan por servicio o se inyectan desde el gestor del despliegue. Los archivos montados localmente siguen requiriendo permisos del sistema y no se consideran cifrados por el mero uso de Compose. Los logs eliminan Authorization, cookies, claves, cadenas de conexión y contenido privado.</p>
+<h2>8.4 Carga de archivos, texto y mapa</h2>
+<p>Validar contenido binario, dimensiones y tamaño, generar claves aleatorias, eliminar EXIF sensible y prohibir archivos ejecutables/activos de usuario. Evidencias PDF quedan privadas y se revisan con controles de contenido antes de acceso administrativo. La aceptación de un archivo no implica aprobación de su publicación.</p>
+<p>Escapar texto y enlaces de publicaciones y respuesta IA. No insertar HTML arbitrario en tarjetas o popups. Enlaces externos se validan por esquema/dominio esperado, sin redirección libre. Las URLs de retorno tras login son internas y permitidas. Los servidores no descargan URLs indicadas libremente por el usuario, evitando SSRF.</p>
+<p>El mapa no solicita ubicación ni incluye botón «mi ubicación». El viewport sirve para explorar, sin crear historial de desplazamientos del turista. La atribución y la política de teselas se mantienen visibles/configuradas. La IP que procese infraestructura para seguridad no se convierte en coordenadas del perfil.</p>
+<h2>8.5 Caché, sesiones y privacidad</h2>
+<p>Todas las rutas autenticadas y archivos privados usan <code>Cache-Control: private, no-store</code>; Cloudflare omite caché compartida para ellas. La clave de un derivado público cambia con su versión y se purga al retirar contenido. Un recurso ya descargado por el usuario no puede recuperarse remotamente. Se prueba que una sesión nunca obtiene respuesta cacheada de otra.</p>
+<p>WEB evita persistir access token en localStorage. I mantiene refresh cifrado en servidor, cookie opaca HttpOnly/Secure y controles CSRF/Origin. El CORS se limita a orígenes autorizados; no combina credenciales con comodín. El origen solo confía en encabezados del proxy configurado.</p>
+<p>Las conversaciones pertenecen al titular. Se informa qué datos se envían a Gemini y se minimiza contexto. Las condiciones de tratamiento/retención del proveedor y elección de región se verificarán antes de producción. La administración de contenido no habilita leer conversaciones por defecto.</p>
+<h2>8.6 Revisión antes del commit y respuesta a exposición</h2>
+<p>Antes de que el propietario haga commit: revisar <code>git status</code>, cambios, archivos rastreados e ignorados; ejecutar detección de patrones de secretos sobre candidatos y, cuando corresponda, historial. Mostrar únicamente rutas y tipo de hallazgo, nunca su valor. Verificar que <code>.env.example</code> no contiene credenciales funcionales y que no se incluyen dumps, documentos privados o logs reales.</p>
+<p>Si aparece una credencial rastreada, detener su publicación, revocar/rotar y revisar exposición. Quitarla del archivo o agregarla a <code>.gitignore</code> no invalida la copia anterior. La limpieza del historial requiere una operación coordinada aparte; no se reescribe automáticamente el repositorio del usuario. No hay garantía absoluta de detección, por lo que la revisión humana del diff sigue siendo necesaria.</p>
+<p>El trabajo de esta entrega queda local: no se ejecutan stage, commit, push ni configuración de cuentas externas. La implementación futura debería incorporar detección automática de secretos y protección de ramas, sin asumir que hoy estén habilitadas.</p>
+<p class="back"><a href="#sdd">Volver al índice</a> · <a href="08-seguridad.md">Fuente Markdown</a></p></section><section id="09" class="chapter"><h1>09 · Despliegue y operación</h1>
+<p><a href="#sdd">Índice</a> · <a href="#08">Anterior</a> · <a href="#10">Siguiente</a></p>
+<h2>9.1 Topología de referencia</h2>
+<p>WEB se publica como activos estáticos en el origen Nginx del alojamiento elegido. Cloudflare gestiona el borde del dominio y proxy HTTPS. Nginx enruta a siete procesos API separados ejecutados con Docker. Supabase gestionado aporta PostgreSQL, Auth y Storage. Gemini y el proveedor de teselas son externos. El servidor/plan de alojamiento de Docker sigue pendiente de presupuesto y operación, sin presuponer que Cloudflare aloje automáticamente todos los contenedores.</p>
+<p><a href="../../modelo-c4/Despliegue-e-infraestructura.md">Vista de despliegue canónica</a>. La distribución física no cambia la propiedad por esquema ni la regla de dependencia interior.</p>
+<h2>9.2 Servicios y redes de Compose</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Unidad</th>
+<th>Red/volumen y exposición</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>web-gateway</td>
+<td>Único punto de acceso del origen; puertos HTTPS/publicación controlados.</td>
+</tr>
+<tr>
+<td>identidad, catalogo, comunidad, eventos, publicidad, recomendaciones, asistente</td>
+<td>Red privada de aplicaciones; puertos no expuestos al Internet. Cuenta de ejecución sin root y filesystem de solo lectura cuando sea posible.</td>
+</tr>
+<tr>
+<td>broker</td>
+<td>Red interna; volumen durable, usuarios/vhosts de alcance mínimo y consola no pública.</td>
+</tr>
+<tr>
+<td>ejecutores E/P</td>
+<td>Parte del despliegue de su servicio; coordinación por tareas/leases persistidos. No cron de una sola memoria de proceso.</td>
+</tr>
+<tr>
+<td>Supabase gestionado</td>
+<td>Conexiones TLS y pools acotados por servicio; no se crea otro PostgreSQL incompatible con el esquema de producción.</td>
+</tr>
+</tbody></table></div>
+<p>Para desarrollo, se permite Supabase local con su herramienta oficial y datos ficticios, o un proyecto de pruebas separado; nunca compartir base productiva para pruebas. Docker reduce diferencias de entorno y no elimina errores, fallos de red o necesidad de restauración. No se incluye Compose ejecutable ni código de aplicación en esta entrega de diseño.</p>
+<p>Cada imagen fijará versión y digest tras validación, usuario de ejecución y healthcheck. No se usarán etiquetas <code>latest</code> para una liberación. Los secretos se montan al iniciar, no al construir. Un archivo <code>.env.example</code> vacío sirve de inventario, no constituye configuración lista para producción.</p>
+<h2>9.3 Cloudflare y almacenamiento de imágenes</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tipo de tráfico</th>
+<th>Política</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTML/CSS/JS públicos versionados</td>
+<td>Caché explícita para activos con hash y actualización controlada del HTML.</td>
+</tr>
+<tr>
+<td>Derivados públicos aprobados</td>
+<td>Cacheables con clave versionada y mecanismo de purga al retirar.</td>
+</tr>
+<tr>
+<td>API, perfil, sesiones, conversaciones y métricas privadas</td>
+<td>Bypass de caché compartida y cabeceras privadas.</td>
+</tr>
+<tr>
+<td>Galería/evidencia</td>
+<td>Servicio dueño valida acceso y transmite desde Storage privado. No CDN pública.</td>
+</tr>
+<tr>
+<td>Teselas</td>
+<td>Petición directa al proveedor permitido respetando atribución, Referer y caché. No proxy masivo de teselas en Cloudflare.</td>
+</tr>
+</tbody></table></div>
+<p>Las reglas WAF y de abuso disponibles dependen del plan. Se probará que no bloqueen autenticación ni carga válida. El TLS entre navegador/borde y borde/origen debe verificarse; no basta cifrar solo el primer tramo. La protección del origen y los tokens de purga se administran aparte del código.</p>
+<h2>9.4 Presupuestos operativos propuestos</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Operación</th>
+<th>Valor inicial para validar</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>API de consulta normal</td>
+<td>Timeout interno 3 s por dependencia y presupuesto total acotado; meta p95 &lt;=2 s en escenario de carga acordado.</td>
+</tr>
+<tr>
+<td>Generación Gemini</td>
+<td>Timeout 15 s; límite de contexto configurable y respuesta alternativa si falla.</td>
+</tr>
+<tr>
+<td>Carga de foto/evidencia</td>
+<td>Límites del capítulo 05; nunca registrar binario o credencial en logs.</td>
+</tr>
+<tr>
+<td>Pool PostgreSQL</td>
+<td>Límite explícito por servicio según capacidad del proyecto; comprobar suma de pools antes de producción.</td>
+</tr>
+<tr>
+<td>Ejecución de tareas</td>
+<td>Lease propuesto 60 s con renovación y recuperación al expirar.</td>
+</tr>
+<tr>
+<td>Caché pública</td>
+<td>Purga/revocación con meta de propagación &lt;=60 s por validar; privados se autorizan en cada entrega.</td>
+</tr>
+<tr>
+<td>Disponibilidad</td>
+<td>Medir por capacidad de negocio; un fallo de Gemini no cuenta como caída de tarjetas independientes.</td>
+</tr>
+</tbody></table></div>
+<p>Estos valores son metas de diseño, no garantías ni mediciones. El dimensionamiento de CPU/RAM, almacenamiento, cuota IA y ancho de banda requiere prueba representativa y presupuesto real.</p>
+<h2>9.5 Observabilidad y recuperación</h2>
+<p>Cada petición genera <code>request_id</code> y correlación entre servicios. Logs estructurados con servicio, operación, duración, error tipado y versión, evitando PII y secretos. Métricas: latencia por API, errores, pool de conexiones, outbox pendiente, retraso/duplicados de consumidores, tareas vencidas, cargas huérfanas y respuestas IA rechazadas. Alertas dirigidas a operación, sin enviar credenciales o conversaciones completas.</p>
+<p>El respaldo cubre PostgreSQL y binarios Storage por separado: no se presupone que una copia de la base contenga los archivos. Exportaciones cifradas fuera del repositorio, inventario de objetos y prueba de restauración en entorno aislado. RPO propuesto inicial 24 h y RTO 8 h para piloto, sujetos a aceptación de negocio y capacidad contratada. Los mecanismos específicos de backups/PITR dependen del plan elegido y no se afirman habilitados.</p>
+<p>Al restaurar, conciliar outbox/inbox, archivos y versiones para no reenviar avisos duplicados ni reactivar campañas vencidas. La fecha actual y elegibilidad se revalidan; restaurar un estado antiguo no concede nuevos beneficios. Documentar ensayos y resultados solo después de ejecutarlos.</p>
+<h2>9.6 Liberación y evolución</h2>
+<p>Secuencia: revisión de contratos y seguridad, pruebas con dobles, integración por servicio, prueba de permisos de datos, imagen fijada, migración compatible, despliegue gradual y comprobación de salud. El rollback de aplicación requiere compatibilidad del esquema; no se elimina una columna como primer paso. Un incidente revoca accesos afectados y mantiene trazabilidad sin publicar secretos.</p>
+<p>La evolución inicial prioriza identidad/perfil, catálogo/movilidad/mapa y lectura social; después calendario, publicidad y planificación asistida, conservando los contratos. Cada entrega puede implementarse de forma incremental sin afirmar que la documentación ya implementó la plataforma.</p>
+<p class="back"><a href="#sdd">Volver al índice</a> · <a href="09-despliegue-y-operacion.md">Fuente Markdown</a></p></section><section id="10" class="chapter"><h1>10 · Trazabilidad, validación y pendientes</h1>
+<p><a href="#sdd">Índice</a> · <a href="#09">Anterior</a></p>
+<h2>10.1 Cobertura funcional</h2>
+<p>La matriz cubre RF01–RF65 sin renumerar requisitos históricos. Las historias HU01–HU46 motivan esos requisitos. Los contratos se describen en el capítulo 05 y los esquemas en el 04. Los escenarios siguientes son especificaciones para pruebas futuras, no resultados ejecutados.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Requisitos</th>
+<th>Servicio y componente</th>
+<th>Datos principales</th>
+<th>Contrato de referencia</th>
+<th>Validación</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RF01, RF46, RF53, RF60</td>
+<td>I / Auth / Perfil</td>
+<td>identidad.perfil; sesion_refresh</td>
+<td>/auth/*; /perfil</td>
+<td>VA01, VA02, VA03, VA04</td>
+</tr>
+<tr>
+<td>RF02, RF03, RF19, RF26, RF52, RF63</td>
+<td>C / Catálogo y mapa</td>
+<td>catalogo.lugar; propuesta_lugar</td>
+<td>/catalogo/*; /propuestas/lugares</td>
+<td>VA05, VA06, VA07</td>
+</tr>
+<tr>
+<td>RF04</td>
+<td>C / Enlaces verificados</td>
+<td>catalogo.lugar</td>
+<td>/catalogo/fichas/{id}</td>
+<td>VA08</td>
+</tr>
+<tr>
+<td>RF05, RF17, RF18, RF36, RF37, RF48, RF49, RF50</td>
+<td>C / Ofertas y revisión</td>
+<td>catalogo.negocio; oferta; categoria_acreditada; evidencia</td>
+<td>/negocios; /ofertas; /archivos/*</td>
+<td>VA09, VA10, VA11</td>
+</tr>
+<tr>
+<td>RF06, RF07, RF21</td>
+<td>M / Reseñas y moderación</td>
+<td>comunidad.resena; reporte</td>
+<td>/comunidad/negocios/{id}/resena; /admin/moderacion</td>
+<td>VA12</td>
+</tr>
+<tr>
+<td>RF08, RF09, RF22, RF23, RF24, RF25</td>
+<td>M / Publicaciones e hilos</td>
+<td>comunidad.publicacion; comentario; objeto</td>
+<td>/comunidad/muro; /comunidad/publicaciones/*</td>
+<td>VA13, VA14</td>
+</tr>
+<tr>
+<td>RF10, RF11, RF20</td>
+<td>M / Contenido cultural</td>
+<td>comunidad.contenido_cultural</td>
+<td>/admin/contenido-cultural; /comunidad/muro</td>
+<td>VA15</td>
+</tr>
+<tr>
+<td>RF12, RF27, RF28, RF29, RF51</td>
+<td>E / Calendario y avisos</td>
+<td>eventos.evento; propuesta; suscripcion; tarea_recordatorio; notificacion</td>
+<td>/eventos/*; /suscripciones; /notificaciones</td>
+<td>VA16, VA17</td>
+</tr>
+<tr>
+<td>RF13, RF34, RF47</td>
+<td>R y A / Planificación</td>
+<td>recomendaciones.viaje; proyeccion_oferta</td>
+<td>/recomendaciones/viajes; /asistente/consultas</td>
+<td>VA18, VA19</td>
+</tr>
+<tr>
+<td>RF14, RF15, RF16, RF35</td>
+<td>A / Contexto y Gemini</td>
+<td>asistente.conversacion; mensaje; documento_conocimiento</td>
+<td>/asistente/consultas</td>
+<td>VA19, VA20</td>
+</tr>
+<tr>
+<td>RF30, RF31, RF32, RF33, RF38, RF39, RF40, RF41</td>
+<td>P / Gestión comercial</td>
+<td>publicidad.politica_gratuita; beneficio; plan; contratacion; pago; campania</td>
+<td>/campanias; /admin/planes; /admin/pagos/*</td>
+<td>VA21, VA22, VA23</td>
+</tr>
+<tr>
+<td>RF42, RF43, RF44, RF45, RF54, RF55</td>
+<td>P / Selección y métricas, C/E / elegibilidad</td>
+<td>publicidad.reserva_cuota; medicion; auditoria</td>
+<td>/internal/anuncios/seleccion; /campanias/{id}/metricas</td>
+<td>VA23, VA24, VA25</td>
+</tr>
+<tr>
+<td>RF56, RF57, RF58, RF59</td>
+<td>M / Likes y respuestas</td>
+<td>comunidad.like; comentario</td>
+<td>/comunidad/objetivos/{tipo}/{id}/*</td>
+<td>VA26, VA27</td>
+</tr>
+<tr>
+<td>RF61, RF62</td>
+<td>C / Movilidad independiente</td>
+<td>catalogo.punto_movilidad; tramo_movilidad; oferta</td>
+<td>/movilidad/*; /catalogo/mapa</td>
+<td>VA28</td>
+</tr>
+<tr>
+<td>RF64</td>
+<td>M / Colecciones y lectura</td>
+<td>comunidad.coleccion; elemento_coleccion</td>
+<td>/colecciones/*</td>
+<td>VA29</td>
+</tr>
+<tr>
+<td>RF65</td>
+<td>WEB / Acceso e identidad visual</td>
+<td>Logo original, sin datos de autenticación</td>
+<td>Vista de acceso y movimiento reducido</td>
+<td>VA34, VA35</td>
+</tr>
+</tbody></table></div>
+<p>ADR-001/002/015/018 fijan distribución, capas, propiedad y comunicación. ADR-023 a ADR-027 precisan Supabase, Docker/Cloudflare, Gemini, mapa y perfil/movilidad. <a href="../01-analisis-de-sistema/07-decisiones-arquitectonicas.md">Registro ADR</a>.</p>
+<h2>10.2 Escenarios de aceptación</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Preparación</th>
+<th>Acción</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>VA01</td>
+<td>Cuenta registrada, confirmada y activa</td>
+<td>Ingresar y renovar sesión</td>
+<td>Perfil propio y token válido; refresh nunca accesible en JS ni logs.</td>
+</tr>
+<tr>
+<td>VA02</td>
+<td>Dos usuarios distintos</td>
+<td>Solicitar perfil, colección o conversación ajenos</td>
+<td>403/404 sin campos privados ni diferencias que permitan enumerar información.</td>
+</tr>
+<tr>
+<td>VA03</td>
+<td>Usuario intenta enviar rol=administrador al editar perfil</td>
+<td>PATCH perfil</td>
+<td>422/403; rol no cambia; evento de seguridad sin copiar el secreto o cuerpo completo.</td>
+</tr>
+<tr>
+<td>VA04</td>
+<td>Cuenta suspendida con JWT no vencido</td>
+<td>Operación protegida</td>
+<td>Se deniega por estado actual. Tarjetas públicas independientes siguen disponibles.</td>
+</tr>
+<tr>
+<td>VA05</td>
+<td>Usuario sin sesión solicita ficha y galería</td>
+<td>Abrir detalle desde tarjeta</td>
+<td>Solicita ingreso y retoma destino interno válido; API no entrega detalle oculto.</td>
+</tr>
+<tr>
+<td>VA06</td>
+<td>Mapa abierto sin permisos del dispositivo</td>
+<td>Arrastrar, zoom y seleccionar marcador</td>
+<td>Mapa cambia de región y abre tarjeta; ninguna llamada a geolocation ni solicitud de permiso.</td>
+</tr>
+<tr>
+<td>VA07</td>
+<td>Propuesta de camping pendiente o fuente insuficiente</td>
+<td>Consultar catálogo y bot</td>
+<td>No figura como lugar aprobado ni se presenta el camping como permitido.</td>
+</tr>
+<tr>
+<td>VA08</td>
+<td>Enlace externo no aprobado o retorno manipulable</td>
+<td>Solicitar redirección</td>
+<td>Se rechaza; no se vende ni cobra entrada dentro de LlegueYa.</td>
+</tr>
+<tr>
+<td>VA09</td>
+<td>Proveedor de otro negocio intenta editar oferta</td>
+<td>Modificar oferta/evidencia</td>
+<td>Denegación en API y política de datos; no basta ocultar el botón.</td>
+</tr>
+<tr>
+<td>VA10</td>
+<td>Estrellas/tenedores declarados sin evidencia</td>
+<td>Consultar ficha y filtros</td>
+<td>No se muestran como acreditados. Puntuación de reseñas permanece separada.</td>
+</tr>
+<tr>
+<td>VA11</td>
+<td>Carga con formato simulado, exceso o EXIF</td>
+<td>Confirmar carga</td>
+<td>Rechaza formato/tamaño o genera derivado saneado antes de publicar; original pendiente privado.</td>
+</tr>
+<tr>
+<td>VA12</td>
+<td>Reseña con puntuación fuera de rango y edición moderada</td>
+<td>Guardar reseña</td>
+<td>Valida 1–5 y nueva revisión; no cambia una categoría oficial.</td>
+</tr>
+<tr>
+<td>VA13</td>
+<td>Publicación pendiente, aprobada y luego editada</td>
+<td>Consultar muro paginado</td>
+<td>Solo versión aprobada; cursor estable sin duplicados por inserción concurrente.</td>
+</tr>
+<tr>
+<td>VA14</td>
+<td>Padre retirado con comentarios/fotos descendientes</td>
+<td>Leer hilo e interactuar</td>
+<td>Hijos ocultos y nuevas interacciones denegadas aunque se retrase el evento de retiro.</td>
+</tr>
+<tr>
+<td>VA15</td>
+<td>Contenido cultural aprobado con suscriptores</td>
+<td>Publicar e intentar reentrega</td>
+<td>Acceso respeta derechos/visibilidad y un solo aviso lógico por clave.</td>
+</tr>
+<tr>
+<td>VA16</td>
+<td>Evento confirmado con suscripción activa</td>
+<td>Consultar mes y ejecutar recordatorio</td>
+<td>Fecha/zona/fuente correctas; solo destinatario y preferencia elegibles.</td>
+</tr>
+<tr>
+<td>VA17</td>
+<td>Evento cancelado tras programar tareas</td>
+<td>Ejecutar mensajes repetidos o antiguos</td>
+<td>No hay recordatorio vigente de versión obsoleta ni regresión de estado.</td>
+</tr>
+<tr>
+<td>VA18</td>
+<td>Familia con presupuesto total y precios por distintas unidades</td>
+<td>Calcular viaje</td>
+<td>Desglose decimal con moneda/unidad y fuentes; faltantes no se sustituyen por cero.</td>
+</tr>
+<tr>
+<td>VA19</td>
+<td>Gemini no disponible o devuelve ids/cifras inventados</td>
+<td>Solicitar recomendación</td>
+<td>Salida inválida descartada; respuesta determinista disponible y alternativas orgánicas.</td>
+</tr>
+<tr>
+<td>VA20</td>
+<td>Relato contiene instrucciones para revelar datos</td>
+<td>Incluirlo en contexto de IA</td>
+<td>No concede acceso, no revela secretos ni ejecuta herramientas arbitrarias.</td>
+</tr>
+<tr>
+<td>VA21</td>
+<td>Dos activaciones simultáneas para mismo negocio</td>
+<td>Asignar gratuidad</td>
+<td>Un beneficio y condiciones copiadas; mes calendario calculado correctamente en fin de mes.</td>
+</tr>
+<tr>
+<td>VA22</td>
+<td>Admin cambia tarifa/política después de contratar</td>
+<td>Consultar contrato vigente</td>
+<td>Conserva condiciones antiguas; nueva versión solo afecta nuevas asignaciones salvo ajuste auditado.</td>
+</tr>
+<tr>
+<td>VA23</td>
+<td>Pago pendiente o confirmado con negocio suspendido</td>
+<td>Seleccionar anuncio</td>
+<td>Pago no habilita por sí solo; no hay nueva autorización si la elegibilidad no puede confirmarse.</td>
+</tr>
+<tr>
+<td>VA24</td>
+<td>Cuota casi agotada, varias solicitudes concurrentes</td>
+<td>Reservar cuota y registrar impresión</td>
+<td>No excede cuota/frecuencia; solicitudes no cuentan como impresión; entrega_id deduplica.</td>
+</tr>
+<tr>
+<td>VA25</td>
+<td>Proveedor consulta métricas de campaña ajena</td>
+<td>GET métricas</td>
+<td>Deniega; propia devuelve agregados sin conversaciones ni identidad de turistas.</td>
+</tr>
+<tr>
+<td>VA26</td>
+<td>Dos PUT de like del mismo usuario/objetivo</td>
+<td>Insertar y retirar</td>
+<td>Un like activo, retirada idempotente y contador coherente.</td>
+</tr>
+<tr>
+<td>VA27</td>
+<td>Respuesta con padre ajeno, ciclo o raíz distinta</td>
+<td>Crear intervención</td>
+<td>Rechaza; solo mismo hilo/objetivo y profundidad admitida.</td>
+</tr>
+<tr>
+<td>VA28</td>
+<td>Turista elige viaje sin paquete</td>
+<td>Buscar terminal y traslado</td>
+<td>Obtiene puntos y ofertas verificadas con fuente; sin reserva ni ubicación del turista.</td>
+</tr>
+<tr>
+<td>VA29</td>
+<td>Colección privada con recurso después retirado</td>
+<td>Consultar guardados desde dos cuentas</td>
+<td>Solo propietario; elemento retirado no expone copia privada del contenido.</td>
+</tr>
+<tr>
+<td>VA30</td>
+<td>Cloudflare delante de dos sesiones</td>
+<td>Repetir API/galería/perfil con caché</td>
+<td>Ninguna respuesta privada compartida; derivados públicos sí siguen política.</td>
+</tr>
+<tr>
+<td>VA31</td>
+<td>Rol SQL de un servicio y pool reutilizado</td>
+<td>Acceder a otro esquema o con contexto anterior</td>
+<td>Deniega otro esquema y no hereda identidad de conexión anterior.</td>
+</tr>
+<tr>
+<td>VA32</td>
+<td>Copia de base y archivos de prueba</td>
+<td>Restaurar en entorno aislado</td>
+<td>Objetos y metadatos conciliados; no reactivar beneficio vencido o avisos duplicados.</td>
+</tr>
+<tr>
+<td>VA33</td>
+<td>Documento/configuración candidatos al commit</td>
+<td>Revisar rastreados, ignorados e historial</td>
+<td>Cero secretos funcionales detectados en candidatos; valores reales nunca se imprimen.</td>
+</tr>
+<tr>
+<td>VA34</td>
+<td>Preferencia de movimiento reducido</td>
+<td>Abrir vista de acceso con logo</td>
+<td>Logo intacto y estático, formulario accesible y sin retraso obligatorio.</td>
+</tr>
+<tr>
+<td>VA35</td>
+<td>Acceso con teclado y pantalla móvil</td>
+<td>Completar tareas de lectura/perfil/mapa</td>
+<td>Foco visible, alternativas en lista, textos legibles y estados de error comprensibles.</td>
+</tr>
+</tbody></table></div>
+<h2>10.3 Estrategia de comprobación</h2>
+<p>El <a href="#11">plan de pruebas y calidad</a> establece niveles, integraciones IT01–IT08, criterios de bloqueo y cobertura mínima del 90 % de líneas y ramas por servicio. Todas las pruebas obligatorias deben aprobarse. Las pruebas ejecutables del lector y prototipo se conservan en <code>tests/</code>; no acreditan el backend.</p>
+<p>El diseño se revisa con trazabilidad, enlaces, límites C4, dirección de dependencias y ausencia de secretos. Al implementar: pruebas unitarias de reglas con Reloj/repositorios dobles; pruebas de contrato para SQL/IA/archivos; integración local de Auth, roles y Storage con datos ficticios; pruebas de concurrencia en likes, cuotas y beneficios; pruebas de API/seguridad; tareas y reentregas; carga de lectura y pruebas de usabilidad.</p>
+<p>Las metas EQ existentes se evalúan en un entorno definido, con carga y conjunto de datos documentados. No se deduce rendimiento real de elegir Docker o Supabase. La evaluación de Gemini usa preguntas en español sobre catálogo, datos faltantes, presupuesto, movilidad y ataques de instrucciones; se registran respuestas inválidas, fidelidad de fuentes, latencia y costo sin datos personales.</p>
+<h2>10.4 Riesgos y decisiones pendientes</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Tema y responsable</th>
+<th>Acción necesaria antes de producción</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DP01</td>
+<td>Modelo Gemini · equipo técnico/propietario</td>
+<td>Evaluar modelo disponible, cuotas, costo, privacidad y región. El proveedor está decidido; el modelo exacto no.</td>
+</tr>
+<tr>
+<td>DP02</td>
+<td>Hosting Docker · propietario/operación</td>
+<td>Elegir capacidad y presupuesto, TLS de origen, red y recuperación. No se contrata recurso en esta entrega.</td>
+</tr>
+<tr>
+<td>DP03</td>
+<td>Proveedor de teselas · equipo técnico</td>
+<td>Piloto de bajo volumen sujeto a política OSM; revisar proveedor al crecer. No prometer gratuidad ilimitada.</td>
+</tr>
+<tr>
+<td>DP04</td>
+<td>Tarifas y exposición · administrador</td>
+<td>Definir importes, cuota, frecuencia y condiciones comerciales sin alterar contratos previos.</td>
+</tr>
+<tr>
+<td>DP05</td>
+<td>Versiones y capacidad · equipo técnico</td>
+<td>Fijar versiones compatibles/digests, pools y recursos tras prueba local.</td>
+</tr>
+<tr>
+<td>DP06</td>
+<td>Conservación y tratamiento · propietario</td>
+<td>Confirmar retenciones, información al usuario y tratamiento por proveedores; no asumir un plazo legal inventado.</td>
+</tr>
+<tr>
+<td>DP07</td>
+<td>Correo · propietario</td>
+<td>Mantener bandeja web como base; definir si se habilita correo y con qué proveedor.</td>
+</tr>
+<tr>
+<td>DP08</td>
+<td>Recuperación · operación</td>
+<td>Validar RPO/RTO propuestos y restaurar base y archivos por separado.</td>
+</tr>
+</tbody></table></div>
+<p>Riesgos: base y proyecto Supabase compartidos concentran disponibilidad; siete servicios aumentan operación; consultas de elegibilidad agregan latencia; caché incorrecta puede filtrar detalle; el mapa depende de un proveedor sin SLA en piloto; una IA puede responder incorrectamente. Mitigaciones: aislamiento de permisos, límites de tiempo, respuestas alternativas, controles de caché y validación determinista de fuentes/precios.</p>
+<h2>10.5 Criterio de suficiencia del SDD</h2>
+<p>El diseño se considera listo para iniciar implementación por capacidad cuando el equipo puede identificar: requisito, dueño, datos, permiso, contrato, estados, fallos y escenario de comprobación. Un pendiente comercial o de contratación debe estar identificado y no sustituirse por un valor ficticio. La línea base se actualiza mediante cambios revisables en Git, sin duplicar versiones «final».</p>
+<p>Esta entrega no contiene secretos reales, no crea cuentas ni servicios externos y no realiza commit/push. La aplicación, pruebas de ejecución y despliegue permanecen por desarrollar.</p>
+<p class="back"><a href="#sdd">Volver al índice</a> · <a href="10-trazabilidad-y-validacion.md">Fuente Markdown</a></p></section><section id="11" class="chapter"><h1>11 · Plan de pruebas y puertas de calidad</h1>
+<blockquote>
+<p>Estado de implementación (29/10/2026): existe una primera capacidad de Identidad con Google y pruebas locales. Consultar <a href="../06-desarrollo/README.md">estado real y ejecución</a>. Las descripciones de producto y pruebas futuras de esta línea base no acreditan que todos los servicios estén implementados.</p>
+</blockquote>
+<p><a href="#sdd">Índice</a> · <a href="#10">Trazabilidad</a></p>
+<h2>11.1 Alcance y criterio del 90 %</h2>
+<p>Este plan es obligatorio para la futura implementación de los siete servicios. Hoy existen documentos y un prototipo HTML; no existen APIs, migraciones ni una aplicación principal ejecutable. Las pruebas del prototipo no acreditan integración con Supabase, Gemini, RabbitMQ o Cloudflare.</p>
+<p>La cobertura mínima será <strong>90 % de líneas y 90 % de ramas</strong>, por separado, en el código propio de producción de cada servicio y del frontend. No basta un promedio global que oculte un servicio sin probar. Se incluyen dominio, casos de uso, adaptadores y controladores; únicamente se excluyen dependencias externas y archivos generados identificados y revisados. Los archivos no importados también cuentan. Los cambios deben conservar ambos umbrales. La cobertura mide ejecución, no ausencia de defectos.</p>
+<p><strong>El 100 % de las pruebas obligatorias debe aprobarse.</strong> Un 90 % de casos aprobados no autoriza una entrega. Un caso omitido, infraestructura caída o reporte ausente queda pendiente y bloquea la puerta correspondiente; nunca se transforma en éxito. Autorización, aislamiento de datos, cálculo de presupuesto, gratuidad y cuota publicitaria requieren todos sus escenarios positivos, negativos y de concurrencia aprobados, independientemente del porcentaje.</p>
+<h2>11.2 Matriz de pruebas</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Nivel</th>
+<th>Qué comprueba</th>
+<th>Escenarios / evidencia</th>
+<th>Criterio</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Unitarias</td>
+<td>Reglas de dominio y casos de uso con reloj y puertos sustituibles</td>
+<td>VA18, VA21–24, VA26–27; límites, fechas, importes, monedas, errores</td>
+<td>100 % aprobadas; cobertura por servicio</td>
+</tr>
+<tr>
+<td>Integración real</td>
+<td>API, persistencia, Auth, Storage y mensajería en entorno aislado</td>
+<td>IT01–IT08; migraciones reales, roles limitados y datos sintéticos</td>
+<td>100 % aprobadas, limpieza verificada</td>
+</tr>
+<tr>
+<td>Contratos</td>
+<td>DTO, estados HTTP, errores, eventos y compatibilidad productor/consumidor</td>
+<td>VA09, VA17, VA19; campos ausentes, tipos erróneos, versiones</td>
+<td>Ninguna incompatibilidad no versionada</td>
+</tr>
+<tr>
+<td>E2E</td>
+<td>Navegador y servicios juntos</td>
+<td>Registro, acceso, perfil, publicar/moderar, likes/respuestas, mapa, calendario y viaje</td>
+<td>Todos los recorridos críticos aprobados</td>
+</tr>
+<tr>
+<td>Seguridad</td>
+<td>Autorización, IDOR, CSRF, XSS, archivos, RLS, secretos y dependencias</td>
+<td>VA02–04, VA09–11, VA20, VA25, VA30–33</td>
+<td>Cero secretos detectados y cero hallazgos críticos/altos sin resolver</td>
+</tr>
+<tr>
+<td>Arquitectura y análisis estático</td>
+<td>Dependencias Clean hacia dentro, tipos, formato y límites de esquemas</td>
+<td>Dominio no importa HTTP, SQL, Supabase o Gemini; servicios sin SQL cruzado</td>
+<td>Cero infracciones de reglas obligatorias</td>
+</tr>
+<tr>
+<td>Rendimiento</td>
+<td>Lecturas, escrituras, paginación, saturación de pool y límites externos</td>
+<td>Escenario y volumen registrados; percentiles, errores y recursos</td>
+<td>Cumplir metas del capítulo 09 bajo carga acordada</td>
+</tr>
+<tr>
+<td>Resiliencia</td>
+<td>Timeout, reconexión, redelivery, DLQ, caídas parciales y caché</td>
+<td>VA17, VA19, VA23–24, VA30</td>
+<td>Sin datos privados filtrados, doble cobro/cuota ni regresión de estado</td>
+</tr>
+<tr>
+<td>Recuperación</td>
+<td>Restauración de PostgreSQL y archivos por separado</td>
+<td>VA32; conciliación y medición de RPO/RTO</td>
+<td>Restauración usable dentro de objetivos aceptados</td>
+</tr>
+<tr>
+<td>Accesibilidad y usabilidad</td>
+<td>Teclado, foco, contraste, zoom, lector de pantalla y movimiento reducido</td>
+<td>VA06, VA34–35; automático y revisión humana</td>
+<td>WCAG 2.2 AA como objetivo; tareas críticas realizables</td>
+</tr>
+<tr>
+<td>Compatibilidad y visuales</td>
+<td>Móvil/escritorio, navegadores, orientación, estados vacíos/error</td>
+<td>Imágenes, tablas, logo, navegación y mapa con alternativa en lista</td>
+<td>Sin bloqueos ni desbordamiento de página</td>
+</tr>
+<tr>
+<td>Regresión y aceptación</td>
+<td>Defectos corregidos y RF01–RF65</td>
+<td>Cada defecto incorpora un caso; responsable acepta evidencia</td>
+<td>Ninguna regresión y matriz actualizada</td>
+</tr>
+</tbody></table></div>
+<h2>11.3 Integraciones que deben ejecutarse</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Montaje y acción</th>
+<th>Comprobación y limpieza</th>
+<th>Trazabilidad</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>IT01</td>
+<td>I + Supabase Auth + PostgreSQL: crear dos usuarios, ingresar, renovar, suspender</td>
+<td>Token anterior rechazado tras suspensión; sesión privada; borrar cuentas y sesiones de prueba</td>
+<td>VA01–04</td>
+</tr>
+<tr>
+<td>IT02</td>
+<td>APIs + roles SQL reales: usar misma conexión del pool para usuarios distintos e intentar otro esquema</td>
+<td>No hereda identidad ni accede a datos ajenos; cerrar transacciones y eliminar fixtures</td>
+<td>VA02, VA09, VA31</td>
+</tr>
+<tr>
+<td>IT03</td>
+<td>C/M/E + Storage: cargar imagen válida y archivo disfrazado, aprobar y retirar</td>
+<td>Solo derivado autorizado visible; original privado; retirada efectiva; eliminar objetos y filas</td>
+<td>VA11, VA14, VA30</td>
+</tr>
+<tr>
+<td>IT04</td>
+<td>M + PostgreSQL: solicitudes concurrentes de like, retiro y respuesta</td>
+<td>Restricción única, contador coherente, sin padres ajenos ni ciclos; borrar hilo</td>
+<td>VA26–27</td>
+</tr>
+<tr>
+<td>IT05</td>
+<td>P + C/E + PostgreSQL: activar beneficio concurrente y reservar última cuota</td>
+<td>Un beneficio por negocio; cuota nunca excedida; negocio suspendido excluido; eliminar campañas sintéticas</td>
+<td>VA21–25</td>
+</tr>
+<tr>
+<td>IT06</td>
+<td>Outbox + RabbitMQ + consumidores E/R: duplicar, retrasar y reordenar mensajes; cancelar evento</td>
+<td>Inbox deduplica, versión no retrocede, no notifica cancelación obsoleta; vaciar colas de prueba</td>
+<td>VA15–17</td>
+</tr>
+<tr>
+<td>IT07</td>
+<td>R + A + catálogo: presupuesto conocido y adaptador Gemini con respuesta válida, inventada, 429 y timeout</td>
+<td>Cálculo determinista, referencias validadas y fallback; conversación sintética eliminada</td>
+<td>VA18–20</td>
+</tr>
+<tr>
+<td>IT08</td>
+<td>Nginx + servicios + entorno Cloudflare de pruebas: dos identidades solicitan mismo recurso</td>
+<td>Ninguna respuesta privada reutilizada; solo portadas públicas cacheables; purgar datos sintéticos</td>
+<td>VA30</td>
+</tr>
+</tbody></table></div>
+<p>Los dobles de Gemini permiten pruebas deterministas del contrato, pero no prueban disponibilidad del proveedor. Una prueba de humo separada con Gemini real requiere configuración segura, presupuesto y entorno autorizado; no se ejecuta en cada cambio ni con datos personales. Cloudflare real también requiere un entorno propio: probar solo cabeceras locales no equivale a validar el CDN. Las pruebas del mapa usan teselas controladas para evitar carga automatizada al servidor público OSM.</p>
+<h2>11.4 Ejecución reproducible y evidencia</h2>
+<p>Al implementar se organizará una sola carpeta <code>tests/</code> por servicio con <code>unit/</code>, <code>integration/</code> y <code>contract/</code>, y una carpeta común <code>tests/e2e/</code>. Los fixtures tendrán identificador de ejecución, usuarios ficticios y limpieza en bloque final incluso si falla una aserción. Ninguna prueba modificará producción. Se fijarán versiones, semilla, reloj y zona horaria donde corresponda. Las pruebas de integración comprobarán que migraciones y restricciones están instaladas antes de correr.</p>
+<p>Secuencia de entrega: análisis estático y secretos → unitarias y cobertura → contratos/integración → E2E y seguridad → rendimiento/recuperación según impacto → aceptación. Un fallo detiene la promoción. Reejecutar un caso intermitente no borra el fallo inicial: se registra y corrige su causa.</p>
+<p>Herramientas propuestas: pytest y coverage.py para Python; Playwright para navegador; comprobador de tipos y reglas de importación para Clean; escáner de secretos y dependencias; axe para análisis automático de accesibilidad, complementado con evaluación manual. No se instalan ni se consideran operativas por mencionarlas aquí. Coverage.py puede bloquear por umbral, pero el control separado de líneas y ramas exige revisar ambos contadores del reporte, no solo el total combinado.</p>
+<p>Cada ejecución conserva fecha, revisión Git y estado de cambios, versiones, entorno, casos aprobados/fallidos/omitidos, duración, cobertura por servicio, incidencias y artefactos saneados. No se guardan tokens, cookies, correos reales ni cuerpos privados. Los reportes voluminosos y capturas se generan en <code>reports/</code> (ignorado); el resumen aceptado puede referenciarse en esta documentación. Una ejecución vacía o un reporte de otra revisión bloquea la entrega.</p>
+<h2>11.5 Comprobaciones disponibles hoy</h2>
+<p>El código ejecutable de comprobación está en <a href="../../tests/README.md">tests/README.md</a>. Verifica la integración <strong>entre documentos HTML, navegación y recursos locales</strong>, además de controles funcionales de la vista previa en un navegador real. No sustituye IT01–IT08 ni mide cobertura del backend inexistente. El lector ofrece el capítulo 11 y conserva la vista de acceso para inspección visual.</p>
+<p>Estado del código principal: <strong>pendiente de implementación; cobertura no medible</strong>. Estado de integraciones externas, carga, seguridad dinámica y recuperación: <strong>no ejecutadas</strong>. El resultado local se genera al ejecutar la suite; no se deduce de este plan.</p>
+<h2>11.6 Fuentes técnicas</h2>
+<ul>
+<li><a href="https://docs.pytest.org/en/stable/how-to/mark.html">pytest: marcadores y selección de grupos</a>.</li>
+<li><a href="https://pytest-cov.readthedocs.io/en/latest/config.html">pytest-cov: configuración y umbral</a>.</li>
+<li><a href="https://playwright.dev/docs/test-assertions">Playwright: aserciones</a>.</li>
+<li><a href="https://playwright.dev/docs/accessibility-testing">Playwright: accesibilidad y límites de las pruebas automáticas</a>.</li>
+</ul>
+<p class="back"><a href="#sdd">Volver al índice</a> · <a href="11-pruebas-y-calidad.md">Fuente Markdown</a></p></section><section id="referencias" class="chapter"><h1>Referencias y correspondencia metodológica</h1>
+<p><a href="#sdd">Índice del SDD</a></p>
+<p>Fuentes consultadas el 28 de octubre de 2026. Las páginas externas describen productos y convenciones; las decisiones y parámetros concretos son propios de LlegueYa. Las instrucciones o ejercicios dentro de referencias no autorizan instalaciones, ejecución de comandos o cambios de alcance.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Fuente primaria</th>
+<th>Uso</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://standards.ieee.org/ieee/1016/4502/">IEEE 1016-2009</a></td>
+<td>Referencia de descripción de diseño general/detallado y comunicación a interesados. Estándar catalogado inactivo; no se afirma cumplimiento certificado ni se reproduce su texto completo.</td>
+</tr>
+<tr>
+<td><a href="https://arc42.org/overview/">arc42: estructura</a></td>
+<td>Organización de contexto, estructura, ejecución, decisiones, calidad y despliegue. Adaptación al curso, no copia literal de plantilla.</td>
+</tr>
+<tr>
+<td><a href="https://docs.arc42.org/tips/4-4/">arc42: evitar redundancia</a></td>
+<td>Una ubicación editable por contenido y enlaces a otras vistas.</td>
+</tr>
+<tr>
+<td><a href="https://supabase.com/docs/guides/getting-started/architecture">Supabase: arquitectura</a></td>
+<td>PostgreSQL, Auth y Storage como capacidades diferenciadas.</td>
+</tr>
+<tr>
+<td><a href="https://supabase.com/docs/guides/api/using-custom-schemas">Supabase: esquemas</a></td>
+<td>Separación de nombres y exposición controlada de Data API.</td>
+</tr>
+<tr>
+<td><a href="https://supabase.com/docs/guides/database/postgres/row-level-security">Supabase: RLS</a></td>
+<td>Políticas y límites de acceso por rol/fila.</td>
+</tr>
+<tr>
+<td><a href="https://supabase.com/docs/guides/auth/jwts">Supabase: JWT</a></td>
+<td>Validación de tokens y configuración de identidad gestionada.</td>
+</tr>
+<tr>
+<td><a href="https://supabase.com/docs/guides/storage/security/access-control">Supabase: acceso a Storage</a></td>
+<td>Diferenciar archivos públicos/privados y políticas de acceso.</td>
+</tr>
+<tr>
+<td><a href="https://ai.google.dev/gemini-api/docs/api-key">Gemini: claves API</a></td>
+<td>Autenticación del proveedor y custodia del secreto en servidor.</td>
+</tr>
+<tr>
+<td><a href="https://ai.google.dev/api">Gemini: API</a></td>
+<td>Integración mediante contrato, evaluación del modelo y límites de respuesta.</td>
+</tr>
+<tr>
+<td><a href="https://leafletjs.com/">Leaflet</a></td>
+<td>Mapa con capas, marcadores y navegación sin exigir geolocalización.</td>
+</tr>
+<tr>
+<td><a href="https://operations.osmfoundation.org/policies/tiles/">OpenStreetMap: política de teselas</a></td>
+<td>Atribución, caché y límites de uso. El servidor público no tiene garantía de disponibilidad ni uso ilimitado.</td>
+</tr>
+<tr>
+<td><a href="https://docs.docker.com/compose/">Docker Compose</a></td>
+<td>Procesos, redes, volúmenes y ejecución reproducible.</td>
+</tr>
+<tr>
+<td><a href="https://docs.docker.com/compose/how-tos/use-secrets/">Docker: secretos</a></td>
+<td>Secretos concedidos por servicio, fuera de capas de imagen.</td>
+</tr>
+<tr>
+<td><a href="https://developers.cloudflare.com/cache/">Cloudflare: CDN</a></td>
+<td>Caché de contenido público y configuración de entrega.</td>
+</tr>
+<tr>
+<td><a href="https://developers.cloudflare.com/cache/concepts/default-cache-behavior/">Cloudflare: caché predeterminada</a></td>
+<td>Necesidad de políticas explícitas para privado/API.</td>
+</tr>
+<tr>
+<td><a href="https://developers.cloudflare.com/waf/">Cloudflare: WAF</a></td>
+<td>Protección del tráfico, diferenciada de autorización de negocio.</td>
+</tr>
+<tr>
+<td><a href="https://fastapi.tiangolo.com/features/">FastAPI</a></td>
+<td>Propuesta de contratos tipados y composición de APIs.</td>
+</tr>
+</tbody></table></div>
+<h2>Correspondencia con vistas de diseño</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Preocupación del lector</th>
+<th>Ubicación</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Identificación, finalidad, actores y límites</td>
+<td>Índice y capítulo 01.</td>
+</tr>
+<tr>
+<td>Contexto y descomposición</td>
+<td>C1/C2 y capítulos 02–03.</td>
+</tr>
+<tr>
+<td>Interfaces y colaboración</td>
+<td>C3/C4, contratos del capítulo 05 y secuencias del 06.</td>
+</tr>
+<tr>
+<td>Información y persistencia</td>
+<td>Capítulo 04 y diagramas de datos.</td>
+</tr>
+<tr>
+<td>Comportamiento y estados</td>
+<td>Capítulo 06.</td>
+</tr>
+<tr>
+<td>Uso y accesibilidad</td>
+<td>Capítulo 07.</td>
+</tr>
+<tr>
+<td>Restricciones y conceptos transversales</td>
+<td>Seguridad y operación, capítulos 08–09.</td>
+</tr>
+<tr>
+<td>Razonamiento y alternativas</td>
+<td>ADR y capítulo 02.</td>
+</tr>
+<tr>
+<td>Evaluación, riesgos y trazabilidad</td>
+<td>Capítulo 10.</td>
+</tr>
+</tbody></table></div>
+<p>Las referencias académicas aportadas se mantienen en <a href="../fuentes/README.md">fuentes del proyecto</a>: GUIA-003-ASF, GUIA-004-ASF, Diagramas C4 y Luca Mezzalira. Los modelos turísticos de esas referencias no sustituyen los requisitos de LlegueYa.</p>
+<p class="back"><a href="#sdd">Volver al índice</a> · <a href="referencias.md">Fuente Markdown</a></p></section><footer>Fuente editable: Markdown y diagramas Draw.io. Documento local sin dependencias de CDN y sin credenciales.</footer></main></body></html>

@@ -2,7 +2,7 @@
 
 ## 1. Estilo y responsabilidades
 
-Arquitectura distribuida orientada a servicios de negocio, con despliegues independientes y Clean Architecture dentro de cada servicio. El proyecto documenta diseño; no contiene aplicación. Las tecnologías se presentan como candidatas pendientes del SDD.
+Arquitectura distribuida orientada a servicios de negocio, con despliegues independientes y Clean Architecture dentro de cada servicio. El proyecto documenta diseño; no contiene aplicación. Supabase, Docker, Cloudflare y Gemini forman parte de la línea base; las propuestas técnicas y pendientes se precisan en el SDD.
 
 | Servicio | Responsabilidades | Propiedad de datos |
 |---|---|---|
@@ -18,11 +18,11 @@ La cuenta habilita detalle y funciones personales, no acceso a expedientes admin
 
 ## 2. Vista lógica
 
-La [vista C2 del proyecto](../../modelo-c4/Nivel2-DiagramadeContenedores.md) es la representación canónica: C2-A identifica WEB, GW, las siete APIs y sus siete bases lógicas; C2-B detalla colaboraciones e integraciones; C2-C muestra mensajería y almacenamiento de fotos/evidencias. Todas declaran límites, tipos, responsabilidades, protocolos y estado tecnológico. El [inventario C4](../../modelo-c4/README.md) explica cómo ampliar cada nivel.
+La [vista C2 del proyecto](../../modelo-c4/Nivel2-DiagramadeContenedores.md) es la representación canónica: C2-A identifica WEB, GW, las siete APIs y el contenedor DB con siete esquemas privados; C2-B detalla colaboraciones e integraciones; C2-C muestra mensajería y almacenamiento de fotos/evidencias. Todas declaran límites, tipos, responsabilidades, protocolos y estado tecnológico. El [inventario C4](../../modelo-c4/README.md) explica cómo ampliar cada nivel.
 
-PostgreSQL es una opción de referencia para DI, DC, DM, DE, DP, DR y DA; cada base pertenece exclusivamente a su servicio. OBJ conserva los archivos binarios y las bases guardan sus metadatos. El SDD definirá el despliegue físico, que no se deduce de los contenedores C4.
+Supabase PostgreSQL aloja siete esquemas de negocio: DI–DA identifican propiedad lógica dentro del contenedor DB, no siete bases independientes. Cada esquema pertenece exclusivamente a su servicio. OBJ conserva los archivos binarios y cada esquema guarda los metadatos que posee. El [SDD](../05-sdd/README.md) documenta la separación por esquemas y la topología propuesta.
 
-Las portadas y miniaturas aprobadas de vistas previas son públicas. Galerías de fichas restringidas requieren sesión mediante acceso firmado de corta duración o entrega autorizada, según tecnología por definir. Documentos y comprobantes solo se entregan a actores autorizados; no se convierten en recursos públicos de CDN.
+Las portadas y miniaturas aprobadas de vistas previas son públicas. Las galerías restringidas se transmiten mediante la API del servicio dueño tras validar sesión y visibilidad actual, sin URL pública reutilizable al original. Documentos y comprobantes solo se entregan a actores autorizados; no se convierten en recursos públicos de CDN.
 
 ## 3. Entidades y contratos
 
@@ -39,7 +39,7 @@ ObjetivoCampaña contiene tipo e identificador: oferta, paquete, evento o lugar.
 
 ## 4. Datos y comunicación
 
-Cada servicio tiene repositorios, credenciales y transacciones propios. Puede compartir un servidor físico con bases/esquemas aislados; no hay joins, claves foráneas ni acceso directo a tablas entre servicios. Se usan identificadores remotos y contratos versionados. Una categoría verificada mantiene documento privado, autoridad, fecha de revisión y vigencia aplicable.
+Cada servicio tiene repositorios, credenciales y transacciones propios. La línea base usa un proyecto Supabase con esquemas y cuentas técnicas aisladas; no hay joins, claves foráneas ni acceso directo a tablas entre servicios. Se usan identificadores remotos y contratos versionados. Una categoría verificada mantiene documento privado, autoridad, fecha de revisión y vigencia aplicable.
 
 Las consultas inmediatas usan REST con límites de tiempo y autorización. Los cambios se propagan mediante eventos con id, entidad, versión, instante y versión de esquema. Productor persiste cambio y outbox en la misma transacción local; consumidor deduplica en inbox. Versiones antiguas no sobrescriben estados nuevos. Hay reintentos acotados, conciliación y manejo de fallos persistentes; no se promete entrega exactamente una vez ni transacción global.
 
@@ -88,4 +88,5 @@ Metas propuestas para validar, sin mediciones ejecutadas.
 
 ## 9. Parámetros de implementación
 
-Se definirán stack, transporte durable, almacenamiento, tiempos límite, recuperación, retención, cuotas, tarifas, límites de fotos y requisitos por categoría. El [registro ADR](../01-analisis-de-sistema/07-decisiones-arquitectonicas.md), [publicidad](03-publicidad-y-periodo-gratuito.md), [acceso](04-acceso-del-turista.md) y [catálogo/eventos](05-catalogo-eventos-y-actividades.md) e [interacción social](06-interaccion-social.md) completan el diseño.
+El [SDD](../05-sdd/README.md) precisa stack, datos, tiempos y parámetros propuestos; tarifas, hosting y decisiones externas pendientes están identificadas en su capítulo 10. El [registro ADR](../01-analisis-de-sistema/07-decisiones-arquitectonicas.md), [publicidad](03-publicidad-y-periodo-gratuito.md), [acceso](04-acceso-del-turista.md) y [catálogo/eventos](05-catalogo-eventos-y-actividades.md) e [interacción social](06-interaccion-social.md) completan el diseño.
+Diseño de [perfil/movilidad/mapa](07-perfil-movilidad-y-mapa.md) y [contratos detallados](../05-sdd/05-contratos-e-integraciones.md).

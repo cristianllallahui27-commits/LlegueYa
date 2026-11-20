@@ -20,6 +20,8 @@ Turista es un único actor: sin registro explora tarjetas y resúmenes públicos
 | Notificaciones | Preferencias y suscripciones, bandeja web, recordatorios y avisos sin duplicados. |
 | Proveedores | Perfil, ofertas, fotos, paquetes propios, requisitos por actividad y evidencia privada. |
 | Publicidad | Periodo gratuito inicial configurable, continuidad pagada, mayor alcance por plan, cuotas, frecuencia y métricas. |
+| Movilidad independiente y mapa | Terminales, embarques y traslados sin paquete; mapa con arrastre/zoom y marcadores, sin geolocalización. |
+| Perfil y lectura personal | Edición propia de perfil y colecciones privadas de lugares/experiencias. |
 | Asistente | Orientación general pública; detalle y opciones personales requieren cuenta. La publicidad se identifica y respeta compatibilidad. |
 | Administración | Catálogo, categorías, acreditación, aprobación de propuestas, moderación, calendario, gratuidad, tarifas y pagos. |
 
@@ -35,8 +37,9 @@ La vista pública incluye portada, nombre, tipo/categoría verificada, zona gene
 
 Sin venta de entradas, reservas, QR, aforo, mensajería privada, videos ni WhatsApp/Telegram. Se abren enlaces de venta verificados. El pago de publicidad es externo y revisado administrativamente. El correo es una integración opcional por definir.
 
-La documentación describe diseño y requisitos; no hay aplicación implementada. Tecnología, tarifas, límites de archivos, cuotas y políticas operativas se definirán antes de implementar o prestar el servicio.
+La documentación describe diseño y requisitos; no hay aplicación implementada. El SDD define Supabase, Docker, Cloudflare, Gemini y propuestas técnicas de APIs/mapa. Tarifas, versiones exactas, capacidad y políticas pendientes se identifican antes de implementar o prestar el servicio.
 
 ## 6. Especificación y trazabilidad
 
-Los [RF01-RF59](../01-analisis-de-sistema/03-requisitos-funcionales.md) y [HU01-HU41](../01-analisis-de-sistema/02-historias-de-usuario.md) son los registros consolidados. Los documentos siguientes desarrollan [arquitectura](02-arquitectura-y-diseno.md), [publicidad y gratuidad](03-publicidad-y-periodo-gratuito.md), [acceso del turista](04-acceso-del-turista.md) y [catálogo, eventos y actividades](05-catalogo-eventos-y-actividades.md) y [likes, comentarios y respuestas](06-interaccion-social.md).
+Los [RF01-RF65](../01-analisis-de-sistema/03-requisitos-funcionales.md) y [HU01-HU46](../01-analisis-de-sistema/02-historias-de-usuario.md) son los registros consolidados. Los documentos siguientes desarrollan [arquitectura](02-arquitectura-y-diseno.md), [publicidad y gratuidad](03-publicidad-y-periodo-gratuito.md), [acceso del turista](04-acceso-del-turista.md) y [catálogo, eventos y actividades](05-catalogo-eventos-y-actividades.md) y [likes, comentarios y respuestas](06-interaccion-social.md).
+[Perfil, movilidad y mapa](07-perfil-movilidad-y-mapa.md) y [SDD de la plataforma](../05-sdd/README.md).

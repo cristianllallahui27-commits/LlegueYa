@@ -35,7 +35,7 @@ La [vista C3](../../modelo-c4/Nivel3-DiagramadeComponentes.md) amplía Publicida
 | NotificadorCorreo | Adaptador de correo | Servicio de correo |
 | AlmacenArchivos | Adaptador del almacén de archivos | Almacén de archivos / CDN |
 
-Los nombres de los puertos son una propuesta del equipo para ilustrar el enfoque, no código implementado.
+La tabla presenta los puertos de forma conceptual. Sus nombres concretos en el código (`RepositorioLugares`, `RepositorioComunidad`, `AlmacenFotos`, `ProveedorIdentidad`…) y la prueba que vigila la regla de dependencias están en [Estilo y patrón implementados](../07-sprint2/01-estilo-y-patron-arquitectonico.md).
 
 ## Flujo de ejemplo: consultar el enlace de venta de un sitio
 
@@ -103,3 +103,5 @@ ADR-002 (Clean Architecture), ADR-005 (puertos y adaptadores), ADR-006 (solo red
 ## Estado del enfoque
 
 Diseño conceptual: los nombres no corresponden a código implementado. Los puertos pueden pertenecer a Aplicación o Dominio según su responsabilidad; el diseño de referencia de Proveedores los ubica en Aplicación. Infraestructura depende del contrato interior que implementa. El correo sigue por confirmar (RC09).
+
+La aplicación detallada de SOLID, puertos y composición se mantiene en el [SDD](../05-sdd/03-servicios-capas-y-solid.md). Supabase, Gemini y el mapa permanecen en adaptadores.

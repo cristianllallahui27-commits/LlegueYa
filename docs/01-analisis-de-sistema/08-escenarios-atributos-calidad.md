@@ -4,7 +4,7 @@
 
 Los escenarios relacionan atributos AC01-AC07 con fuente, estímulo, artefacto, entorno, respuesta, medida y verificación. Incluyen acceso autenticado, aprobación de propuestas, publicidad y operación distribuida.
 
-**Estado del entregable:** diseño documental. No hay implementación ni resultados de pruebas en este repositorio. Los valores numéricos de rendimiento, disponibilidad, escalabilidad y usabilidad son **propuestas por validar**, no compromisos aprobados ni cifras de usuarios reales. Los valores de 200 usuarios, 2/3 segundos y 99,5 % se toman como referencia del ejemplo académico de la guía; no se deducen de los arribos turísticos anuales.
+**Estado del entregable:** los escenarios fijan las metas que la primera versión debe demostrar; los resultados medidos y su evidencia están en [Validación de atributos de calidad](../07-sprint2/07-validacion-atributos-calidad.md). Los valores numéricos de rendimiento, disponibilidad, escalabilidad y usabilidad son **propuestas por validar**, no compromisos aprobados ni cifras de usuarios reales. Los valores de 200 usuarios, 2/3 segundos y 99,5 % se toman como referencia del ejemplo académico de la guía; no se deducen de los arribos turísticos anuales.
 
 ## EQ-01. Rendimiento: consultar información turística (AC01)
 
@@ -103,11 +103,11 @@ Trazabilidad: RF02-RF04, RF14-RF16; RC01; DA03 y DA06.
 | Fuente del estímulo | Equipo de desarrollo. |
 | Estímulo | Se sustituye el proveedor técnico del servicio de mapas. |
 | Artefacto | Puerto ServicioMapas, adaptador de mapas y composición de dependencias. |
-| Entorno | Código organizado según Clean Architecture y contratos acordados, cuando se implemente. |
+| Entorno | Código organizado según Clean Architecture y contratos acordados. |
 | Respuesta | Cambiar el adaptador y su configuración, manteniendo el contrato y las reglas del dominio. |
 | Medida | Cero importaciones de SDK de mapas en dominio/aplicación; aprobar el 100 % de pruebas de contrato y regresión acordadas; no modificar reglas de verificación por sustituir mapas. |
 | Verificación | Inspeccionar dependencias y cambios; ejecutar pruebas con adaptador de prueba y adaptador real. |
-| Estado | Pendientes: elegir tecnología, precisar contrato y crear las pruebas. No se afirma que existan hoy. |
+| Estado | Verificado con `tests/test_arquitectura.py` (regla de dependencias) y con la sustitución de capas del mapa en un solo módulo (`apps/web/js/vistas/mapa.js`). |
 
 Trazabilidad: DA05 y DA10; ADR-002 y ADR-005.
 

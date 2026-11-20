@@ -45,5 +45,10 @@ Turista es un único actor; su acceso depende de si ha iniciado sesión. Proveed
 | HU39 | Como administrador quiero difundir eventos y lugares aprobados y controlar su publicidad. |
 | HU40 | Como usuario registrado quiero dar y retirar likes en fotos y comentarios para expresar qué contenido me gusta. |
 | HU41 | Como usuario registrado quiero comentar fotos y responder a otros usuarios para compartir consejos y conversar sobre los lugares. |
+| HU42 | Como turista quiero editar mi nombre, avatar, biografía e intereses para expresar mi identidad y preferencias sin modificar permisos administrativos. |
+| HU43 | Como turista quiero encontrar terminales, puntos de embarque y movilidad privada para viajar de forma independiente sin comprar paquetes. |
+| HU44 | Como turista quiero mover y ampliar el mapa y abrir sus marcadores para explorar lugares sin compartir mi ubicación. |
+| HU45 | Como turista quiero guardar lugares y experiencias en colecciones privadas para organizar lo que deseo leer o visitar. |
+| HU46 | Como usuario quiero reconocer el logo de LlegueYa en un acceso visualmente agradable que respete mi preferencia de movimiento y me permita ingresar sin esperas artificiales. |
 
 Los [requisitos funcionales](03-requisitos-funcionales.md) y la [especificación funcional](../04-especificacion-funcional/01-analisis-y-alcance.md) detallan reglas y permisos.

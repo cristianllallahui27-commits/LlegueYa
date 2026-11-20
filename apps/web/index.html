@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>LlegueYa · La comunidad viajera de Ayacucho</title>
+  <meta name="description" content="Descubre Ayacucho con fotos, experiencias de viajeros, fiestas y lugares verificados.">
+  <meta name="theme-color" content="#173F38">
+  <link rel="icon" href="logo.png">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/app.css">
+  <script src="vendor/leaflet/leaflet.js" defer></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <!-- Iconos propios (trazos simples, sin marcas de terceros) -->
+  <svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-ojo" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-ojo-tachado" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5c1.6 0 3 .4 4.2 1M21.5 12s-1.3 2.4-3.6 4.2M9.9 18.3c.7.1 1.4.2 2.1.2"/><path d="M4 4l16 16"/><path d="M10.2 10.2a3 3 0 0 0 3.6 3.6"/></symbol>
+    <symbol id="i-inicio" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-explorar" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></symbol>
+    <symbol id="i-mapa" viewBox="0 0 24 24"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6zM9 4v14m6-12v14"/></symbol>
+    <symbol id="i-calendario" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4m8-4v4"/></symbol>
+    <symbol id="i-perfil" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20.5c1.2-3.7 4-5.5 7.5-5.5s6.3 1.8 7.5 5.5"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5h16v10.5H10l-4.5 3.5V16H4z"/></symbol>
+    <symbol id="i-mas" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8m-4-4h8"/></symbol>
+    <symbol id="i-corazon" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></symbol>
+    <symbol id="i-comentario" viewBox="0 0 24 24"><path d="M20 11.5a8 8 0 0 1-11.6 7.1L4 20l1.4-4.2A8 8 0 1 1 20 11.5z"/></symbol>
+    <symbol id="i-guardar" viewBox="0 0 24 24"><path d="M6 3.5h12V21l-6-4.5L6 21z"/></symbol>
+    <symbol id="i-compartir" viewBox="0 0 24 24"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+    <symbol id="i-cerrar" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-buscar" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></symbol>
+    <symbol id="i-foto" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="9" cy="10.5" r="2"/><path d="m21 17-5.5-5.5L6 20"/></symbol>
+    <symbol id="i-candado" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol>
+    <symbol id="i-campana" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-flecha" viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></symbol>
+    <symbol id="i-escudo" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-tienda" viewBox="0 0 24 24"><path d="M4 9.5 5.5 4h13L20 9.5M4 9.5h16M4 9.5c0 1.4 1.1 2.5 2.7 2.5S9.3 10.9 9.3 9.5c0 1.4 1.2 2.5 2.7 2.5s2.7-1.1 2.7-2.5c0 1.4 1.1 2.5 2.6 2.5S20 10.9 20 9.5M5.5 12v8h13v-8"/></symbol>
+    <symbol id="i-bandera" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+    <symbol id="i-salir" viewBox="0 0 24 24"><path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10"/></symbol>
+  </svg>
+
+  <a class="saltar" href="#vista">Ir al contenido</a>
+
+  <div class="marco">
+    <!-- Navegación principal: barra lateral en escritorio, inferior en móvil -->
+    <nav class="riel" aria-label="Principal">
+      <a class="marca" href="#/inicio" aria-label="LlegueYa, inicio">
+        <img src="logo.png" alt="" width="44" height="44" class="marca-logo">
+        <span class="marca-texto">Llegue<span>Ya</span></span>
+      </a>
+      <ul class="riel-lista">
+        <li><a href="#/inicio" data-ruta="inicio"><svg class="ico"><use href="#i-inicio"/></svg><span>Inicio</span></a></li>
+        <li><a href="#/explorar" data-ruta="explorar"><svg class="ico"><use href="#i-explorar"/></svg><span>Explorar</span></a></li>
+        <li><a href="#/mapa" data-ruta="mapa"><svg class="ico"><use href="#i-mapa"/></svg><span>Mapa</span></a></li>
+        <li><a href="#/calendario" data-ruta="calendario"><svg class="ico"><use href="#i-calendario"/></svg><span>Calendario</span></a></li>
+        <li><a href="#/servicios" data-ruta="servicios"><svg class="ico"><use href="#i-tienda"/></svg><span>Servicios</span></a></li>
+        <li><a href="#/mi-espacio" data-ruta="mi-espacio"><svg class="ico"><use href="#i-perfil"/></svg><span>Mi espacio</span></a></li>
+        <li class="solo-admin" hidden><a href="#/admin" data-ruta="admin"><svg class="ico"><use href="#i-escudo"/></svg><span>Administración</span></a></li>
+      </ul>
+      <button class="boton boton-principal riel-crear" type="button" data-accion="crear">
+        <svg class="ico"><use href="#i-mas"/></svg><span>Publicar</span>
+      </button>
+    </nav>
+
+    <header class="barra-movil">
+      <a class="marca" href="#/inicio" aria-label="LlegueYa, inicio">
+        <img src="logo.png" alt="" width="36" height="36" class="marca-logo">
+        <span class="marca-texto">Llegue<span>Ya</span></span>
+      </a>
+      <div class="barra-movil-acciones">
+        <a class="boton-icono" href="#/mapa" aria-label="Mapa"><svg class="ico"><use href="#i-mapa"/></svg></a>
+        <button class="boton-icono" type="button" data-accion="crear" aria-label="Compartir experiencia"><svg class="ico"><use href="#i-mas"/></svg></button>
+      </div>
+    </header>
+
+    <main id="vista" class="vista" tabindex="-1" aria-live="polite"></main>
+
+    <aside class="lateral" aria-label="Tu cuenta y sugerencias">
+      <section id="tarjeta-cuenta" class="tarjeta cuenta"></section>
+      <section class="tarjeta">
+        <h2 class="titulo-bloque">Próximas fiestas</h2>
+        <ol id="lateral-eventos" class="lista-eventos-mini"></ol>
+        <a class="enlace-suave" href="#/calendario">Ver calendario</a>
+      </section>
+      <footer class="pie">
+        <p>Fotos de lugares: Wikimedia Commons, con autor y licencia en cada ficha. Mapa © colaboradores de OpenStreetMap.</p>
+        <p>Los lugares marcados como <em>demostración</em> son datos de prueba revisados en fuentes públicas.</p>
+        <p><a href="/api/v1/health">Estado del sistema</a></p>
+      </footer>
+    </aside>
+  </div>
+
+  <!-- Willaq Uma: burbuja flotante que se puede arrastrar; nunca desaparece -->
+  <button id="willaq-boton" class="willaq-burbuja" type="button" aria-label="Willaq Uma, tu sabio guía. Pulsa para conversar; arrástralo para moverlo" aria-expanded="false" aria-controls="willaq-panel">
+    <img src="img/asistente-inca.png" alt="" width="64" height="64" draggable="false">
+    <span class="willaq-burbuja-nombre" aria-hidden="true">Willaq Uma</span>
+  </button>
+  <section id="willaq-panel" class="willaq-panel" hidden aria-label="Willaq Uma, sabio guía de LlegueYa">
+    <header class="willaq-cabecera">
+      <img src="img/asistente-inca.png" alt="" width="42" height="42">
+      <div>
+        <h2>Willaq Uma</h2>
+        <p>Sabio guía de LlegueYa</p>
+      </div>
+      <button type="button" class="boton-icono" data-cerrar-willaq aria-label="Cerrar conversación (Willaq Uma queda como burbuja)"><svg class="ico"><use href="#i-cerrar"/></svg></button>
+    </header>
+    <div class="willaq-mensajes" data-willaq-mensajes></div>
+    <div class="willaq-sugerencias" data-willaq-sugerencias></div>
+    <form class="willaq-form" data-willaq-form>
+      <label class="oculto" for="willaq-texto">Escribe tu pregunta</label>
+      <input id="willaq-texto" name="texto" maxlength="500" autocomplete="off" placeholder="Cuéntame qué te gusta o qué buscas" required>
+      <button class="boton-icono" type="submit" aria-label="Enviar"><svg class="ico"><use href="#i-compartir"/></svg></button>
+    </form>
+  </section>
+
+  <!-- Diálogos -->
+  <dialog id="dialogo-acceso" class="dialogo dialogo-acceso" aria-labelledby="acceso-titulo">
+    <button type="button" class="boton-icono dialogo-cerrar" data-cerrar aria-label="Cerrar"><svg class="ico"><use href="#i-cerrar"/></svg></button>
+    <img src="logo.png" alt="LlegueYa: llama, montañas y patrimonio de Ayacucho" class="acceso-logo" width="120" height="120">
+    <h2 id="acceso-titulo">Entra a LlegueYa</h2>
+    <p id="acceso-motivo">Con tu cuenta puedes dar me gusta, comentar, conversar con Willaq Uma y compartir tus fotos.</p>
+    <form id="acceso-google" action="/api/v1/auth/google" method="post" hidden>
+      <button class="boton boton-google" type="submit">
+        <svg class="g" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2-1.9 3.2-4.7 3.2-8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1-3.7 1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.1a11 11 0 0 0 0 9.8z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"/></svg>
+        Continuar con Google
+      </button>
+      <p class="separador"><span>o con tu correo</span></p>
+    </form>
+    <div id="acceso-correo" hidden>
+      <div class="pestanas pestanas-acceso" role="tablist" aria-label="Acceso con correo">
+        <button type="button" role="tab" id="tab-entrar" data-pestana="entrar" aria-controls="form-entrar" aria-selected="true">Entrar</button>
+        <button type="button" role="tab" id="tab-registro" data-pestana="registro" aria-controls="form-registro" aria-selected="false">Crear cuenta</button>
+      </div>
+      <form id="form-entrar" class="form-acceso" role="tabpanel" aria-labelledby="tab-entrar" novalidate>
+        <label class="etiqueta" for="entrar-correo">Correo</label>
+        <input id="entrar-correo" name="correo" type="email" autocomplete="email" required maxlength="254">
+        <label class="etiqueta" for="entrar-clave">Clave</label>
+        <input id="entrar-clave" name="clave" type="password" autocomplete="current-password" required maxlength="72">
+        <button class="boton boton-principal" type="submit">Entrar</button>
+        <button class="boton boton-texto" type="button" data-pestana="recuperar">¿Olvidaste tu clave?</button>
+      </form>
+      <form id="form-registro" class="form-acceso" role="tabpanel" aria-labelledby="tab-registro" novalidate hidden>
+        <label class="etiqueta" for="registro-nombre">Tu nombre</label>
+        <input id="registro-nombre" name="nombre" autocomplete="name" required maxlength="120">
+        <label class="etiqueta" for="registro-correo">Correo personal o institucional</label>
+        <input id="registro-correo" name="correo" type="email" autocomplete="email" required maxlength="254" placeholder="tu.nombre@unsch.edu.pe" aria-describedby="registro-correo-nota">
+        <p class="nota" id="registro-correo-nota"></p>
+        <label class="etiqueta" for="registro-clave">Crea una clave</label>
+        <input id="registro-clave" name="clave" type="password" autocomplete="new-password" required minlength="8" maxlength="72" aria-describedby="registro-clave-nota">
+        <p class="nota" id="registro-clave-nota">De 8 a 72 caracteres, con letras y números.</p>
+        <button class="boton boton-principal" type="submit">Crear mi cuenta</button>
+      </form>
+      <form id="form-recuperar" class="form-acceso" novalidate hidden>
+        <h3 class="subtitulo">Recupera tu clave</h3>
+        <p class="nota">Te enviaremos un enlace para crear una clave nueva. Ábrelo en este mismo navegador.</p>
+        <label class="etiqueta" for="recuperar-correo">Correo de tu cuenta</label>
+        <input id="recuperar-correo" name="correo" type="email" autocomplete="email" required maxlength="254">
+        <button class="boton boton-principal" type="submit">Enviar enlace</button>
+        <button class="boton boton-texto" type="button" data-pestana="entrar">Volver a entrar</button>
+      </form>
+    </div>
+    <p class="nota" id="acceso-estado" role="status" aria-live="polite"></p>
+  </dialog>
+
+  <dialog id="dialogo-reporte" class="dialogo dialogo-reporte" aria-labelledby="reporte-titulo">
+    <form id="form-reporte" method="dialog">
+      <header class="dialogo-cabecera">
+        <h2 id="reporte-titulo">Reportar publicación</h2>
+        <button type="button" class="boton-icono" data-cerrar aria-label="Cerrar"><svg class="ico"><use href="#i-cerrar"/></svg></button>
+      </header>
+      <div class="dialogo-cuerpo">
+        <p class="nota">El equipo de LlegueYa revisa cada reporte. Quien publicó no sabrá que fuiste tú.</p>
+        <fieldset class="motivos"><legend class="etiqueta">¿Qué pasa con esta publicación?</legend><div id="reporte-motivos"></div></fieldset>
+        <label class="etiqueta" for="reporte-detalle">Detalle (opcional)</label>
+        <textarea id="reporte-detalle" name="detalle" rows="3" maxlength="600"></textarea>
+        <p class="nota" id="reporte-estado" role="status"></p>
+        <button class="boton boton-principal" type="submit">Enviar reporte</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialogo-crear" class="dialogo dialogo-crear" aria-labelledby="crear-titulo">
+    <form id="form-crear" class="form-crear" enctype="multipart/form-data">
+      <header class="dialogo-cabecera">
+        <h2 id="crear-titulo">Compartir experiencia</h2>
+        <button type="button" class="boton-icono" data-cerrar aria-label="Cerrar"><svg class="ico"><use href="#i-cerrar"/></svg></button>
+      </header>
+      <label class="zona-foto" for="crear-foto">
+        <img id="crear-vista-previa" alt="Vista previa de tu foto" hidden>
+        <span id="crear-foto-texto"><svg class="ico ico-grande"><use href="#i-foto"/></svg>Agrega una foto (JPG, PNG o WebP, hasta 5 MB)</span>
+      </label>
+      <input id="crear-foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp" class="oculto">
+      <label for="crear-texto" class="etiqueta">Cuéntanos</label>
+      <textarea id="crear-texto" name="texto" maxlength="2000" rows="4" placeholder="¿Qué descubriste? Un consejo para el próximo viajero vale oro."></textarea>
+      <label for="crear-lugar" class="etiqueta">Lugar (opcional)</label>
+      <select id="crear-lugar" name="lugar"><option value="">Sin lugar</option></select>
+      <p class="nota" id="crear-estado" role="status"></p>
+      <button class="boton boton-principal" type="submit">Publicar</button>
+    </form>
+  </dialog>
+
+  <dialog id="dialogo-comentarios" class="dialogo dialogo-comentarios" aria-labelledby="comentarios-titulo">
+    <header class="dialogo-cabecera">
+      <h2 id="comentarios-titulo">Comentarios</h2>
+      <button type="button" class="boton-icono" data-cerrar aria-label="Cerrar"><svg class="ico"><use href="#i-cerrar"/></svg></button>
+    </header>
+    <div id="comentarios-lista" class="comentarios-lista"></div>
+    <form id="form-comentario" class="form-comentario">
+      <p id="comentario-respondiendo" class="nota" hidden></p>
+      <label class="oculto" for="comentario-texto">Escribe un comentario</label>
+      <input id="comentario-texto" name="texto" maxlength="1000" autocomplete="off" placeholder="Agrega un comentario…" required>
+      <button class="boton boton-texto" type="submit">Publicar</button>
+    </form>
+  </dialog>
+
+  <div id="aviso" class="aviso" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
