@@ -22,7 +22,7 @@ Los IDs WEB, GW, I, C, M, E, P, R, A, DI, DC, DM, DE, DP, DR, DA, BUS y OBJ se c
 
 **Leyenda:** persona = actor humano; sistema externo = software fuera de LlegueYa; rectángulo = aplicación o componente según el nivel declarado; cilindro = almacén; flecha continua = llamada o lectura/escritura iniciada en origen; flecha discontinua = publicación/consumo de eventos o implementación de interfaz, según la leyenda específica. Los textos también expresan el tipo: el color no es la única señal.
 
-**Estado tecnológico anterior y decisiones del SDD:** Supabase (PostgreSQL/Auth/Storage), Docker, Cloudflare y Gemini forman parte de la línea base. (*) identifica propuestas técnicas como Python/FastAPI, Nginx, RabbitMQ y Leaflet. El mapa no usa geolocalización. Correo, hosting, capacidad, modelo Gemini y versiones exactas pendientes se identifican en el SDD. PHP y Node.js no forman parte del backend.
+**Tecnología y decisiones del SDD:** Supabase (PostgreSQL/Auth/Storage), Docker y Cloudflare forman parte de la línea base; Gemini es una integración opcional del asistente. (*) identifica propuestas técnicas como Python/FastAPI, Nginx, RabbitMQ y Leaflet. El mapa usa la ubicación solo si la persona la activa y nunca la envía al servidor. Correo, hosting y capacidad se precisan en el SDD. PHP y Node.js no forman parte del backend.
 
 Las vistas C2 se separan por propósito para mantener legibilidad. C2-A muestra todas las aplicaciones y el contenedor DB con esquemas propios; C2-B muestra colaboración y sistemas externos; C2-C muestra eventos y archivos. Deben leerse juntas. El inventario y las tablas de relaciones completan el modelo y evitan interpretar una vista parcial como todo el sistema.
 

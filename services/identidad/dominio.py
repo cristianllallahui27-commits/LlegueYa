@@ -10,6 +10,17 @@ MENSAJE_GENERICO = 'No pudimos completar el acceso. Vuelve a intentarlo.'
 CLAVE_INCORRECTA = 'Correo o clave incorrectos.'
 CORREO_REGISTRADO = 'Ese correo ya tiene una cuenta. Inicia sesión o recupera tu clave.'
 CUENTA_SUSPENDIDA = 'Esta cuenta está suspendida. Escribe a administración si crees que es un error.'
+CODIGO_INVALIDO = 'El código no es correcto o ya venció. Revísalo o pide uno nuevo.'
+CODIGO_BLOQUEADO = 'Demasiados códigos incorrectos. Pide uno nuevo en unos minutos.'
+CUENTA_BLOQUEADA = 'Por seguridad bloqueamos esta cuenta 15 minutos tras varios intentos fallidos. Si olvidaste tu clave, usa «¿Olvidaste tu clave?».'
+CORREO_SIN_CONFIRMAR = 'Primero confirma tu correo: revisa tu bandeja de entrada o spam.'
+
+
+def validar_codigo(codigo) -> str:
+    codigo = re.sub(r'\s', '', codigo) if isinstance(codigo, str) else ''
+    if not re.fullmatch(r'\d{6,10}', codigo):
+        raise DatosInvalidos('Escribe el código de 6 dígitos que te llegó al correo.')
+    return codigo
 
 # Código HTTP de cada fallo conocido (REST): 401 credenciales, 403 cuenta no habilitada,
 # 409 conflicto con una cuenta existente, 429 límite del proveedor. El resto, 400.
@@ -20,6 +31,9 @@ ESTADOS_HTTP = {
     'Primero confirma tu correo: revisa tu bandeja de entrada o spam.': 403,
     'Se enviaron muchos correos seguidos. Espera unos minutos y vuelve a intentarlo.': 429,
     'Demasiados intentos. Espera unos minutos.': 429,
+    CODIGO_INVALIDO: 401,
+    CODIGO_BLOQUEADO: 429,
+    CUENTA_BLOQUEADA: 429,
 }
 
 
@@ -76,3 +90,4 @@ class Usuario:
 class Credencial:
     token: str
     segundos: int
+    refresco: Optional[str] = None   # refresh token: renueva la sesión sin volver a pedir la clave

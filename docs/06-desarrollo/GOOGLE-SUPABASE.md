@@ -1,6 +1,6 @@
 # Registro e inicio de sesión con Google
 
-El código ya hace todo el flujo (PKCE, callback, sesión HttpOnly, cierre). Solo falta **configurar tu proyecto**. Proyecto actual: `zbpghcmxsxjngwbdehyh`.
+El código implementa todo el flujo (PKCE, callback, sesión HttpOnly, cierre); esta guía configura **tu proyecto**. Proyecto actual: `zbpghcmxsxjngwbdehyh`.
 
 ## Pasos (unos 10 minutos)
 

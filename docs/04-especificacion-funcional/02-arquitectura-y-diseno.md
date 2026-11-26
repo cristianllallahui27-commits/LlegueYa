@@ -2,7 +2,7 @@
 
 ## 1. Estilo y responsabilidades
 
-Arquitectura distribuida orientada a servicios de negocio, con despliegues independientes y Clean Architecture dentro de cada servicio. El proyecto documenta diseño; no contiene aplicación. Supabase, Docker, Cloudflare y Gemini forman parte de la línea base; las propuestas técnicas y pendientes se precisan en el SDD.
+Arquitectura distribuida orientada a servicios de negocio, con despliegues independientes y Clean Architecture dentro de cada servicio. Supabase, Docker y Cloudflare forman parte de la línea base; las propuestas técnicas se precisan en el SDD y su implementación en [Sprint 2](../07-sprint2/01-estilo-y-patron-arquitectonico.md).
 
 | Servicio | Responsabilidades | Propiedad de datos |
 |---|---|---|
@@ -67,7 +67,7 @@ El detalle se restringe también en API, búsquedas e información suministrada 
 
 ## 7. Escenarios de calidad
 
-Metas propuestas para validar, sin mediciones ejecutadas.
+Metas de diseño de los servicios. Las mediciones de la primera versión (EQ-01 a EQ-07) están en [Validación de atributos de calidad](../07-sprint2/07-validacion-atributos-calidad.md).
 
 | ID | Estímulo y entorno | Respuesta | Medida |
 |---|---|---|---|
@@ -84,7 +84,7 @@ Metas propuestas para validar, sin mediciones ejecutadas.
 
 ## 8. Modelo C4
 
-[Contexto](../../modelo-c4/Nivel1-DiagramadeContextodelSistema.md) define actores e integraciones; [contenedores](../../modelo-c4/Nivel2-DiagramadeContenedores.md), despliegues y datos; [componentes](../../modelo-c4/Nivel3-DiagramadeComponentes.md), Publicidad y validación de objetivos; [clases conceptuales](../../modelo-c4/Nivel4-DiagramadeCodigo.md), reglas y contratos. Son vistas de diseño, no código implementado.
+[Contexto](../../modelo-c4/Nivel1-DiagramadeContextodelSistema.md) define actores e integraciones; [contenedores](../../modelo-c4/Nivel2-DiagramadeContenedores.md), despliegues y datos; [componentes](../../modelo-c4/Nivel3-DiagramadeComponentes.md), Publicidad y validación de objetivos; [clases conceptuales](../../modelo-c4/Nivel4-DiagramadeCodigo.md), reglas y contratos. Son vistas de diseño; su correspondencia con el código está en [Sprint 2](../07-sprint2/01-estilo-y-patron-arquitectonico.md).
 
 ## 9. Parámetros de implementación
 

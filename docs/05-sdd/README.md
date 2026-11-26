@@ -1,10 +1,10 @@
 # LlegueYa · Descripción del diseño de software
 
-> Estado de implementación (29/10/2026): existe una primera capacidad de Identidad con Google y pruebas locales. Consultar [estado real y ejecución](../06-desarrollo/README.md). Las descripciones de producto y pruebas futuras de esta línea base no acreditan que todos los servicios estén implementados.
+> Este SDD es la línea base de diseño. Lo implementado, cómo ejecutarlo y las mediciones de la primera versión están en [Desarrollo](../06-desarrollo/README.md) y en [Sprint 2](../07-sprint2/README.md).
 
 **SDD 1.0 · Línea base de diseño · 28 de octubre de 2026**
 
-Plataforma social de turismo de Ayacucho, centrada en lectura, fotografías y planificación. Este SDD especifica el diseño que orientará la implementación. No acredita una aplicación desplegada, recursos contratados ni pruebas ejecutadas. Los valores operativos propuestos se distinguen de las reglas aprobadas.
+Plataforma social de turismo de Ayacucho, centrada en lectura, fotografías y planificación. Este SDD especifica el diseño que guía la implementación. Los valores operativos propuestos se distinguen de las reglas aprobadas.
 
 [Leer el documento con navegación](index.html) · [Índice general de documentación](../README.md) · [Modelo C4](../../modelo-c4/README.md)
 
@@ -33,9 +33,9 @@ Plataforma social de turismo de Ayacucho, centrada en lectura, fotografías y pl
 | Equipo | Cristian Mier Llallahui Gomez y Yordi Ajeo Atao Huaman. |
 | Curso | Arquitectura de Software, IS-488, UNSCH. |
 | Línea base funcional | RF01–RF65 y HU01–HU46. |
-| Diseño aprobado por alcance | Supabase, Docker, Cloudflare, Gemini; mapa interactivo sin geolocalización. |
+| Diseño aprobado por alcance | Supabase, Docker, Cloudflare y Gemini como integración opcional del asistente; mapa interactivo con ubicación solo si la persona la activa. |
 | Diseño propuesto por el equipo | Python/FastAPI, frontend HTML/CSS/JavaScript, Leaflet y mensajería RabbitMQ. |
-| Pendientes de ejecución | Implementar, fijar versiones exactas tras compatibilidad, contratar alojamiento y ejecutar validaciones. |
+| Implementación y validación | Primera versión en `services/` y `apps/web/`; pruebas y mediciones en [Sprint 2](../07-sprint2/README.md). |
 | Control de cambios | Git conserva el historial. Este documento no contiene secretos y no requiere cuentas reales para leerlo. |
 
 ## Propiedad de la información
@@ -44,4 +44,4 @@ Los requisitos pertenecen al análisis y a la especificación funcional; las dec
 
 La estructura se inspira en descripción de diseño y vistas de arquitectura, adaptadas al curso. No se afirma certificación formal IEEE. La [matriz metodológica](referencias.md) explica su correspondencia.
 
-**Convención:** «debe» identifica una obligación del diseño; «propuesto» identifica un valor que requiere validación; «pendiente» marca una decisión externa o una tarea aún no ejecutada. Los ejemplos usan identificadores ficticios. No hay código de aplicación en esta entrega.
+**Convención:** «debe» identifica una obligación del diseño; «propuesto» identifica un valor que requiere validación; «pendiente» marca una decisión externa o una tarea aún no ejecutada. Los ejemplos usan identificadores ficticios.

@@ -19,6 +19,9 @@ async function pedir(ruta, opciones = {}) {
   let datos = null;
   try { datos = await respuesta.json(); } catch { /* respuesta sin cuerpo JSON */ }
   if (!respuesta.ok) {
+    // Sesión perdida o rol retirado: avisamos a la guardia (js/guardia.js) sin tocar el flujo de quien llamó.
+    if (respuesta.status === 401 && !ruta.startsWith('/api/v1/auth/')) document.dispatchEvent(new CustomEvent('ly:sesion-vencida'));
+    if (respuesta.status === 403 && ruta.includes('/admin')) document.dispatchEvent(new CustomEvent('ly:sin-permiso'));
     throw new ErrorApi(respuesta.status, (datos && datos.detail && typeof datos.detail === 'string')
       ? datos.detail : 'Algo falló en el servidor. Vuelve a intentarlo.', Boolean(datos && datos.requiere_sesion) || respuesta.status === 401);
   }
@@ -33,11 +36,17 @@ export const api = {
   registrar: datos => pedir('/api/v1/auth/registro', json('POST', datos)),
   entrar: (correo, clave) => pedir('/api/v1/auth/entrar', json('POST', { correo, clave })),
   recuperar: correo => pedir('/api/v1/auth/recuperar', json('POST', { correo })),
+  verificarCodigo: (correo, codigo) => pedir('/api/v1/auth/verificar', json('POST', { correo, codigo })),
+  reenviarCodigo: correo => pedir('/api/v1/auth/reenviar', json('POST', { correo })),
   nuevaClave: clave => pedir('/api/v1/auth/clave', json('POST', { clave })),
   lugares: (params = {}) => pedir('/api/v1/catalogo/lugares?' + new URLSearchParams(params)),
   lugar: slug => pedir(`/api/v1/catalogo/lugares/${encodeURIComponent(slug)}`),
+  transporte: () => pedir('/api/v1/catalogo/transporte'),
+  terminales: () => pedir('/api/v1/catalogo/terminales'),
   destinos: () => pedir('/api/v1/catalogo/destinos'),
   mapa: () => pedir('/api/v1/catalogo/mapa'),
+  geoBuscar: q => pedir(`/api/v1/catalogo/geo/buscar?q=${encodeURIComponent(q)}`),
+  geoRuta: (a, b, modo = 'driving') => pedir(`/api/v1/catalogo/geo/ruta?desde_lat=${a[0]}&desde_lon=${a[1]}&hasta_lat=${b[0]}&hasta_lon=${b[1]}&modo=${modo}`),
   favorito: (slug, activo) => pedir(`/api/v1/catalogo/favoritos/${encodeURIComponent(slug)}`, json('PUT', { activo })),
   favoritos: () => pedir('/api/v1/catalogo/favoritos'),
   muro: (params = {}) => pedir('/api/v1/comunidad/muro?' + new URLSearchParams(params)),
@@ -56,12 +65,14 @@ export const api = {
   aceptarViaje: plan => pedir('/api/v1/recomendaciones/viajes', json('POST', { plan })),
   misViajes: () => pedir('/api/v1/recomendaciones/viajes'),
   eliminarViaje: id => pedir(`/api/v1/recomendaciones/viajes/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  destacados: () => pedir('/api/v1/comunidad/destacados'),
   anuncios: () => pedir('/api/v1/publicidad/anuncios'),
   rubros: () => pedir('/api/v1/publicidad/rubros'),
   planes: () => pedir('/api/v1/publicidad/planes'),
   solicitarPromocion: datos => pedir('/api/v1/publicidad/solicitudes', json('POST', datos)),
   directorio: rubro => pedir('/api/v1/publicidad/directorio' + (rubro ? `?rubro=${encodeURIComponent(rubro)}` : '')),
   misSolicitudes: () => pedir('/api/v1/publicidad/mis-solicitudes'),
+  subirFotoNegocio: archivo => { const f = new FormData(); f.append('foto', archivo); return pedir('/api/v1/publicidad/fotos', { method: 'POST', body: f }); },
   admin: {
     resumen: () => pedir('/api/v1/admin/resumen'),
     moderacion: () => pedir('/api/v1/admin/moderacion'),
@@ -72,6 +83,16 @@ export const api = {
     crearLugar: datos => pedir('/api/v1/catalogo/admin/lugares', json('POST', datos)),
     editarLugar: (slug, datos) => pedir(`/api/v1/catalogo/admin/lugares/${encodeURIComponent(slug)}`, json('PUT', datos)),
     estadoLugar: (slug, publicado) => pedir(`/api/v1/catalogo/admin/lugares/${encodeURIComponent(slug)}/estado`, json('POST', { publicado })),
+    eliminarLugar: slug => pedir(`/api/v1/catalogo/admin/lugares/${encodeURIComponent(slug)}`, { method: 'DELETE' }),
+    quitarDemostracion: () => pedir('/api/v1/catalogo/admin/demostracion', { method: 'DELETE' }),
+    crearTerminal: datos => pedir('/api/v1/catalogo/admin/terminales', json('POST', datos)),
+    editarTerminal: (id, datos) => pedir(`/api/v1/catalogo/admin/terminales/${encodeURIComponent(id)}`, json('PUT', datos)),
+    eliminarTerminal: id => pedir(`/api/v1/catalogo/admin/terminales/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    subirFotoLugar: archivo => { const f = new FormData(); f.append('foto', archivo); return pedir('/api/v1/catalogo/admin/fotos', { method: 'POST', body: f }); },
+    eventos: () => pedir('/api/v1/eventos/admin'),
+    crearEvento: datos => pedir('/api/v1/eventos/admin', json('POST', datos)),
+    editarEvento: (id, datos) => pedir(`/api/v1/eventos/admin/${encodeURIComponent(id)}`, json('PUT', datos)),
+    eliminarEvento: id => pedir(`/api/v1/eventos/admin/${encodeURIComponent(id)}`, { method: 'DELETE' }),
     reportes: () => pedir('/api/v1/admin/reportes'),
     resolverReporte: (id, datos) => pedir(`/api/v1/admin/reportes/${encodeURIComponent(id)}`, json('POST', datos)),
     contenido: () => pedir('/api/v1/admin/contenido'),
@@ -81,6 +102,7 @@ export const api = {
     solicitudes: () => pedir('/api/v1/publicidad/admin/solicitudes'),
     crearPlan: datos => pedir('/api/v1/publicidad/admin/planes', json('POST', datos)),
     activarPlan: (id, activo) => pedir(`/api/v1/publicidad/admin/planes/${encodeURIComponent(id)}`, json('PUT', { activo })),
+    editarPlan: (id, datos) => pedir(`/api/v1/publicidad/admin/planes/${encodeURIComponent(id)}`, json('PUT', datos)),
     requisito: (id, requisito, cumple) => pedir(`/api/v1/publicidad/admin/solicitudes/${encodeURIComponent(id)}/requisitos`, json('PUT', { requisito, cumple })),
     pago: (id, referencia) => pedir(`/api/v1/publicidad/admin/solicitudes/${encodeURIComponent(id)}/pago`, json('POST', { referencia })),
     decisionSolicitud: (id, aprobar, motivo) => pedir(`/api/v1/publicidad/admin/solicitudes/${encodeURIComponent(id)}/decision`, json('POST', { aprobar, motivo })),

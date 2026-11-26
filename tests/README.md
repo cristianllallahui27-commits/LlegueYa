@@ -4,6 +4,7 @@
 |---|---|---|
 | `test_identidad.py` | Unitarias e integración HTTP de Identidad | `python -m pytest tests -q` |
 | `test_plataforma.py` | Catálogo, Comunidad, Eventos, Willaq Uma y gateway | igual |
+| `test_administracion.py`, `test_cuentas.py`, `test_planes_negocio.py`, `test_reputacion.py`, `test_mapas_y_fotos.py`, `test_negocios_y_asistente.py` | Administración, cuentas con correo, planes por nivel, reputación, mapas y rutas, terminales, fotos y Willaq Uma | igual |
 | `test_postgres.py` | Migraciones + RLS + repositorios en PostgreSQL real | define `TEST_DATABASE_URL` (base desechable) |
 | `test_arquitectura.py` | Reglas de dependencias entre capas y servicios | igual |
 | `jest/unidad/` | Lógica de la web y Worker de borde (Jest) | `npm run test:unidad` |

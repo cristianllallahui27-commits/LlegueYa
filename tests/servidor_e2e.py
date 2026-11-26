@@ -38,6 +38,7 @@ class GoogleDoble:
         self.accesos = 0
         self.cuentas = {}
         self.enlaces = {}   # correo -> challenge del último enlace de recuperación
+        self.codigos = {}   # correo -> código de verificación pendiente
 
     def autorizar(self, challenge):
         self.accesos += 1
@@ -61,6 +62,16 @@ class GoogleDoble:
     async def recuperar(self, correo, challenge):
         if correo in self.cuentas:
             self.enlaces[correo] = challenge
+
+    async def verificar_codigo(self, correo, codigo):
+        if correo not in self.codigos or self.codigos[correo] != codigo:
+            raise AuthError('El código no es correcto o ya venció. Revísalo o pide uno nuevo.')
+        del self.codigos[correo]
+        return Credencial('correo:' + correo, 3600)
+
+    async def reenviar_codigo(self, correo):
+        if correo in self.cuentas:
+            self.codigos[correo] = '654321'
 
     async def cambiar_clave(self, token, clave):
         self.cuentas[token.split(':', 1)[1]][0] = clave

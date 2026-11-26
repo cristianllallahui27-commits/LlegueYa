@@ -54,15 +54,6 @@ htmlcov/
 __pycache__/
 
 .venv/
-.env
 
-
-# Plataforma social: fotos subidas en desarrollo y pruebas
+# Fotos subidas en desarrollo y pruebas
 data/
-tmp/fotos-e2e/
-reports/e2e-foto.jpg
-reports/coverage-servicios.json
-
-# Dependencias y reportes generados
-node_modules/
-reports/jest-coverage/

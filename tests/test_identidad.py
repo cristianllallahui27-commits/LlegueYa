@@ -136,14 +136,14 @@ def test_supabase_contract():
     def handler(r):
         requests.append(r)
         if r.url.path.endswith('/token'):
-            return httpx.Response(200,json={'access_token':'access','expires_in':60,'refresh_token':'not-retained'})
+            return httpx.Response(200,json={'access_token':'access','expires_in':60,'refresh_token':'solo-en-memoria'})
         return httpx.Response(200,json={'id':'id','user_metadata':{'full_name':'Test'}})
     provider=adapter(handler)
     params=parse_qs(urlparse(provider.autorizar('challenge')).query)
     assert params['code_challenge_method']==['s256']
     assert params['provider']==['google']
     assert params['redirect_to']==[ORIGIN+'/api/v1/auth/callback']
-    assert run(provider.intercambiar('code','verifier')) == Credencial('access',60)
+    assert run(provider.intercambiar('code','verifier')) == Credencial('access',60,'solo-en-memoria')
     assert run(provider.usuario('access')).nombre=='Test'
     assert requests[1].headers['authorization']=='Bearer access'
     assert b'code_verifier' in requests[0].content

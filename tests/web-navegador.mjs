@@ -56,7 +56,7 @@ try {
   });
   await paso('Acceso con Google (doble) muestra al usuario', async () => {
     await page.locator('#tarjeta-cuenta').getByRole('button', { name: 'Entrar' }).click();
-    await page.locator('#acceso-google button[type=submit]').click();
+    await page.locator('#acceso-bienvenida .acceso-google-form').click();
     await page.getByText('Viajera de Prueba').first().waitFor();
   });
   await paso('Publicar experiencia con foto y lugar', async () => {
@@ -173,7 +173,7 @@ try {
     await neg.route(/wikimedia|openstreetmap|googleusercontent|cartocdn|arcgisonline|opentopomap/, r => r.abort());
     await neg.goto(BASE + '/#/inicio');
     await neg.locator('#tarjeta-cuenta').getByRole('button', { name: 'Entrar' }).click();
-    await neg.locator('#acceso-google button[type=submit]').click();
+    await neg.locator('#acceso-bienvenida .acceso-google-form').click();
     await neg.getByText('Cuenta Sospechosa').first().waitFor();
     await neg.waitForLoadState('networkidle');
     assert.equal(await neg.locator('.solo-admin').isVisible(), false);

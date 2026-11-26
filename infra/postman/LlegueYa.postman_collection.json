@@ -1,0 +1,3040 @@
+{
+  "info": {
+    "_postman_id": "69a311c3-5c38-591b-a11a-a7e0374ce6e3",
+    "name": "LlegueYa API",
+    "description": "Colección generada desde /api/openapi.json. 1) Arranca la app (iniciar-llegueya.bat). 2) Ejecuta «Identidad → Iniciar sesión»: Postman guarda la cookie de sesión. 3) Las rutas de administración exigen un correo de ADMIN_CORREOS.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Pruebas funcionales (Lab 05)",
+      "item": [
+        {
+          "name": "PF-01 Salud del servicio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('PF-01: Salud del servicio responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Es JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "health"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "PF-02 Listar lugares",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('PF-02: Listar lugares responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Trae items', () => pm.expect(pm.response.json().items).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/lugares",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "lugares"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "PF-03 Mapa con coordenadas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('PF-03: Mapa con coordenadas responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Marcadores', () => pm.expect(pm.response.json().marcadores).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/mapa",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "mapa"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "PF-04 Lugar inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('PF-04: Lugar inexistente responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/lugares/no-existe-xyz",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "lugares",
+                "no-existe-xyz"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "PF-05 Filtro por tipo inválido (validación)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('PF-05: Filtro por tipo inválido (validación) responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/lugares?tipo=inventado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "lugares"
+              ],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "inventado"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PF-06 Administración sin sesión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('PF-06: Administración sin sesión responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "cuentas"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "PF-07 Ruta con coordenadas inválidas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('PF-07: Ruta con coordenadas inválidas responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/geo/ruta?desde_lat=99&desde_lon=0&hasta_lat=0&hasta_lon=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "geo",
+                "ruta"
+              ],
+              "query": [
+                {
+                  "key": "desde_lat",
+                  "value": "99"
+                },
+                {
+                  "key": "desde_lon",
+                  "value": "0"
+                },
+                {
+                  "key": "hasta_lat",
+                  "value": "0"
+                },
+                {
+                  "key": "hasta_lon",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PF-08 Buscar sitio requiere texto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('PF-08: Buscar sitio requiere texto responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/geo/buscar?q=a",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "geo",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "a"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Identidad",
+      "item": [
+        {
+          "name": "Estado del servicio y métodos de acceso activos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "health"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Crear cuenta con correo y clave",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/registro",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "registro"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Nombre de ejemplo\",\n  \"correo\": \"usuario@ejemplo.com\",\n  \"clave\": \"Clave12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Activar la cuenta con el código enviado al correo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/verificar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verificar"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"usuario@ejemplo.com\",\n  \"codigo\": \"texto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Reenviar el código de verificación",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/reenviar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "reenviar"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"usuario@ejemplo.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Iniciar sesión con correo y clave",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/entrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "entrar"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"usuario@ejemplo.com\",\n  \"clave\": \"Clave12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Pedir enlace para recuperar la clave",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/recuperar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "recuperar"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"usuario@ejemplo.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Volver del enlace de recuperación (redirección)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/recuperacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "recuperacion"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Cambiar la clave de la sesión actual",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/clave",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "clave"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Requiere sesión (401 sin ella).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clave\": \"Clave12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Iniciar sesión con Google (redirección PKCE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/google",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "google"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Volver de Google o de la confirmación de correo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/callback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "callback"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Datos de la sesión actual (incluye si es admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Requiere sesión (401 sin ella)."
+          }
+        },
+        {
+          "name": "Cerrar sesión",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Requiere sesión (401 sin ella)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catálogo",
+      "item": [
+        {
+          "name": "Buscar lugares (texto, tipo, destino) con paginación",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/lugares",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "lugares"
+              ],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "destino",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "desde",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limite",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Ficha de un lugar: vista previa sin sesión, completa con sesión",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/lugares/:slug",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "lugares",
+                ":slug"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": "plaza-mayor-huamanga"
+                }
+              ]
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Buscar puntos de referencia (OpenStreetMap/Photon, gratis)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/geo/buscar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "geo",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Ruta, distancia y tiempo entre dos puntos (OSRM, gratis)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/geo/ruta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "geo",
+                "ruta"
+              ],
+              "query": [
+                {
+                  "key": "desde_lat",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "desde_lon",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "hasta_lat",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "hasta_lon",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "modo",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Paraderos, pasaje y tiempo aproximados para llegar a cada destino",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/transporte",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "transporte"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Terminales y paraderos de autos y buses (referencia para viajar por cuenta propia)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/terminales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "terminales"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Crear un terminal o paradero",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/admin/terminales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "admin",
+                "terminales"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Nombre de ejemplo\",\n  \"tipo\": \"natural\",\n  \"referencia\": \"texto\",\n  \"lat\": -13.1588,\n  \"lon\": -74.2238,\n  \"mapa\": \"\",\n  \"horario\": \"\",\n  \"frecuencia\": \"\",\n  \"pasaje\": \"\",\n  \"descripcion\": \"\",\n  \"foto_url\": \"\",\n  \"destinos\": [\n    {\n      \"slug\": null,\n      \"tiempo\": null,\n      \"tarifa\": null,\n      \"nota\": null\n    }\n  ],\n  \"fuentes\": [\n    {\n      \"nombre\": \"Nombre de ejemplo\",\n      \"url\": \"https://ejemplo.org/foto.jpg\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Corregir un terminal o paradero",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/admin/terminales/:tid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "admin",
+                "terminales",
+                ":tid"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "tid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Nombre de ejemplo\",\n  \"tipo\": \"natural\",\n  \"referencia\": \"texto\",\n  \"lat\": -13.1588,\n  \"lon\": -74.2238,\n  \"mapa\": \"\",\n  \"horario\": \"\",\n  \"frecuencia\": \"\",\n  \"pasaje\": \"\",\n  \"descripcion\": \"\",\n  \"foto_url\": \"\",\n  \"destinos\": [\n    {\n      \"slug\": null,\n      \"tiempo\": null,\n      \"tarifa\": null,\n      \"nota\": null\n    }\n  ],\n  \"fuentes\": [\n    {\n      \"nombre\": \"Nombre de ejemplo\",\n      \"url\": \"https://ejemplo.org/foto.jpg\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar un terminal o paradero",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/admin/terminales/:tid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "admin",
+                "terminales",
+                ":tid"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "tid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin)."
+          }
+        },
+        {
+          "name": "Puntos del mapa",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/mapa",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "mapa"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Destinos con cantidad de lugares",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/destinos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "destinos"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Guardar o quitar un lugar de favoritos",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/favoritos/:slug",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "favoritos",
+                ":slug"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": "plaza-mayor-huamanga"
+                }
+              ]
+            },
+            "description": "Requiere sesión (401 sin ella).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Mis lugares favoritos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/favoritos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "favoritos"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Requiere sesión (401 sin ella)."
+          }
+        },
+        {
+          "name": "Todos los lugares, también los retirados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/admin/lugares",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "admin",
+                "lugares"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin)."
+          }
+        },
+        {
+          "name": "Crear un lugar turístico",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/admin/lugares",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "admin",
+                "lugares"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Nombre de ejemplo\",\n  \"tipo\": \"natural\",\n  \"destino\": \"texto\",\n  \"zona\": \"\",\n  \"resumen\": \"texto\",\n  \"descripcion\": \"texto\",\n  \"lat\": -13.1588,\n  \"lon\": -74.2238,\n  \"altitud_m\": 1,\n  \"como_llegar\": \"\",\n  \"recomendaciones\": [\n    \"texto\"\n  ],\n  \"fuente_url\": \"\",\n  \"fotos\": [\n    {\n      \"url\": \"https://ejemplo.org/foto.jpg\",\n      \"autor\": null,\n      \"licencia\": null,\n      \"fuente_url\": null,\n      \"descripcion\": null\n    }\n  ],\n  \"entrada_costo\": \"\",\n  \"entrada_compra\": \"\",\n  \"entrada_url\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Editar un lugar turístico",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/admin/lugares/:slug",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "admin",
+                "lugares",
+                ":slug"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": "plaza-mayor-huamanga"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Nombre de ejemplo\",\n  \"tipo\": \"natural\",\n  \"destino\": \"texto\",\n  \"zona\": \"\",\n  \"resumen\": \"texto\",\n  \"descripcion\": \"texto\",\n  \"lat\": -13.1588,\n  \"lon\": -74.2238,\n  \"altitud_m\": 1,\n  \"como_llegar\": \"\",\n  \"recomendaciones\": [\n    \"texto\"\n  ],\n  \"fuente_url\": \"\",\n  \"fotos\": [\n    {\n      \"url\": \"https://ejemplo.org/foto.jpg\",\n      \"autor\": null,\n      \"licencia\": null,\n      \"fuente_url\": null,\n      \"descripcion\": null\n    }\n  ],\n  \"entrada_costo\": \"\",\n  \"entrada_compra\": \"\",\n  \"entrada_url\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar un lugar de forma definitiva",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/admin/lugares/:slug",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "admin",
+                "lugares",
+                ":slug"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": "plaza-mayor-huamanga"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin)."
+          }
+        },
+        {
+          "name": "Retirar o volver a publicar un lugar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/admin/lugares/:slug/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "admin",
+                "lugares",
+                ":slug",
+                "estado"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": "plaza-mayor-huamanga"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"publicado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar todos los lugares de demostración",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/admin/demostracion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "admin",
+                "demostracion"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin)."
+          }
+        },
+        {
+          "name": "Subir una foto (JPG, PNG o WebP, máx. 5 MB) para un lugar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/admin/fotos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "admin",
+                "fotos"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Foto de un lugar subida por administración",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/catalogo/fotos/:nombre",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "fotos",
+                ":nombre"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "nombre",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Público."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Comunidad",
+      "item": [
+        {
+          "name": "Muro de publicaciones (paginado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comunidad/muro",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comunidad",
+                "muro"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limite",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "lugar",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "con_foto",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Viajeros con más me gusta recibidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comunidad/destacados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comunidad",
+                "destacados"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Publicar una experiencia con foto opcional",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comunidad/publicaciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comunidad",
+                "publicaciones"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Requiere sesión (401 sin ella).",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dar o quitar me gusta (idempotente)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comunidad/likes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comunidad",
+                "likes"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Requiere sesión (401 sin ella).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"natural\",\n  \"id\": \"texto\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Comentarios en hilo de una publicación",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comunidad/publicaciones/:pid/comentarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comunidad",
+                "publicaciones",
+                ":pid",
+                "comentarios"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "pid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Comentar o responder",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comunidad/publicaciones/:pid/comentarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comunidad",
+                "publicaciones",
+                ":pid",
+                "comentarios"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "pid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Requiere sesión (401 sin ella).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texto\": \"texto\",\n  \"padre_id\": \"texto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Guardar una publicación en mi colección",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comunidad/guardados/:pid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comunidad",
+                "guardados",
+                ":pid"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "pid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Requiere sesión (401 sin ella).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Motivos válidos para reportar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comunidad/motivos-reporte",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comunidad",
+                "motivos-reporte"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Reportar una publicación",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comunidad/publicaciones/:pid/reportes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comunidad",
+                "publicaciones",
+                ":pid",
+                "reportes"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "pid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Requiere sesión (401 sin ella).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivo\": \"texto\",\n  \"detalle\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Mis publicaciones y guardados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comunidad/yo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comunidad",
+                "yo"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Requiere sesión (401 sin ella)."
+          }
+        },
+        {
+          "name": "Foto de una publicación visible",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comunidad/fotos/:fid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comunidad",
+                "fotos",
+                ":fid"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "fid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Público."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Eventos",
+      "item": [
+        {
+          "name": "Próximos eventos y festividades",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/eventos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eventos"
+              ],
+              "query": [
+                {
+                  "key": "mes",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Todos los eventos, también los pasados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/eventos/admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eventos",
+                "admin"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin)."
+          }
+        },
+        {
+          "name": "Crear un evento del calendario (con foto opcional)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/eventos/admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eventos",
+                "admin"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"texto\",\n  \"descripcion\": \"texto\",\n  \"lugar_texto\": \"texto\",\n  \"lugar_slug\": \"texto\",\n  \"inicio\": \"texto\",\n  \"fin\": \"texto\",\n  \"foto_url\": \"texto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Editar un evento o cambiar su foto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/eventos/admin/:eid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eventos",
+                "admin",
+                ":eid"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "eid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"texto\",\n  \"descripcion\": \"texto\",\n  \"lugar_texto\": \"texto\",\n  \"lugar_slug\": \"texto\",\n  \"inicio\": \"texto\",\n  \"fin\": \"texto\",\n  \"foto_url\": \"texto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar un evento",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/eventos/admin/:eid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eventos",
+                "admin",
+                ":eid"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "eid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin)."
+          }
+        },
+        {
+          "name": "Suscribirme o no a un evento",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/eventos/:eid/suscripcion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eventos",
+                ":eid",
+                "suscripcion"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "eid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Requiere sesión (401 sin ella).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activa\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Asistente",
+      "item": [
+        {
+          "name": "Presentación de Willaq Uma",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/asistente/presentacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "asistente",
+                "presentacion"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Conversar con Willaq Uma (respuestas basadas en la plataforma)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/asistente/mensajes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "asistente",
+                "mensajes"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Requiere sesión (401 sin ella).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texto\": \"texto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Publicidad",
+      "item": [
+        {
+          "name": "Rubros y requisitos de verificación",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publicidad/rubros",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publicidad",
+                "rubros"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Planes activos y comparación de niveles Básico, Plus y Premium",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publicidad/planes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publicidad",
+                "planes"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Subir una foto de mi negocio (según el plan)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publicidad/fotos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publicidad",
+                "fotos"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Requiere sesión (401 sin ella).",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Foto de un negocio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publicidad/fotos/:nombre",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publicidad",
+                "fotos",
+                ":nombre"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "nombre",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Anuncios patrocinados vigentes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publicidad/anuncios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publicidad",
+                "anuncios"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Directorio de servicios y artesanía (contacto solo con sesión)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publicidad/directorio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publicidad",
+                "directorio"
+              ],
+              "query": [
+                {
+                  "key": "rubro",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": []
+            },
+            "description": "Público."
+          }
+        },
+        {
+          "name": "Registrar mi negocio y pedir promoción",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publicidad/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publicidad",
+                "solicitudes"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Requiere sesión (401 sin ella).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"negocio\": \"texto\",\n  \"rubro\": \"texto\",\n  \"descripcion\": \"texto\",\n  \"contacto\": \"texto\",\n  \"plan_id\": \"texto\",\n  \"enlace\": \"\",\n  \"lugar_slug\": \"texto\",\n  \"direccion\": \"\",\n  \"lat\": -13.1588,\n  \"lon\": -74.2238,\n  \"ofertas\": [\n    \"texto\"\n  ],\n  \"fotos\": [\n    \"texto\"\n  ],\n  \"videos\": [\n    \"texto\"\n  ],\n  \"whatsapp\": \"\",\n  \"horario\": \"\",\n  \"carta\": [\n    \"texto\"\n  ],\n  \"servicios\": [\n    \"texto\"\n  ],\n  \"habitaciones\": 1,\n  \"capacidad\": 1,\n  \"testimonios\": [\n    \"texto\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Mis solicitudes de negocio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publicidad/mis-solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publicidad",
+                "mis-solicitudes"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Requiere sesión (401 sin ella)."
+          }
+        },
+        {
+          "name": "Todas las solicitudes de negocios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publicidad/admin/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publicidad",
+                "admin",
+                "solicitudes"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin)."
+          }
+        },
+        {
+          "name": "Crear un plan de promoción",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publicidad/admin/planes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publicidad",
+                "admin",
+                "planes"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Nombre de ejemplo\",\n  \"descripcion\": \"\",\n  \"precio\": \"texto\",\n  \"duracion_dias\": 1,\n  \"destacado\": false,\n  \"nivel\": \"texto\",\n  \"moneda\": \"PEN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Editar precio, moneda y duración de un plan, o activarlo/desactivarlo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publicidad/admin/planes/:pid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publicidad",
+                "admin",
+                "planes",
+                ":pid"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "pid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": true,\n  \"precio\": \"texto\",\n  \"moneda\": \"texto\",\n  \"duracion_dias\": 1,\n  \"nombre\": \"Nombre de ejemplo\",\n  \"descripcion\": \"texto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Marcar un requisito como cumplido",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publicidad/admin/solicitudes/:sid/requisitos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publicidad",
+                "admin",
+                "solicitudes",
+                ":sid",
+                "requisitos"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "sid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requisito\": \"texto\",\n  \"cumple\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Registrar el pago manual",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publicidad/admin/solicitudes/:sid/pago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publicidad",
+                "admin",
+                "solicitudes",
+                ":sid",
+                "pago"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "sid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"referencia\": \"texto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Aprobar o rechazar un negocio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publicidad/admin/solicitudes/:sid/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publicidad",
+                "admin",
+                "solicitudes",
+                ":sid",
+                "decision"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "sid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aprobar\": true,\n  \"motivo\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recomendaciones",
+      "item": [
+        {
+          "name": "Mis viajes aceptados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/recomendaciones/viajes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recomendaciones",
+                "viajes"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Requiere sesión (401 sin ella)."
+          }
+        },
+        {
+          "name": "Aceptar el plan de viaje de Willaq Uma",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/recomendaciones/viajes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recomendaciones",
+                "viajes"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Requiere sesión (401 sin ella).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar un viaje",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/recomendaciones/viajes/:vid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recomendaciones",
+                "viajes",
+                ":vid"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "vid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Requiere sesión (401 sin ella)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Administración",
+      "item": [
+        {
+          "name": "Cifras del panel de administración",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/resumen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "resumen"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin)."
+          }
+        },
+        {
+          "name": "Contenido pendiente de revisión",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/moderacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "moderacion"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin)."
+          }
+        },
+        {
+          "name": "Aprobar o rechazar una publicación o comentario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/moderacion/:tipo/:oid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "moderacion",
+                ":tipo",
+                ":oid"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "tipo",
+                  "value": "id"
+                },
+                {
+                  "key": "oid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aprobar\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Reportes pendientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/reportes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "reportes"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin)."
+          }
+        },
+        {
+          "name": "Resolver un reporte (retirar, desestimar, suspender autor)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/reportes/:rid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "reportes",
+                ":rid"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "rid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"retirar\": true,\n  \"decision\": \"\",\n  \"suspender_autor\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Publicaciones visibles para revisar fotos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/contenido",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "contenido"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin)."
+          }
+        },
+        {
+          "name": "Retirar una publicación",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/publicaciones/:pid/retirar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "publicaciones",
+                ":pid",
+                "retirar"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "pid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin)."
+          }
+        },
+        {
+          "name": "Quitar la foto de una publicación",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/publicaciones/:pid/quitar-foto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "publicaciones",
+                ":pid",
+                "quitar-foto"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "pid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin)."
+          }
+        },
+        {
+          "name": "Suspender varias cuentas a la vez",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/cuentas/suspension-masiva",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "cuentas",
+                "suspension-masiva"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"texto\"\n  ],\n  \"motivo\": \"texto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Cuentas conocidas y su estado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "cuentas"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin)."
+          }
+        },
+        {
+          "name": "Suspender o reactivar una cuenta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/cuentas/:uid/suspension",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "cuentas",
+                ":uid",
+                "suspension"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "id"
+                }
+              ]
+            },
+            "description": "Solo administración (401 sin sesión, 403 si no es admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"suspender\": true,\n  \"motivo\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000"
+    }
+  ]
+}

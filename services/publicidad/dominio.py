@@ -36,7 +36,71 @@ REQUISITOS = {
 
 # Región de Ayacucho (aprox.): evita ubicaciones fuera de la zona por error.
 LIMITES_AYACUCHO = (-15.7, -12.0, -75.3, -73.0)
-MAX_OFERTAS = 8
+MONEDAS = {'PEN': 'S/', 'USD': 'US$'}
+MAX_OFERTAS = 20   # tope absoluto; cada nivel tiene el suyo
+
+
+@dataclass(frozen=True)
+class Nivel:
+    """Lo que un negocio puede mostrar según su plan (como los planes Gratis/Plus/Pro de un servicio en línea)."""
+    id: str
+    nombre: str
+    lema: str
+    fotos: int
+    videos: int
+    ofertas: int
+    descripcion: int          # caracteres
+    contacto: bool            # botón de WhatsApp visible al viajero (Plus y Premium)
+    completo: bool            # además teléfono, horario y página web (solo Premium)
+    carta: int                # platos o productos de la carta / tarifario
+    testimonios: int          # experiencias de clientes
+    servicios: int            # servicios incluidos (wifi, desayuno, guía bilingüe…)
+    capacidad: bool           # habitaciones y aforo
+    prioridad: int            # orden en Inicio y Servicios
+
+    def beneficios(self) -> list:
+        b = [f'Hasta {self.fotos} fotos del local', 'Dirección y ubicación en el mapa', 'Sello «Verificado por LlegueYa»',
+             f'Hasta {self.ofertas} productos o servicios con precio']
+        if self.contacto:
+            b.append('Botón de WhatsApp para que te escriban')
+        if self.completo:
+            b.append('Teléfono, horario de atención y página o red social')
+        if self.videos:
+            b.append(f'{self.videos} video' + ('s' if self.videos > 1 else '') + ' (YouTube, Facebook, TikTok o Instagram)')
+        if self.carta:
+            b.append(f'Carta o tarifario completo (hasta {self.carta} ítems)')
+        if self.servicios:
+            b.append('Servicios que incluyes (wifi, desayuno, guía, estacionamiento…)')
+        if self.capacidad:
+            b.append('Habitaciones y aforo')
+        if self.testimonios:
+            b.append(f'Hasta {self.testimonios} experiencias de clientes')
+        b.append({0: 'Patrocinado en Inicio el primer mes', 1: 'Patrocinado en Inicio mientras dure el plan',
+                  2: 'Destacado arriba de todos en Inicio y Servicios'}[self.prioridad])
+        b.append({0: 'Willaq Uma te menciona con tu dirección', 1: 'Willaq Uma te recomienda antes y comparte tu WhatsApp',
+                  2: 'Willaq Uma te recomienda primero y con todo tu detalle'}[self.prioridad])
+        return b
+
+
+NIVELES = {
+    'basico': Nivel('basico', 'Básico', 'Para empezar: tu negocio verificado en el directorio.',
+                    fotos=2, videos=0, ofertas=3, descripcion=300, contacto=False, completo=False,
+                    carta=0, testimonios=0, servicios=0, capacidad=False, prioridad=0),
+    'plus': Nivel('plus', 'Plus', 'Más fotos, un video y que te escriban por WhatsApp.',
+                  fotos=4, videos=1, ofertas=8, descripcion=800, contacto=True, completo=False,
+                  carta=0, testimonios=0, servicios=0, capacidad=False, prioridad=1),
+    'premium': Nivel('premium', 'Premium', 'Tu vitrina completa: carta, servicios, capacidad y experiencias de clientes.',
+                     fotos=10, videos=3, ofertas=20, descripcion=2000, contacto=True, completo=True,
+                     carta=40, testimonios=6, servicios=20, capacidad=True, prioridad=2),
+}
+
+# Planes con los que arranca la plataforma (administración puede crear otros o desactivarlos).
+# (nombre, descripción, precio, moneda, días, nivel, gratuidad inicial)
+PLANES_INICIALES = (
+    ('Básico', 'Gratis. Tu negocio verificado con dirección, mapa y 2 fotos.', '0', 'PEN', 30, 'basico', True),
+    ('Plus', 'Mensual. Más fotos, un video, tu WhatsApp y presencia en Inicio.', '20', 'PEN', 30, 'plus', False),
+    ('Premium', 'Anual. Todo completo: teléfono, horario, web, carta, servicios, habitaciones y experiencias de clientes.', '59', 'PEN', 365, 'premium', False),
+)
 
 
 class ReglaPublicidad(ValueError):
@@ -52,13 +116,19 @@ class Plan:
     id: str
     nombre: str
     descripcion: str
-    precio: Decimal          # soles (PEN); 0 = gratuito
+    precio: Decimal          # en la moneda del plan; 0 = gratuito
     duracion_dias: int
     destacado: bool = False
     activo: bool = True
     gratuidad_inicial: bool = False   # solo una vez por usuario
+    nivel: str = 'basico'             # basico | plus | premium (ver NIVELES)
+    moneda: str = 'PEN'               # PEN (soles) o USD (dólares)
 
     def __post_init__(self):
+        if self.nivel not in NIVELES:
+            raise ReglaPublicidad('Nivel de plan no válido.')
+        if self.moneda not in MONEDAS:
+            raise ReglaPublicidad('La moneda debe ser soles (PEN) o dólares (USD).')
         if self.precio < 0:
             raise ReglaPublicidad('El precio no puede ser negativo.')
         if not 1 <= self.duracion_dias <= 365:
@@ -90,6 +160,17 @@ class Solicitud:
     lat: Optional[float] = None
     lon: Optional[float] = None
     ofertas: list = field(default_factory=list)   # [{nombre, precio_desde, detalle}] productos o servicios
+    # Lo siguiente depende del nivel del plan (ver NIVELES)
+    fotos: list = field(default_factory=list)        # rutas de fotos subidas por el mismo negocio
+    videos: list = field(default_factory=list)       # enlaces https a YouTube, Facebook, TikTok o Instagram
+    whatsapp: str = ''                               # 51 + 9 dígitos
+    horario: str = ''
+    carta: list = field(default_factory=list)        # [{nombre, precio_desde, detalle}]
+    servicios: list = field(default_factory=list)    # ['Wifi', 'Desayuno', …]
+    habitaciones: Optional[int] = None
+    capacidad: Optional[int] = None                  # aforo o personas
+    testimonios: list = field(default_factory=list)  # [{autor, texto}] contados por el negocio y revisados por admin
+    nivel: str = 'basico'                            # nivel del plan al pedirlo (lo usa Willaq Uma)
 
     @property
     def requisitos_completos(self) -> bool:

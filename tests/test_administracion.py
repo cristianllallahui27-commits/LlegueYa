@@ -106,7 +106,7 @@ def test_gratuidad_inicial_una_vez_y_verificacion_completa(pub):
 def test_plan_de_pago_requiere_pago_registrado_y_destacados_primero(pub):
     destacado = pub.crear_plan('Destacado mensual', 'Arriba en el muro', '120.50', 30, destacado=True)
     assert destacado.precio == Decimal('120.50')
-    normal = pub.crear_plan('Básico', '', '50', 15)
+    normal = pub.crear_plan('Básico', '', '50', 15, nivel='premium')
     a = pub.solicitar('u2', 'Luis', 'Transportes Pampa', 'transporte', 'Traslados a Quinua', 'wsp', normal.id, 'https://ejemplo.pe')
     b = pub.solicitar('u3', 'Eva', 'Agencia Wari', 'operador', 'Full day', 'correo', destacado.id)
     for s in (a, b):
@@ -234,7 +234,7 @@ def test_http_admin_modera_suspende_y_publicidad(app):
     plan = admin.post('/api/v1/publicidad/admin/planes', json={'nombre': 'Destacado', 'precio': '80', 'duracion_dias': 30, 'destacado': True}, headers=H).json()
     assert otro.post('/api/v1/publicidad/admin/planes', json={'nombre': 'X', 'precio': '1', 'duracion_dias': 1}, headers=H).status_code in (401, 403)
     assert admin.post('/api/v1/publicidad/admin/planes', json={'nombre': 'Malo', 'precio': '-5', 'duracion_dias': 3}, headers=H).status_code == 422
-    assert len(negocio.get('/api/v1/publicidad/planes').json()['planes']) == 2
+    assert len(negocio.get('/api/v1/publicidad/planes').json()['planes']) == 4   # Básico, Plus, Premium + el nuevo
     assert TestClient(app, base_url=ORIGIN).post('/api/v1/publicidad/solicitudes', json={}, headers=H).status_code == 422
     sin_sesion = TestClient(app, base_url=ORIGIN).post('/api/v1/publicidad/solicitudes', headers=H, json={
         'negocio': 'N', 'rubro': 'otro', 'descripcion': 'D', 'contacto': 'C', 'plan_id': plan['id']})
@@ -247,7 +247,7 @@ def test_http_admin_modera_suspende_y_publicidad(app):
         'negocio': 'X', 'rubro': 'casino', 'descripcion': 'D', 'contacto': 'C', 'plan_id': plan['id']}).status_code == 422
     sid = s['id']
     lista = admin.get('/api/v1/publicidad/admin/solicitudes').json()
-    assert lista['items'][0]['solicitante'] == 'Cuenta Sospechosa' and len(lista['planes']) == 2
+    assert lista['items'][0]['solicitante'] == 'Cuenta Sospechosa' and len(lista['planes']) == 4
     assert admin.post(f'/api/v1/publicidad/admin/solicitudes/{sid}/decision', json={'aprobar': True}, headers=H).status_code == 422
     for req in s['requisitos']:
         admin.put(f'/api/v1/publicidad/admin/solicitudes/{sid}/requisitos', json={'requisito': req, 'cumple': True}, headers=H)
@@ -393,18 +393,23 @@ def test_http_reportes_contenido_y_suspension_masiva(app):
 
 def test_http_directorio_muestra_contacto_solo_con_sesion(app):
     admin, negocio = cliente(app), cliente(app)
-    plan = negocio.get('/api/v1/publicidad/planes').json()['planes'][0]['id']
+    planes = negocio.get('/api/v1/publicidad/planes').json()
+    assert [n['id'] for n in planes['niveles']] == ['basico', 'plus', 'premium']
+    plus = next(p['id'] for p in planes['planes'] if p['nivel'] == 'plus')
     s = negocio.post('/api/v1/publicidad/solicitudes', headers=H, json={
         'negocio': 'Combis Quinua', 'rubro': 'transporte', 'descripcion': 'Salidas a Quinua y Wari', 'contacto': '999 111 222',
-        'plan_id': plan, 'direccion': 'Paradero Pasaje Cáceres', 'lat': -13.157, 'lon': -74.221,
+        'plan_id': plus, 'direccion': 'Paradero Pasaje Cáceres', 'lat': -13.157, 'lon': -74.221, 'whatsapp': '999 111 222',
         'ofertas': [{'nombre': 'Huamanga - Quinua', 'precio_desde': '5', 'detalle': 'Por persona'}]}).json()
-    assert s['ofertas'][0]['precio_desde'] == '5.00' and s['lat'] == -13.157
+    assert s['ofertas'][0]['precio_desde'] == '5.00' and s['lat'] == -13.157 and s['whatsapp'] == '51999111222'
     for req in s['requisitos']:
         admin.put(f"/api/v1/publicidad/admin/solicitudes/{s['id']}/requisitos", json={'requisito': req, 'cumple': True}, headers=H)
+    admin.post(f"/api/v1/publicidad/admin/solicitudes/{s['id']}/pago", json={'referencia': 'YAPE-1'}, headers=H)
     admin.post(f"/api/v1/publicidad/admin/solicitudes/{s['id']}/decision", json={'aprobar': True}, headers=H)
     anon = TestClient(app, base_url=ORIGIN).get('/api/v1/publicidad/directorio?rubro=transporte').json()['items'][0]
-    assert anon['contacto'] is None and anon['requiere_sesion'] and anon['lat'] == -13.157 and anon['patrocinado']
-    assert negocio.get('/api/v1/publicidad/directorio').json()['items'][0]['contacto'] == '999 111 222'
+    assert anon['contacto'] is None and anon['whatsapp'] is None and anon['requiere_sesion'] and anon['lat'] == -13.157
+    assert anon['patrocinado'] and anon['nivel'] == 'plus'
+    con = negocio.get('/api/v1/publicidad/directorio').json()['items'][0]
+    assert con['contacto'] is None and con['whatsapp'] == '51999111222'   # Plus: solo WhatsApp
     assert negocio.get('/api/v1/publicidad/directorio?rubro=casino').status_code == 422
 
 
@@ -477,3 +482,57 @@ def test_http_catalogo_admin(app):
     assert {'slug': 'mirador-de-acuchimay', 'estado': 'retirado'}.items() <= next(i for i in items if i['slug'] == 'mirador-de-acuchimay').items()
     assert admin.post('/api/v1/catalogo/admin/lugares/nada/estado', json={'publicado': True}, headers=H).status_code == 404
     assert otro.post('/api/v1/catalogo/admin/lugares/mirador-de-acuchimay/estado', json={'publicado': True}, headers=H).status_code == 403
+
+
+def test_http_eventos_admin_con_foto(app):
+    admin, otro = cliente(app), cliente(app)
+    anon = TestClient(app, base_url=ORIGIN)
+    nuevo = {'titulo': 'Festival de la Quinua', 'descripcion': 'Música y comida típica.', 'lugar_texto': 'Quinua', 'lugar_slug': 'pueblo-de-quinua',
+             'inicio': '2027-05-01', 'fin': '2027-05-02', 'foto_url': 'https://upload.wikimedia.org/foto.jpg'}
+    assert anon.get('/api/v1/eventos/admin').status_code == 401
+    assert otro.get('/api/v1/eventos/admin').status_code == 403
+    assert otro.post('/api/v1/eventos/admin', json=nuevo, headers=H).status_code == 403
+    r = admin.post('/api/v1/eventos/admin', json=nuevo, headers=H)
+    assert r.status_code == 201 and r.json()['foto_url'] == nuevo['foto_url'] and r.json()['fecha_referencial'] is False
+    eid = r.json()['id']
+    assert any(e['id'] == eid and e['foto_url'] for e in anon.get('/api/v1/eventos').json()['items'])
+    # Validaciones: fechas al revés, foto con otro esquema.
+    assert admin.post('/api/v1/eventos/admin', json={**nuevo, 'fin': '2027-04-01'}, headers=H).status_code == 422
+    assert admin.post('/api/v1/eventos/admin', json={**nuevo, 'foto_url': 'javascript:alert(1)'}, headers=H).status_code == 422
+    r = admin.put(f'/api/v1/eventos/admin/{eid}', json={**nuevo, 'foto_url': '/api/v1/catalogo/fotos/' + 'a' * 32 + '.jpg'}, headers=H)
+    assert r.status_code == 200 and r.json()['foto_url'].endswith('.jpg')
+    assert admin.put('/api/v1/eventos/admin/nada', json=nuevo, headers=H).status_code == 404
+    assert otro.delete(f'/api/v1/eventos/admin/{eid}', headers=H).status_code == 403
+    assert admin.delete(f'/api/v1/eventos/admin/{eid}', headers=H).json()['eliminado'] == 'Festival de la Quinua'
+    assert all(e['id'] != eid for e in anon.get('/api/v1/eventos').json()['items'])
+
+
+def test_transporte_publico_trae_paraderos_y_fuentes():
+    from services.catalogo.transporte import TRANSPORTE
+    assert 'vilcashuaman' in TRANSPORTE
+    for slug, t in TRANSPORTE.items():
+        assert t['paraderos'] and t['tarifa'] and t['tiempo'] and t['fuentes'], slug
+        assert all(f['url'].startswith('https://') for f in t['fuentes'])
+
+
+def test_ruta_a_pie_y_en_auto_usan_servidores_distintos():
+    from services.catalogo.geo import crear_router_geo
+    from fastapi import FastAPI
+    visitadas = []
+
+    class Doble:
+        def get(self, url, params=None):
+            visitadas.append(url)
+            class R:
+                def raise_for_status(self): pass
+                def json(self):
+                    return {'routes': [{'distance': 1000, 'duration': 120 if 'car' in url else 750, 'geometry': {'coordinates': [[-74.2, -13.1], [-74.19, -13.11]]}}]}
+            return R()
+
+    app = FastAPI()
+    app.include_router(crear_router_geo(Doble()))
+    c = TestClient(app)
+    q = '/geo/ruta?desde_lat=-13.1&desde_lon=-74.2&hasta_lat=-13.11&hasta_lon=-74.19&modo='
+    auto, pie = c.get(q + 'driving').json(), c.get(q + 'foot').json()
+    assert auto['duracion_s'] == 120 and pie['duracion_s'] == 750 and not pie['estimado']
+    assert 'routed-car' in visitadas[0] and 'routed-foot' in visitadas[1]

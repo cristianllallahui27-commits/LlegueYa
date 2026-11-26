@@ -34,7 +34,7 @@ def catalogo():
 
 def test_explorar_filtra_y_pagina():
     c = catalogo()
-    assert c.explorar().total == 8
+    assert c.explorar().total == len(LUGARES)
     assert {l.tipo for l in c.explorar(tipo='arqueologico').items} == {'arqueologico'}
     assert [l.slug for l in c.explorar(texto='wari').items] == ['complejo-arqueologico-wari']
     assert c.explorar(destino='Quinua').total == 3
@@ -232,7 +232,7 @@ def test_willaq_eventos_y_saludos_humanizados(willaq):
 
 def test_willaq_solo_agrega_datos_generales_cuando_falta_contenido(willaq):
     comida = willaq.responder('¿Qué puedo comer?', False)
-    assert comida.dato_general and 'puca picante' in comida.parrafos[1]
+    assert not comida.dato_general and 'Todavía no hay restaurantes verificados' in comida.parrafos[0]   # nada de fuera de LlegueYa
     assert willaq.responder('qué tal la altura', False).dato_general
     vilcas = willaq.responder('clima en vilcashuaman', True)
     assert vilcas.lugares[0]['slug'] == 'vilcashuaman' and vilcas.dato_general
@@ -494,3 +494,80 @@ def test_openapi_y_swagger():
     html = c.get('/api/docs').text
     assert '/vendor/swagger-ui/swagger-ui-bundle.js' in html and '/js/swagger.js' in html
     assert c.get('/vendor/swagger-ui/swagger-ui.css').status_code == 200
+
+
+# ------------------------------------------------------------------ Baja de lugares, demostración y fotos propias
+def test_eliminar_lugar_y_demostracion():
+    from services.catalogo.dominio import LugarNoEncontrado
+    c = catalogo()
+    nombre = c.eliminar_lugar('plaza-mayor-huamanga')
+    assert nombre == 'Plaza Mayor de Huamanga'
+    assert c.repositorio.obtener('plaza-mayor-huamanga') is None
+    with pytest.raises(LugarNoEncontrado):
+        c.eliminar_lugar('plaza-mayor-huamanga')
+    # Un lugar creado por administración no es de demostración: sobrevive a la limpieza.
+    propio = c.guardar_lugar({'nombre': 'Picantería Doña Rosa', 'tipo': 'gastronomia', 'destino': 'Huamanga',
+                              'resumen': 'Puca picante los jueves.', 'descripcion': 'Cocina ayacuchana de todos los días.'})
+    c2 = c.eliminar_demostracion()
+    assert c2 == len(LUGARES) - 1
+    assert [l.slug for l in c.explorar().items] == [propio.slug]
+    assert c.eliminar_demostracion() == 0
+
+
+def test_foto_propia_no_exige_autor_ni_licencia_y_la_externa_si():
+    from services.catalogo.dominio import DatosLugarInvalidos
+    base = {'nombre': 'Cerámica de Quinua', 'tipo': 'artesania', 'destino': 'Quinua',
+            'resumen': 'Talleres de cerámica.', 'descripcion': 'Taller donde se modela y pinta cerámica.'}
+    c = catalogo()
+    ok = c.guardar_lugar({**base, 'fotos': [{'url': '/api/v1/catalogo/fotos/' + 'a' * 32 + '.jpg'}]})
+    assert (ok.fotos[0].autor, ok.fotos[0].licencia) == ('LlegueYa', 'Foto propia')
+    with pytest.raises(DatosLugarInvalidos):
+        c.guardar_lugar({**base, 'fotos': [{'url': 'https://ejemplo.org/foto.jpg'}]})
+
+
+def test_subir_foto_valida_formato_y_solo_admin(tmp_path, monkeypatch):
+    from services.catalogo import presentacion
+    monkeypatch.setattr(presentacion, 'CARPETA_FOTOS', tmp_path)
+    assert presentacion.detectar_formato(b'\xff\xd8\xff\xe0' + b'0' * 20)[0] == 'jpg'
+    assert presentacion.detectar_formato(b'\x89PNG\r\n\x1a\n' + b'0')[0] == 'png'
+    assert presentacion.detectar_formato(b'RIFF1234WEBPVP8 ')[0] == 'webp'
+    assert presentacion.detectar_formato(b'RIFF1234WAVEfmt ') is None
+    assert presentacion.detectar_formato(b'<script>alert(1)</script>') is None
+    app = crear_app((ORIGIN, None))
+    c = TestClient(app, base_url=ORIGIN)
+    r = c.post('/api/v1/catalogo/admin/fotos', files={'foto': ('a.jpg', b'\xff\xd8\xff\xe0' + b'0' * 20, 'image/jpeg')},
+               headers={'Origin': ORIGIN})
+    assert r.status_code in (401, 403)             # sin sesión de administración no se sube nada
+    assert c.get('/api/v1/catalogo/fotos/../../.env').status_code in (404, 422)
+    assert c.get('/api/v1/catalogo/fotos/' + 'b' * 32 + '.jpg').status_code == 404
+
+
+def test_geo_busca_y_rutas_con_proveedor_doble_y_cache():
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from services.catalogo.geo import crear_router_geo
+
+    class Resp:
+        def __init__(self, datos): self.datos = datos
+        def raise_for_status(self): pass
+        def json(self): return self.datos
+
+    class Falso:
+        llamadas = 0
+        def get(self, url, params=None):
+            Falso.llamadas += 1
+            if 'photon' in url:
+                return Resp({'features': [
+                    {'geometry': {'coordinates': [-74.22, -13.16]}, 'properties': {'name': 'Plaza Mayor', 'city': 'Huamanga', 'state': 'Ayacucho'}},
+                    {'geometry': {'coordinates': [2.3, 48.8]}, 'properties': {'name': 'Paris'}}]})
+            return Resp({'routes': [{'distance': 1234.4, 'duration': 321.0, 'geometry': {'coordinates': [[-74.2, -13.1], [-74.1, -13.0]]}}]})
+
+    app = FastAPI(); app.include_router(crear_router_geo(Falso()), prefix='/g')
+    c = TestClient(app)
+    r = c.get('/g/geo/buscar', params={'q': 'plaza'}).json()
+    assert [i['nombre'] for i in r['items']] == ['Plaza Mayor']          # fuera de Ayacucho se descarta
+    c.get('/g/geo/buscar', params={'q': 'plaza'})
+    assert Falso.llamadas == 1                                            # segunda vez sale de la caché
+    ruta = c.get('/g/geo/ruta', params={'desde_lat': -13.1, 'desde_lon': -74.2, 'hasta_lat': -13.0, 'hasta_lon': -74.1}).json()
+    assert ruta['distancia_m'] == 1234 and ruta['trazo'][0] == [-13.1, -74.2]
+    assert c.get('/g/geo/ruta', params={'desde_lat': 99, 'desde_lon': 0, 'hasta_lat': 0, 'hasta_lon': 0}).status_code == 422

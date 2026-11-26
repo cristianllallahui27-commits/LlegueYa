@@ -9,6 +9,19 @@ PROFUNDIDAD_MAXIMA = 3          # el esquema admite 5; la lectura móvil se acot
 FOTO_BYTES_MAXIMO = 5 * 1024 * 1024
 OBJETIVOS_LIKE = ('publicacion', 'comentario')
 
+# Reputación: me gusta recibidos en publicaciones publicadas. Umbrales ajustables.
+UMBRAL_CONFIABLE = 5
+UMBRAL_EMBAJADOR = 20
+NIVELES = {'confiable': 'Viajero confiable', 'embajador': 'Embajador de Ayacucho'}
+
+
+def nivel_de_confianza(likes: int):
+    if likes >= UMBRAL_EMBAJADOR:
+        return 'embajador'
+    if likes >= UMBRAL_CONFIABLE:
+        return 'confiable'
+    return None
+
 
 class ReglaVulnerada(ValueError):
     """La solicitud no cumple una regla de negocio; el mensaje es apto para el usuario."""

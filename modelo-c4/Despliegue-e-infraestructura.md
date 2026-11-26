@@ -4,7 +4,7 @@
 
 [Diagramas ampliables en navegador](diagramas/index.html) · [Archivo editable Draw.io](diagramas/LlegueYa-C4.drawio)
 
-Vista complementaria a C4. **Estado:** propuesta de diseño pendiente del SDD, sin servidores contratados ni mediciones. La ubicación física no cambia las responsabilidades de C2. Clean Architecture se mantiene dentro de cada servicio.
+Vista complementaria a C4. Las mediciones de la primera versión (réplicas, caída de un backend y carga) están en [Sprint 2](../docs/07-sprint2/07-validacion-atributos-calidad.md). La ubicación física no cambia las responsabilidades de C2. Clean Architecture se mantiene dentro de cada servicio.
 
 ```mermaid
 flowchart TB

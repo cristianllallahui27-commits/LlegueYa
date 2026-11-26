@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>LlegueYa · La comunidad viajera de Ayacucho</title>
   <meta name="description" content="Descubre Ayacucho con fotos, experiencias de viajeros, fiestas y lugares verificados.">
-  <meta name="theme-color" content="#173F38">
+  <meta name="theme-color" content="#3E7B2E">
   <link rel="icon" href="logo.png">
+  <link rel="preload" href="fuentes/bricolage-grotesque-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fuentes/atkinson-hyperlegible-next-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="css/app.css">
   <script src="vendor/leaflet/leaflet.js" defer></script>
@@ -29,6 +31,7 @@
     <symbol id="i-guardar" viewBox="0 0 24 24"><path d="M6 3.5h12V21l-6-4.5L6 21z"/></symbol>
     <symbol id="i-compartir" viewBox="0 0 24 24"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></symbol>
     <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+    <symbol id="i-salir" viewBox="0 0 24 24"><path d="M9 4.5H6a1.5 1.5 0 0 0-1.5 1.5v12A1.5 1.5 0 0 0 6 19.5h3M15 8l4 4-4 4M19 12H9.5"/></symbol>
     <symbol id="i-cerrar" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
     <symbol id="i-buscar" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></symbol>
     <symbol id="i-foto" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="9" cy="10.5" r="2"/><path d="m21 17-5.5-5.5L6 20"/></symbol>
@@ -39,6 +42,25 @@
     <symbol id="i-tienda" viewBox="0 0 24 24"><path d="M4 9.5 5.5 4h13L20 9.5M4 9.5h16M4 9.5c0 1.4 1.1 2.5 2.7 2.5S9.3 10.9 9.3 9.5c0 1.4 1.2 2.5 2.7 2.5s2.7-1.1 2.7-2.5c0 1.4 1.1 2.5 2.6 2.5S20 10.9 20 9.5M5.5 12v8h13v-8"/></symbol>
     <symbol id="i-bandera" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
     <symbol id="i-salir" viewBox="0 0 24 24"><path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10"/></symbol>
+    <!-- Iconos por categoría (trazo simple, no realista) -->
+    <symbol id="i-tipo-arqueologico" viewBox="0 0 24 24"><path d="M4 20h16M6 20V9m4 11V9m4 11V9m4 11V9M4 9h16M5 9l7-4.5L19 9"/></symbol>
+    <symbol id="i-tipo-natural" viewBox="0 0 24 24"><path d="M2.5 20 9 8.5l4 6.5 2.5-3.5L21.5 20zM17 5.5h.01"/><circle cx="17" cy="5.5" r="1.6"/></symbol>
+    <symbol id="i-tipo-cultural" viewBox="0 0 24 24"><path d="M3 20h18M5 20V10l7-5.5L19 10v10M9.5 20v-5a2.5 2.5 0 0 1 5 0v5M12 4.5V2.5M11 3.5h2"/></symbol>
+    <symbol id="i-tipo-gastronomia" viewBox="0 0 24 24"><path d="M2.5 18h19M4.5 18a7.5 7.5 0 0 1 15 0M12 10.5V8.5M10.5 8.5h3M3 20.5h18"/></symbol>
+    <symbol id="i-tipo-artesania" viewBox="0 0 24 24"><path d="M9.5 3.5h5M10 3.5V6C6.5 7.5 5.5 10.5 5.5 13.5c0 4 2.7 6.5 6.5 6.5s6.5-2.5 6.5-6.5c0-3-1-6-4.5-7.5V3.5M6 12.5h12M6.5 16h11M8.5 14.2l1.5-1.4 1.5 1.4 1.5-1.4 1.5 1.4"/></symbol>
+    <symbol id="i-tipo-camping" viewBox="0 0 24 24"><path d="M2.5 19.5 12 4.5l9.5 15zM12 4.5v15M9.5 19.5 12 14l2.5 5.5"/></symbol>
+    <symbol id="i-tipo-aventura" viewBox="0 0 24 24"><path d="M3 20h18M5.5 20 12 8l6.5 12M12 8V3l4.5 1.7L12 6.5"/></symbol>
+    <symbol id="i-tipo-otro" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.7-6.5-11a6.5 6.5 0 0 1 13 0c0 5.3-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+    <symbol id="i-anterior" viewBox="0 0 24 24"><path d="m14.5 5-7 7 7 7"/></symbol>
+    <symbol id="i-siguiente" viewBox="0 0 24 24"><path d="m9.5 5 7 7-7 7"/></symbol>
+    <symbol id="i-papelera" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-subir" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v4h16v-4"/></symbol>
+    <symbol id="i-bus" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="14" rx="3"/><path d="M4 11h16M8 17.5V20M16 17.5V20"/><circle cx="8" cy="14.3" r=".9"/><circle cx="16" cy="14.3" r=".9"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10.5 5-3v9l-5-3z"/></symbol>
+    <symbol id="i-whatsapp" viewBox="0 0 24 24"><path d="M4 20l1.3-3.9A8.5 8.5 0 1 1 8 19z"/><path d="M9 8.5c0 3.5 2.8 6.5 6.5 6.5l1-1.6-2-1-1 .8c-1-.5-2-1.5-2.5-2.5l.8-1-1-2z"/></symbol>
+    <symbol id="i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-estrella" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/></symbol>
   </svg>
 
   <a class="saltar" href="#vista">Ir al contenido</a>
@@ -54,11 +76,12 @@
         <li><a href="#/inicio" data-ruta="inicio"><svg class="ico"><use href="#i-inicio"/></svg><span>Inicio</span></a></li>
         <li><a href="#/explorar" data-ruta="explorar"><svg class="ico"><use href="#i-explorar"/></svg><span>Explorar</span></a></li>
         <li><a href="#/mapa" data-ruta="mapa"><svg class="ico"><use href="#i-mapa"/></svg><span>Mapa</span></a></li>
+        <li class="solo-escritorio"><a href="#/terminales" data-ruta="terminales"><svg class="ico"><use href="#i-bus"/></svg><span>Terminales</span></a></li>
         <li><a href="#/calendario" data-ruta="calendario"><svg class="ico"><use href="#i-calendario"/></svg><span>Calendario</span></a></li>
         <li><a href="#/servicios" data-ruta="servicios"><svg class="ico"><use href="#i-tienda"/></svg><span>Servicios</span></a></li>
-        <li><a href="#/mi-espacio" data-ruta="mi-espacio"><svg class="ico"><use href="#i-perfil"/></svg><span>Mi espacio</span></a></li>
         <li class="solo-admin" hidden><a href="#/admin" data-ruta="admin"><svg class="ico"><use href="#i-escudo"/></svg><span>Administración</span></a></li>
       </ul>
+      <button class="riel-campana" type="button" data-campana aria-label="Notificaciones"><svg class="ico"><use href="#i-campana"/></svg><span>Notificaciones</span></button>
       <button class="boton boton-principal riel-crear" type="button" data-accion="crear">
         <svg class="ico"><use href="#i-mas"/></svg><span>Publicar</span>
       </button>
@@ -70,6 +93,8 @@
         <span class="marca-texto">Llegue<span>Ya</span></span>
       </a>
       <div class="barra-movil-acciones">
+        <div class="perfil-grupo movil-perfil"><form class="perfil-salir" action="/api/v1/auth/logout" method="post" data-salir hidden><button type="submit" aria-label="Cerrar sesión" title="Cerrar sesión"><svg class="ico"><use href="#i-salir"/></svg></button></form><button class="perfil-boton" type="button" data-perfil aria-haspopup="dialog" aria-expanded="false" aria-controls="perfil-menu" aria-label="Perfil"><span class="perfil-avatar"></span><span class="perfil-rotulo">Perfil</span></button></div>
+        <button class="boton-icono" type="button" data-campana aria-label="Notificaciones"><svg class="ico"><use href="#i-campana"/></svg></button>
         <a class="boton-icono" href="#/mapa" aria-label="Mapa"><svg class="ico"><use href="#i-mapa"/></svg></a>
         <button class="boton-icono" type="button" data-accion="crear" aria-label="Compartir experiencia"><svg class="ico"><use href="#i-mas"/></svg></button>
       </div>
@@ -77,20 +102,14 @@
 
     <main id="vista" class="vista" tabindex="-1" aria-live="polite"></main>
 
-    <aside class="lateral" aria-label="Tu cuenta y sugerencias">
-      <section id="tarjeta-cuenta" class="tarjeta cuenta"></section>
-      <section class="tarjeta">
-        <h2 class="titulo-bloque">Próximas fiestas</h2>
-        <ol id="lateral-eventos" class="lista-eventos-mini"></ol>
-        <a class="enlace-suave" href="#/calendario">Ver calendario</a>
-      </section>
-      <footer class="pie">
-        <p>Fotos de lugares: Wikimedia Commons, con autor y licencia en cada ficha. Mapa © colaboradores de OpenStreetMap.</p>
-        <p>Los lugares marcados como <em>demostración</em> son datos de prueba revisados en fuentes públicas.</p>
-        <p><a href="/api/v1/health">Estado del sistema</a></p>
-      </footer>
-    </aside>
+    <div class="perfil-grupo perfil-flotante"><button class="perfil-campana" type="button" data-campana aria-label="Notificaciones" title="Notificaciones"><svg class="ico"><use href="#i-campana"/></svg></button><button class="perfil-boton" type="button" data-perfil aria-haspopup="dialog" aria-expanded="false" aria-controls="perfil-menu" aria-label="Perfil"><span class="perfil-avatar"></span><span class="perfil-rotulo">Perfil</span></button><form class="perfil-salir" action="/api/v1/auth/logout" method="post" data-salir hidden><button type="submit" aria-label="Cerrar sesión" title="Cerrar sesión"><svg class="ico"><use href="#i-salir"/></svg></button></form></div>
   </div>
+
+  <div id="aviso-red" class="aviso-red" role="status" aria-live="polite" hidden></div>
+  <aside id="aviso-cookies" class="aviso-cookies" hidden role="region" aria-label="Aviso de cookies">
+    <p>Solo usamos cookies necesarias para tu sesión. Sin publicidad ni rastreo. <a href="#/legal">Más información</a></p>
+    <button class="boton boton-principal" type="button" id="aviso-cookies-ok">Entendido</button>
+  </aside>
 
   <!-- Willaq Uma: burbuja flotante que se puede arrastrar; nunca desaparece -->
   <button id="willaq-boton" class="willaq-burbuja" type="button" aria-label="Willaq Uma, tu sabio guía. Pulsa para conversar; arrástralo para moverlo" aria-expanded="false" aria-controls="willaq-panel">
@@ -115,53 +134,97 @@
     </form>
   </section>
 
+  <!-- Puerta de entrada: sin sesión solo se ve esto (fotos del catálogo en movimiento, desenfocadas) -->
+  <div id="puerta" class="puerta" hidden>
+    <div id="puerta-fondo" class="puerta-fondo" aria-hidden="true"></div>
+    <div class="puerta-velo" aria-hidden="true"></div>
+    <div class="puerta-marca">
+      <img src="logo.png" alt="" width="84" height="84">
+      <p class="puerta-nombre">Llegue<span>Ya</span></p>
+      <p class="puerta-lema">Vive Ayacucho como lo cuentan quienes ya llegaron.</p>
+      <ul class="puerta-puntos">
+        <li>Lugares, fiestas y rutas verificadas</li>
+        <li>Fotos y consejos de viajeros reales</li>
+        <li>Willaq Uma, tu sabio guía</li>
+      </ul>
+    </div>
+  </div>
+
   <!-- Diálogos -->
+  <form id="form-google" action="/api/v1/auth/google" method="post" hidden></form>
   <dialog id="dialogo-acceso" class="dialogo dialogo-acceso" aria-labelledby="acceso-titulo">
     <button type="button" class="boton-icono dialogo-cerrar" data-cerrar aria-label="Cerrar"><svg class="ico"><use href="#i-cerrar"/></svg></button>
+    <button type="button" class="acceso-volver boton-icono" data-pestana="bienvenida" aria-label="Volver a la bienvenida" hidden><svg class="ico"><use href="#i-anterior"/></svg></button>
     <img src="logo.png" alt="LlegueYa: llama, montañas y patrimonio de Ayacucho" class="acceso-logo" width="120" height="120">
-    <h2 id="acceso-titulo">Entra a LlegueYa</h2>
-    <p id="acceso-motivo">Con tu cuenta puedes dar me gusta, comentar, conversar con Willaq Uma y compartir tus fotos.</p>
-    <form id="acceso-google" action="/api/v1/auth/google" method="post" hidden>
-      <button class="boton boton-google" type="submit">
-        <svg class="g" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2-1.9 3.2-4.7 3.2-8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1-3.7 1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.1a11 11 0 0 0 0 9.8z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"/></svg>
-        Continuar con Google
-      </button>
-      <p class="separador"><span>o con tu correo</span></p>
-    </form>
-    <div id="acceso-correo" hidden>
-      <div class="pestanas pestanas-acceso" role="tablist" aria-label="Acceso con correo">
+    <h2 id="acceso-titulo">¡Bienvenido a LlegueYa!</h2>
+    <p id="acceso-motivo">Lugares, fiestas y experiencias reales de viajeros en Ayacucho.</p>
+
+    <!-- Paso 1: bienvenida con las tres formas de entrar -->
+    <div id="acceso-bienvenida" class="acceso-paso">
+      <ul class="bienvenida-chips" aria-label="Qué puedes hacer">
+        <li><svg class="ico"><use href="#i-explorar"/></svg>Descubre</li>
+        <li><svg class="ico"><use href="#i-foto"/></svg>Comparte</li>
+        <li><svg class="ico"><use href="#i-chat"/></svg>Pregúntale a Willaq</li>
+      </ul>
+      <div class="bienvenida-opciones">
+        <button class="boton boton-google boton-grande acceso-google-form" type="submit" form="form-google" hidden><svg class="g" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2-1.9 3.2-4.7 3.2-8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1-3.7 1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.1a11 11 0 0 0 0 9.8z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"/></svg> Continuar con Google</button>
+        <button class="boton boton-principal boton-grande solo-correo" type="button" data-pestana="registro">Crear cuenta nueva</button>
+        <p class="separador solo-correo"><span>¿Ya tienes cuenta?</span></p>
+        <button class="boton boton-borde boton-grande solo-correo" type="button" data-pestana="entrar">Iniciar sesión</button>
+      </div>
+      <p class="nota bienvenida-legal">Al continuar aceptas los <a href="#/legal">Términos</a> y la <a href="#/legal">Política de privacidad</a> de LlegueYa.</p>
+    </div>
+
+    <!-- Paso 2: formularios con correo -->
+    <div id="acceso-correo" class="acceso-paso" hidden>
+      <div class="pestanas pestanas-acceso" role="tablist" hidden aria-label="Acceso con correo">
         <button type="button" role="tab" id="tab-entrar" data-pestana="entrar" aria-controls="form-entrar" aria-selected="true">Entrar</button>
         <button type="button" role="tab" id="tab-registro" data-pestana="registro" aria-controls="form-registro" aria-selected="false">Crear cuenta</button>
       </div>
       <form id="form-entrar" class="form-acceso" role="tabpanel" aria-labelledby="tab-entrar" novalidate>
-        <label class="etiqueta" for="entrar-correo">Correo</label>
-        <input id="entrar-correo" name="correo" type="email" autocomplete="email" required maxlength="254">
-        <label class="etiqueta" for="entrar-clave">Clave</label>
-        <input id="entrar-clave" name="clave" type="password" autocomplete="current-password" required maxlength="72">
-        <button class="boton boton-principal" type="submit">Entrar</button>
-        <button class="boton boton-texto" type="button" data-pestana="recuperar">¿Olvidaste tu clave?</button>
+        <label class="etiqueta sr-solo" for="entrar-correo">Correo</label>
+        <input id="entrar-correo" name="correo" type="email" autocomplete="email" required maxlength="254" placeholder="Correo electrónico">
+        <label class="etiqueta sr-solo" for="entrar-clave">Clave</label>
+        <input id="entrar-clave" name="clave" type="password" autocomplete="current-password" required maxlength="72" placeholder="Clave">
+        <button class="boton boton-principal boton-grande" type="submit">Iniciar sesión</button>
+        <button class="boton boton-texto acceso-olvido" type="button" data-pestana="recuperar">¿Olvidaste tu clave?</button>
+        <p class="separador acceso-con-google" hidden><span>o</span></p>
+        <button class="boton boton-google boton-grande acceso-google-form" type="submit" form="form-google" hidden><svg class="g" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2-1.9 3.2-4.7 3.2-8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1-3.7 1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.1a11 11 0 0 0 0 9.8z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"/></svg> Entrar con Google</button>
+        <p class="acceso-cambio">¿No tienes cuenta? <button class="boton-enlace" type="button" data-pestana="registro">Regístrate</button></p>
       </form>
       <form id="form-registro" class="form-acceso" role="tabpanel" aria-labelledby="tab-registro" novalidate hidden>
-        <label class="etiqueta" for="registro-nombre">Tu nombre</label>
-        <input id="registro-nombre" name="nombre" autocomplete="name" required maxlength="120">
-        <label class="etiqueta" for="registro-correo">Correo personal o institucional</label>
-        <input id="registro-correo" name="correo" type="email" autocomplete="email" required maxlength="254" placeholder="tu.nombre@unsch.edu.pe" aria-describedby="registro-correo-nota">
+        <button class="boton boton-google boton-grande acceso-google-form" type="submit" form="form-google" hidden><svg class="g" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2-1.9 3.2-4.7 3.2-8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1-3.7 1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.1a11 11 0 0 0 0 9.8z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"/></svg> Registrarme con Google</button>
+        <p class="separador acceso-con-google" hidden><span>o con tu correo</span></p>
+        <label class="etiqueta sr-solo" for="registro-nombre">Tu nombre</label>
+        <input id="registro-nombre" name="nombre" autocomplete="name" required maxlength="120" placeholder="Tu nombre">
+        <label class="etiqueta sr-solo" for="registro-correo">Correo personal o institucional</label>
+        <input id="registro-correo" name="correo" type="email" autocomplete="email" required maxlength="254" placeholder="Correo (personal o institucional)" aria-describedby="registro-correo-nota">
         <p class="nota" id="registro-correo-nota"></p>
-        <label class="etiqueta" for="registro-clave">Crea una clave</label>
-        <input id="registro-clave" name="clave" type="password" autocomplete="new-password" required minlength="8" maxlength="72" aria-describedby="registro-clave-nota">
-        <p class="nota" id="registro-clave-nota">De 8 a 72 caracteres, con letras y números.</p>
-        <button class="boton boton-principal" type="submit">Crear mi cuenta</button>
+        <label class="etiqueta sr-solo" for="registro-clave">Crea una clave</label>
+        <input id="registro-clave" name="clave" type="password" autocomplete="new-password" required minlength="8" maxlength="72" placeholder="Crea una clave" aria-describedby="registro-clave-nota">
+        <p class="nota" id="registro-clave-nota">De 8 a 72 caracteres, con letras y números. Te enviaremos un código a tu correo para confirmarlo.</p>
+        <button class="boton boton-principal boton-grande" type="submit">Crear mi cuenta</button>
+        <p class="acceso-cambio">¿Ya tienes cuenta? <button class="boton-enlace" type="button" data-pestana="entrar">Inicia sesión</button></p>
+      </form>
+      <form id="form-verificar" class="form-acceso" novalidate hidden>
+        <p class="nota" id="verificar-nota">Te enviamos un código de 6 dígitos a <strong id="verificar-correo-texto"></strong>. Revisa también spam.</p>
+        <input type="hidden" name="correo" id="verificar-correo">
+        <label class="etiqueta sr-solo" for="verificar-codigo">Código de verificación</label>
+        <input id="verificar-codigo" class="campo-codigo" name="codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="12" placeholder="••••••" required>
+        <button class="boton boton-principal boton-grande" type="submit">Verificar y entrar</button>
+        <button class="boton boton-texto" type="button" id="verificar-reenviar">Reenviar código</button>
+        <button class="boton boton-texto" type="button" data-pestana="registro">Usar otro correo</button>
       </form>
       <form id="form-recuperar" class="form-acceso" novalidate hidden>
-        <h3 class="subtitulo">Recupera tu clave</h3>
         <p class="nota">Te enviaremos un enlace para crear una clave nueva. Ábrelo en este mismo navegador.</p>
-        <label class="etiqueta" for="recuperar-correo">Correo de tu cuenta</label>
-        <input id="recuperar-correo" name="correo" type="email" autocomplete="email" required maxlength="254">
-        <button class="boton boton-principal" type="submit">Enviar enlace</button>
-        <button class="boton boton-texto" type="button" data-pestana="entrar">Volver a entrar</button>
+        <label class="etiqueta sr-solo" for="recuperar-correo">Correo de tu cuenta</label>
+        <input id="recuperar-correo" name="correo" type="email" autocomplete="email" required maxlength="254" placeholder="Correo de tu cuenta">
+        <button class="boton boton-principal boton-grande" type="submit">Enviar enlace</button>
+        <p class="acceso-cambio"><button class="boton-enlace" type="button" data-pestana="entrar">Volver a iniciar sesión</button></p>
       </form>
     </div>
     <p class="nota" id="acceso-estado" role="status" aria-live="polite"></p>
+    <p class="pie-enlaces acceso-legal"><a href="#/legal">Privacidad</a> <a href="#/legal">Cookies</a> <a href="#/legal">Términos</a></p>
   </dialog>
 
   <dialog id="dialogo-reporte" class="dialogo dialogo-reporte" aria-labelledby="reporte-titulo">

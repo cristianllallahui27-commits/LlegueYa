@@ -150,4 +150,23 @@ import { enlaceComoLlegar } from '../../../apps/web/js/util.js';
 test('Cómo llegar abre Google Maps hacia el punto', () => {
   assert.equal(enlaceComoLlegar(-13.06056, -74.19889), 'https://www.google.com/maps/dir/?api=1&destination=-13.060560,-74.198890');
   assert.equal(enlaceComoLlegar('-13.1', '-74.2'), 'https://www.google.com/maps/dir/?api=1&destination=-13.100000,-74.200000');
+  assert.equal(enlaceComoLlegar(-13.16, -74.22, 'Arco del Triunfo'), 'https://www.google.com/maps/dir/?api=1&destination=Arco%20del%20Triunfo%2C%20Ayacucho%2C%20Per%C3%BA');
+});
+
+import { precioPlan, sinRepetir } from '../../../apps/web/js/util.js';
+
+test('sinRepetir quita de la descripción las frases que ya dice el resumen', () => {
+  const resumen = 'Mirador colonial con vista panorámica de la ciudad.';
+  const texto = 'Mirador colonial con vista panorámica. Tiene escalinatas de piedra y un arco histórico.';
+  assert.deepEqual(sinRepetir(texto, resumen), ['Tiene escalinatas de piedra y un arco histórico.']);
+  // Si todo se repite, conserva el texto original para no dejar la ficha vacía.
+  assert.deepEqual(sinRepetir('Mirador colonial panorámica.', resumen), ['Mirador colonial panorámica.']);
+  assert.deepEqual(sinRepetir('', resumen), ['']);
+});
+
+test('precioPlan muestra moneda y periodo del plan', () => {
+  assert.equal(precioPlan({ precio: '0', moneda: 'PEN', duracion_dias: 30 }), 'Gratis');
+  assert.equal(precioPlan({ precio: '20.00', moneda: 'PEN', duracion_dias: 30 }), 'S/ 20 / mes');
+  assert.equal(precioPlan({ precio: '59', moneda: 'USD', duracion_dias: 365 }), 'US$ 59 / año');
+  assert.equal(precioPlan({ precio: '12.50', moneda: 'PEN', duracion_dias: 90 }), 'S/ 12.50 / 90 días');
 });

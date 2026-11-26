@@ -1,54 +1,62 @@
-# LlegueYa distribuida en local: nginx (web + gateway) y servicios separados.
-#   docker compose up --build        →  http://127.0.0.1:8080
-# Para Google en este modo, añade http://127.0.0.1:8080/api/v1/auth/callback en Supabase.
-x-servicio: &servicio
-  build: .
-  read_only: true
-  tmpfs: [/tmp]
-  security_opt: [no-new-privileges:true]
-  restart: unless-stopped
-
+# LlegueYa en contenedores (Guía de Laboratorio 06): aplicación + PostgreSQL con volumen y healthcheck.
+#   copy env.docker.ejemplo .env.docker   (completar contraseñas propias; NO subir a Git)
+#   docker compose --env-file .env.docker config
+#   docker compose --env-file .env.docker up --build -d
+#   docker compose --env-file .env.docker ps
+# NUNCA usar `docker compose down -v`: borra el volumen con los datos.
 services:
-  web:
-    image: nginx:1.27-alpine
-    ports: ["127.0.0.1:8080:80"]
-    volumes:
-      - ./infra/nginx/llegueya.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./apps/web:/usr/share/nginx/html:ro
-    depends_on: [gateway, catalogo, comunidad]
+  db:
+    image: postgres:16-alpine
     restart: unless-stopped
-
-  # Identidad + Eventos + Willaq Uma (las sesiones viven en memoria: una sola réplica).
-  gateway:
-    <<: *servicio
     environment:
-      SERVICIO: gateway
-      APP_ORIGIN: http://127.0.0.1:8080
+      POSTGRES_DB: llegueya
+      POSTGRES_USER: llegueya_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Completa POSTGRES_PASSWORD en .env.docker}
+      DB_CATALOGO_PASSWORD: ${DB_CATALOGO_PASSWORD:?Completa DB_CATALOGO_PASSWORD en .env.docker}
+      DB_COMUNIDAD_PASSWORD: ${DB_COMUNIDAD_PASSWORD:?Completa DB_COMUNIDAD_PASSWORD en .env.docker}
+    volumes:
+      - llegueya_pgdata:/var/lib/postgresql/data
+      - ./infra/docker/db-init:/docker-entrypoint-initdb.d:ro
+      - ./supabase/migrations:/migraciones:ro
+      - ./supabase/seed:/semillas:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U llegueya_admin -d llegueya"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    ports:
+      - "127.0.0.1:5433:5432"
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      # Con Cloudflare: la dirección pública https (el script de publicación la completa sola).
+      APP_ORIGIN: ${APP_ORIGIN:-http://127.0.0.1:8000}
       ADMIN_CORREOS: ${ADMIN_CORREOS:-}
-      SUPABASE_GOOGLE_ACTIVO: ${SUPABASE_GOOGLE_ACTIVO:-false}
-      BORDE_CLAVE: ${BORDE_CLAVE:-}
       SUPABASE_PROJECT_URL: ${SUPABASE_PROJECT_URL:-}
       SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-}
-      DB_CATALOGO_DSN: ${DB_CATALOGO_DSN:-}
-
-  # Sin estado propio: escala horizontalmente detrás de nginx.
-  catalogo:
-    <<: *servicio
-    deploy: { replicas: 2 }
-    environment:
-      SERVICIO: catalogo
-      APP_ORIGIN: http://127.0.0.1:8080
-      IDENTIDAD_URL: http://gateway:8000
-      DB_CATALOGO_DSN: ${DB_CATALOGO_DSN:-}
-      CATALOGO_CACHE_TTL: "60"
-
-  # Con DB_COMUNIDAD_DSN (Supabase) puede tener varias réplicas; sin ella usa memoria (1 réplica).
-  comunidad:
-    <<: *servicio
-    tmpfs: [/tmp, /app/data]
-    environment:
-      SERVICIO: comunidad
-      APP_ORIGIN: http://127.0.0.1:8080
-      IDENTIDAD_URL: http://gateway:8000
-      DB_COMUNIDAD_DSN: ${DB_COMUNIDAD_DSN:-}
+      SUPABASE_GOOGLE_ACTIVO: ${SUPABASE_GOOGLE_ACTIVO:-false}
+      DB_CATALOGO_DSN: postgresql://svc_catalogo:${DB_CATALOGO_PASSWORD}@db:5432/llegueya
+      DB_COMUNIDAD_DSN: postgresql://svc_comunidad:${DB_COMUNIDAD_PASSWORD}@db:5432/llegueya
+      COMUNIDAD_AUTOPUBLICAR: ${COMUNIDAD_AUTOPUBLICAR:-true}
+      CATALOGO_FOTOS_DIR: /app/data/fotos/catalogo
       COMUNIDAD_FOTOS_DIR: /app/data/fotos
+      PUBLICIDAD_FOTOS_DIR: /app/data/fotos/negocios
+    volumes:
+      - llegueya_fotos:/app/data/fotos
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  llegueya_pgdata:
+  llegueya_fotos:

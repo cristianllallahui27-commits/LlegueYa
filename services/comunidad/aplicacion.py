@@ -8,7 +8,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Optional, Protocol
-from .dominio import (COMENTARIO_MAXIMO, MOTIVOS_REPORTE, OBJETIVOS_LIKE, PROFUNDIDAD_MAXIMA, TEXTO_MAXIMO, Autor,
+from .dominio import (nivel_de_confianza, COMENTARIO_MAXIMO, MOTIVOS_REPORTE, OBJETIVOS_LIKE, PROFUNDIDAD_MAXIMA, TEXTO_MAXIMO, Autor,
                       Comentario, NoEncontrado, Publicacion, ReglaVulnerada, Reporte, limpiar_texto, tipo_de_imagen)
 
 
@@ -16,6 +16,8 @@ class RepositorioComunidad(Protocol):
     def guardar_autor(self, autor: Autor) -> None: ...
     def crear_publicacion(self, p: Publicacion) -> None: ...
     def publicacion(self, id: str, viewer: Optional[str]) -> Optional[Publicacion]: ...
+    def likes_por_autor(self, autor_ids=None) -> dict: ...
+    def autor_de(self, autor_id: str): ...
     def publicaciones(self, viewer: Optional[str], desde: int, limite: int,
                       lugar: Optional[str] = None, autor: Optional[str] = None) -> list: ...
     def crear_comentario(self, c: Comentario) -> None: ...
@@ -44,6 +46,7 @@ class VistaPublicacion:
     me_gusta: bool
     comentarios: int
     guardada: bool
+    autor_likes: int = 0
 
 
 @dataclass(frozen=True)
@@ -67,9 +70,9 @@ class Comunidad:
         self.reloj, self.nuevo_id = reloj, nuevo_id
 
     # --- lectura ---------------------------------------------------------
-    def muro(self, viewer: Optional[str], desde=0, limite=10, lugar=None, autor=None) -> list:
+    def muro(self, viewer: Optional[str], desde=0, limite=10, lugar=None, autor=None, con_foto=False) -> list:
         limite = min(max(1, limite), self.LIMITE_MAXIMO)
-        pubs = self.repo.publicaciones(viewer, max(0, desde), limite, lugar, autor)
+        pubs = self.repo.publicaciones(viewer, max(0, desde), limite, lugar, autor, con_foto)
         return self._vistas(pubs, viewer)
 
     def guardadas(self, usuario: str) -> list:
@@ -227,5 +230,24 @@ class Comunidad:
         mios = self.repo.likes_de(viewer, 'publicacion', ids) if viewer else set()
         coms = self.repo.contar_comentarios(ids, viewer)
         guardadas = set(self.repo.guardados(viewer)) if viewer else set()
-        return [VistaPublicacion(p, likes.get(p.id, 0), p.id in mios, coms.get(p.id, 0), p.id in guardadas)
+        reputacion = self.repo.likes_por_autor(sorted({p.autor.id for p in pubs})) if pubs else {}
+        return [VistaPublicacion(p, likes.get(p.id, 0), p.id in mios, coms.get(p.id, 0), p.id in guardadas,
+                                 reputacion.get(p.autor.id, 0))
                 for p in pubs]
+
+    def reputacion(self, autor_id: str) -> int:
+        return self.repo.likes_por_autor([autor_id]).get(autor_id, 0)
+
+    def destacados(self, limite=6) -> list:
+        """Viajeros con más me gusta recibidos (solo quienes ya alcanzaron el nivel confiable)."""
+        ranking = sorted(self.repo.likes_por_autor().items(), key=lambda kv: -kv[1])
+        salida = []
+        for autor_id, total in ranking:
+            if nivel_de_confianza(total) is None:
+                break
+            autor = self.repo.autor_de(autor_id)
+            if autor is not None:
+                salida.append((autor, total))
+            if len(salida) >= limite:
+                break
+        return salida

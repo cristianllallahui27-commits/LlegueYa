@@ -68,14 +68,23 @@ describe('Acceso con correo (RF01, EQ-04)', () => {
     expect(otroSitio.status).toBe(403);
   });
 
-  test('límite de intentos: tras 10 intentos por minuto responde 429', async () => {
+  test('límite por IP: tras 10 intentos por minuto responde 429 y otras IP siguen atendidas', async () => {
     const atacante = new Cliente({ ip: '203.0.113.50' });
     const estados = [];
-    for (let i = 0; i < 12; i++) estados.push((await atacante.post('/api/v1/auth/entrar', { correo: 'victima@llegueya.test', clave: `intento${i}x` })).status);
+    for (let i = 0; i < 12; i++) estados.push((await atacante.post('/api/v1/auth/entrar', { correo: correoNuevo(), clave: `intento${i}x` })).status);
     expect(estados.slice(0, 10)).toEqual(Array(10).fill(401));
     expect(estados.at(-1)).toBe(429);
-    // Otra IP no queda bloqueada.
-    expect((await new Cliente().post('/api/v1/auth/entrar', { correo: 'victima@llegueya.test', clave: 'intento99x' })).status).toBe(401);
+    expect((await new Cliente().post('/api/v1/auth/entrar', { correo: correoNuevo(), clave: 'intento99x' })).status).toBe(401);
+  });
+
+  test('bloqueo por cuenta: tras 5 claves incorrectas la cuenta se bloquea aunque cambie la IP', async () => {
+    const correo = correoNuevo();
+    const estados = [];
+    for (let i = 0; i < 5; i++) estados.push((await new Cliente().post('/api/v1/auth/entrar', { correo, clave: `intento${i}x` })).status);
+    expect(estados).toEqual([401, 401, 401, 401, 429]);
+    const otraIp = await new Cliente().post('/api/v1/auth/entrar', { correo, clave: 'intento9x' });
+    expect(otraIp.status).toBe(429);
+    expect(otraIp.json.detail).toMatch(/bloqueamos/);
   });
 
   test('candado de origen: sin pasar por el Worker de Cloudflare la API responde 403', async () => {

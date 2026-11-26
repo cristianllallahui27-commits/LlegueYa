@@ -6,7 +6,7 @@
 |---|---|
 | [1. Estilo y patrón arquitectónico](01-estilo-y-patron-arquitectonico.md) | Servicios de negocio + Clean Architecture llevados a código, con diagramas y la prueba que vigila la regla de dependencias |
 | [2. Especificaciones SDD](02-especificaciones-sdd.md) | Nueve funcionalidades con historia de usuario, criterios de aceptación (Dado/Cuando/Entonces), tareas técnicas y pruebas |
-| [3. API REST y OpenAPI](03-api-rest-openapi.md) | Swagger UI, contrato OpenAPI 3, convenciones y las 60 operaciones |
+| [3. API REST y OpenAPI](03-api-rest-openapi.md) | Swagger UI, contrato OpenAPI 3, convenciones y las 80 operaciones |
 | [4. Base de datos y caché](04-base-de-datos-y-cache.md) | Comportamiento medido de PostgreSQL (RLS, índices, planes de ejecución) y estrategia de caché en cuatro niveles |
 | [5. SOLID y patrones](05-solid-y-patrones.md) | Cada principio y patrón con la clase donde se aplica |
 | [6. Pruebas y CI/CD](06-pruebas-automatizadas-y-ci.md) | Jest, pytest, Playwright, cobertura ≥ 90 % y flujo de GitHub Actions |
@@ -20,13 +20,13 @@
 
 | # | Actividad pedida | Cómo se cumple | Evidencia |
 |---|---|---|---|
-| 1 | Implementar el estilo arquitectónico | Siete servicios de negocio con datos propios, entrada API única y despliegue independiente por servicio; borde en Cloudflare con réplicas | [Doc. 1 §1.1](01-estilo-y-patron-arquitectonico.md#11-estilo-servicios-de-negocio-detrás-de-una-entrada-única) · `services/` · `compose.yaml` · `infra/` |
+| 1 | Implementar el estilo arquitectónico | Siete servicios de negocio con datos propios, entrada API única y despliegue independiente por servicio; borde en Cloudflare con réplicas | [Doc. 1 §1.1](01-estilo-y-patron-arquitectonico.md#11-estilo-servicios-de-negocio-detrás-de-una-entrada-única) · `services/` · `infra/` |
 | 2 | Aplicar el patrón arquitectónico (Clean Architecture) | Dominio, aplicación (casos de uso + puertos), infraestructura (adaptadores) y presentación en los 7 servicios; la regla de dependencias se prueba en cada cambio | [Doc. 1 §1.2](01-estilo-y-patron-arquitectonico.md#12-patrón-clean-architecture-en-cada-servicio) · `tests/test_arquitectura.py` |
 | 3 | Especificaciones SDD con criterios de aceptación y tareas técnicas | 9 funcionalidades, 43 criterios de aceptación enlazados a sus pruebas | [Doc. 2](02-especificaciones-sdd.md) · [SDD](../05-sdd/README.md) |
-| 4 | Endpoints REST funcionales documentados con OpenAPI/Swagger | 60 operaciones en 8 grupos; Swagger UI en `/api/docs`; contrato exportado y verificado en el CI | [Doc. 3](03-api-rest-openapi.md) · [`api/openapi.json`](api/openapi.json) |
-| 5 | Analizar el comportamiento de la base de datos y la estrategia de caché | Mediciones con 20 000 publicaciones: índices, RLS, planes de ejecución; caché en navegador, CDN, proceso y ETag | [Doc. 4](04-base-de-datos-y-cache.md) · [`evidencias/bd-y-cache.json`](evidencias/bd-y-cache.json) |
+| 4 | Endpoints REST funcionales documentados con OpenAPI/Swagger | 80 operaciones en 8 grupos; Swagger UI en `/api/docs`; contrato exportado y verificado en el CI | [Doc. 3](03-api-rest-openapi.md) · [`api/openapi.json`](api/openapi.json) |
+| 5 | Analizar el comportamiento de la base de datos y la estrategia de caché | Mediciones con 20 000 publicaciones: índices, RLS, planes de ejecución; caché en navegador, CDN, borde y proceso | [Doc. 4](04-base-de-datos-y-cache.md) · [`evidencias/bd-y-cache.json`](evidencias/bd-y-cache.json) |
 | 6 | Aplicar principios SOLID y patrones de diseño | Los cinco principios y 13 patrones, cada uno con su clase | [Doc. 5](05-solid-y-patrones.md) |
-| 7 | Pruebas automatizadas con Jest integradas en CI/CD con GitHub Actions | Jest (unidad + reglas de negocio de la API) con cobertura ≥ 90 %; job `jest` en `.github/workflows/ci.yml`, junto a pytest, Playwright y k6 | [Doc. 6](06-pruebas-automatizadas-y-ci.md) · `jest.config.mjs` · `tests/jest/` |
+| 7 | Pruebas automatizadas con Jest integradas en CI/CD con GitHub Actions | Jest: 28 pruebas unitarias y 59 de reglas de negocio de la API, con cobertura ≥ 90 %; job `jest` en `.github/workflows/ci.yml`, junto a pytest, Playwright y k6 | [Doc. 6](06-pruebas-automatizadas-y-ci.md) · `jest.config.mjs` · `tests/jest/` |
 | 8 | Pruebas de atributos de calidad (k6 hasta 2 000 usuarios, Jest…) | k6 con rampa progresiva 200 → 500 → 1 000 → 2 000 usuarios concurrentes, 1 y 2 réplicas; matriz de seguridad con Jest; *failover*; arquitectura | [Doc. 7](07-validacion-atributos-calidad.md) · `tests/carga/k6-plataforma.js` |
 
 ### Entregables

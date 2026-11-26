@@ -24,7 +24,7 @@ if sin_resumen:
 if '--check' in sys.argv:
     if not DESTINO.exists() or DESTINO.read_text(encoding='utf-8') != texto:
         sys.exit('openapi.json está desactualizado: ejecuta python scripts/exportar-openapi.py')
-    print('OpenAPI al día:', len(contrato['paths']), 'rutas')
+    print('OpenAPI al día:', sum(len(v) for v in contrato['paths'].values()), 'operaciones')
 else:
     DESTINO.write_text(texto, encoding='utf-8')
     print('Escrito', DESTINO.relative_to(DESTINO.parents[3]), '·', sum(len(v) for v in contrato['paths'].values()), 'operaciones')

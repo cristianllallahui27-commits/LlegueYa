@@ -1,9 +1,22 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LlegueYa · SDD</title><link rel="stylesheet" href="assets/lector.css"></head><body><aside><img src="assets/logo-llegueya.png" alt="Logo original de LlegueYa"><h2>LlegueYa</h2><p>Diseño de software<br>Línea base 1.0 · 28 octubre 2026</p><nav aria-label="Capítulos del SDD"><a href="#sdd">Portada e índice</a><a href="#01">01 · Alcance y reglas del diseño</a><a href="#02">02 · Arquitectura y decisiones técnicas</a><a href="#03">03 · Diseño de servicios, capas y SOLID</a><a href="#04">04 · Modelo de datos y Supabase</a><a href="#05">05 · Contratos de API e integraciones</a><a href="#06">06 · Comportamiento, secuencias y estados</a><a href="#07">07 · Interfaz y experiencia de lectura</a><a href="#08">08 · Seguridad, privacidad y credenciales</a><a href="#09">09 · Despliegue y operación</a><a href="#10">10 · Trazabilidad, validación y pendientes</a><a href="#11">11 · Plan de pruebas y puertas de calidad</a><a href="#referencias">Referencias y correspondencia metodológica</a></nav><button class="print" onclick="window.print()">Imprimir o guardar PDF</button></aside><main><p class="masthead">Turismo de Ayacucho · documentación de diseño</p><a class="preview" href="vista-previa-acceso.html">Ver diseño de acceso y logo animado</a><section id="sdd" class="chapter"><h1>LlegueYa · Descripción del diseño de software</h1>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LlegueYa · SDD</title><link rel="stylesheet" href="assets/lector.css"></head><body><aside><img src="assets/logo-llegueya.png" alt="Logo original de LlegueYa"><h2>LlegueYa</h2><p>Diseño de software<br>Línea base 1.0 · 28 octubre 2026</p><nav aria-label="Capítulos del SDD"><a href="#sdd">Portada e índice
+</a><a href="#01">01 · Alcance y reglas del diseño
+</a><a href="#02">02 · Arquitectura y decisiones técnicas
+</a><a href="#03">03 · Diseño de servicios, capas y SOLID
+</a><a href="#04">04 · Modelo de datos y Supabase
+</a><a href="#05">05 · Contratos de API e integraciones
+</a><a href="#06">06 · Comportamiento, secuencias y estados
+</a><a href="#07">07 · Interfaz y experiencia de lectura
+</a><a href="#08">08 · Seguridad, privacidad y credenciales
+</a><a href="#09">09 · Despliegue y operación
+</a><a href="#10">10 · Trazabilidad, validación y pendientes
+</a><a href="#11">11 · Plan de pruebas y puertas de calidad
+</a><a href="#referencias">Referencias y correspondencia metodológica
+</a></nav><button class="print" onclick="window.print()">Imprimir o guardar PDF</button></aside><main><p class="masthead">Turismo de Ayacucho · documentación de diseño</p><a class="preview" href="vista-previa-acceso.html">Ver diseño de acceso y logo animado</a><section id="sdd" class="chapter"><h1>LlegueYa · Descripción del diseño de software</h1>
 <blockquote>
-<p>Estado de implementación (29/10/2026): existe una primera capacidad de Identidad con Google y pruebas locales. Consultar <a href="../06-desarrollo/README.md">estado real y ejecución</a>. Las descripciones de producto y pruebas futuras de esta línea base no acreditan que todos los servicios estén implementados.</p>
+<p>Este SDD es la línea base de diseño. Lo implementado, cómo ejecutarlo y las mediciones de la primera versión están en <a href="../06-desarrollo/README.md">Desarrollo</a> y en <a href="../07-sprint2/README.md">Sprint 2</a>.</p>
 </blockquote>
 <p><strong>SDD 1.0 · Línea base de diseño · 28 de octubre de 2026</strong></p>
-<p>Plataforma social de turismo de Ayacucho, centrada en lectura, fotografías y planificación. Este SDD especifica el diseño que orientará la implementación. No acredita una aplicación desplegada, recursos contratados ni pruebas ejecutadas. Los valores operativos propuestos se distinguen de las reglas aprobadas.</p>
+<p>Plataforma social de turismo de Ayacucho, centrada en lectura, fotografías y planificación. Este SDD especifica el diseño que guía la implementación. Los valores operativos propuestos se distinguen de las reglas aprobadas.</p>
 <p><a href="index.html">Leer el documento con navegación</a> · <a href="../README.md">Índice general de documentación</a> · <a href="../../modelo-c4/README.md">Modelo C4</a></p>
 <h2>Lectura del documento</h2>
 <div class="table-wrap"><table>
@@ -88,15 +101,15 @@
 </tr>
 <tr>
 <td>Diseño aprobado por alcance</td>
-<td>Supabase, Docker, Cloudflare, Gemini; mapa interactivo sin geolocalización.</td>
+<td>Supabase, Docker, Cloudflare y Gemini como integración opcional del asistente; mapa interactivo con ubicación solo si la persona la activa.</td>
 </tr>
 <tr>
 <td>Diseño propuesto por el equipo</td>
 <td>Python/FastAPI, frontend HTML/CSS/JavaScript, Leaflet y mensajería RabbitMQ.</td>
 </tr>
 <tr>
-<td>Pendientes de ejecución</td>
-<td>Implementar, fijar versiones exactas tras compatibilidad, contratar alojamiento y ejecutar validaciones.</td>
+<td>Implementación y validación</td>
+<td>Primera versión en <code>services/</code> y <code>apps/web/</code>; pruebas y mediciones en <a href="../07-sprint2/README.md">Sprint 2</a>.</td>
 </tr>
 <tr>
 <td>Control de cambios</td>
@@ -106,7 +119,7 @@
 <h2>Propiedad de la información</h2>
 <p>Los requisitos pertenecen al análisis y a la especificación funcional; las decisiones generales al registro ADR; los diagramas C4 a <code>modelo-c4/</code>. Este SDD es la fuente del diseño detallado de datos, contratos, estados e interfaz. El resumen de tecnología enlaza al capítulo 02. Los gráficos derivados y el lector HTML se generan desde las fuentes de documentación, sin duplicar decisiones editables.</p>
 <p>La estructura se inspira en descripción de diseño y vistas de arquitectura, adaptadas al curso. No se afirma certificación formal IEEE. La <a href="#referencias">matriz metodológica</a> explica su correspondencia.</p>
-<p><strong>Convención:</strong> «debe» identifica una obligación del diseño; «propuesto» identifica un valor que requiere validación; «pendiente» marca una decisión externa o una tarea aún no ejecutada. Los ejemplos usan identificadores ficticios. No hay código de aplicación en esta entrega.</p>
+<p><strong>Convención:</strong> «debe» identifica una obligación del diseño; «propuesto» identifica un valor que requiere validación; «pendiente» marca una decisión externa o una tarea aún no ejecutada. Los ejemplos usan identificadores ficticios.</p>
 <p class="back"><a href="#sdd">Volver al índice</a> · <a href="README.md">Fuente Markdown</a></p></section><section id="01" class="chapter"><h1>01 · Alcance y reglas del diseño</h1>
 <p><a href="#sdd">Índice</a> · <a href="#02">Siguiente: arquitectura</a></p>
 <h2>1.1 Propósito y lectores</h2>
@@ -741,7 +754,7 @@
     PUBLICIDAD_CAMPANIA ||--o{ PUBLICIDAD_RESERVA : limita
     ASISTENTE_CONVERSACION ||--o{ ASISTENTE_MENSAJE : contiene
 </code></pre></details>
-<p>Los prefijos indican el esquema propietario. El gráfico muestra relaciones locales representativas. Las referencias entre dominios son ids remotos y no se dibujan como claves foráneas. El diccionario es la definición lógica. La línea base DDL está en <a href="../../supabase/README.md">supabase/migrations</a>, con 64 tablas; su aplicación remota se verifica por separado.</p>
+<p>Los prefijos indican el esquema propietario. El gráfico muestra relaciones locales representativas. Las referencias entre dominios son ids remotos y no se dibujan como claves foráneas. El diccionario es la definición lógica. La línea base DDL está en <a href="../../supabase/README.md">supabase/migrations</a>, con 67 tablas; su aplicación remota se verifica con la consulta de esa guía.</p>
 <h2>4.5 Acceso a PostgreSQL y RLS</h2>
 <p>Los esquemas de negocio no se exponen a la Data API pública de Supabase en esta línea base. El navegador usa las APIs de LlegueYa. Los roles <code>svc_identidad</code>, <code>svc_catalogo</code>, etc., tienen USAGE y permisos mínimos exclusivamente en su esquema y no son propietarios, superusuarios ni BYPASSRLS. El rol de migración es distinto y no se usa para tráfico normal.</p>
 <p>Las APIs validan JWT y permisos; para tablas personales con RLS, establecen contexto de usuario validado a nivel <strong>transacción</strong>, nunca desde campos enviados por el cliente. El contexto se limpia al devolver conexiones al pool. Las políticas verifican propietario/estado; las tareas internas utilizan un rol específico y alcance explícito. Se probarán accesos con todos los roles y con contexto ausente. RLS no reemplaza autorización de negocio ni protege automáticamente a un rol que pueda omitirla.</p>
@@ -2017,7 +2030,7 @@
 <p>Esta entrega no contiene secretos reales, no crea cuentas ni servicios externos y no realiza commit/push. La aplicación, pruebas de ejecución y despliegue permanecen por desarrollar.</p>
 <p class="back"><a href="#sdd">Volver al índice</a> · <a href="10-trazabilidad-y-validacion.md">Fuente Markdown</a></p></section><section id="11" class="chapter"><h1>11 · Plan de pruebas y puertas de calidad</h1>
 <blockquote>
-<p>Estado de implementación (29/10/2026): existe una primera capacidad de Identidad con Google y pruebas locales. Consultar <a href="../06-desarrollo/README.md">estado real y ejecución</a>. Las descripciones de producto y pruebas futuras de esta línea base no acreditan que todos los servicios estén implementados.</p>
+<p>Este SDD es la línea base de diseño. Lo implementado, cómo ejecutarlo y las mediciones de la primera versión están en <a href="../06-desarrollo/README.md">Desarrollo</a> y en <a href="../07-sprint2/README.md">Sprint 2</a>.</p>
 </blockquote>
 <p><a href="#sdd">Índice</a> · <a href="#10">Trazabilidad</a></p>
 <h2>11.1 Alcance y criterio del 90 %</h2>
@@ -2173,8 +2186,8 @@
 <p>Herramientas propuestas: pytest y coverage.py para Python; Playwright para navegador; comprobador de tipos y reglas de importación para Clean; escáner de secretos y dependencias; axe para análisis automático de accesibilidad, complementado con evaluación manual. No se instalan ni se consideran operativas por mencionarlas aquí. Coverage.py puede bloquear por umbral, pero el control separado de líneas y ramas exige revisar ambos contadores del reporte, no solo el total combinado.</p>
 <p>Cada ejecución conserva fecha, revisión Git y estado de cambios, versiones, entorno, casos aprobados/fallidos/omitidos, duración, cobertura por servicio, incidencias y artefactos saneados. No se guardan tokens, cookies, correos reales ni cuerpos privados. Los reportes voluminosos y capturas se generan en <code>reports/</code> (ignorado); el resumen aceptado puede referenciarse en esta documentación. Una ejecución vacía o un reporte de otra revisión bloquea la entrega.</p>
 <h2>11.5 Comprobaciones disponibles hoy</h2>
-<p>El código ejecutable de comprobación está en <a href="../../tests/README.md">tests/README.md</a>. Verifica la integración <strong>entre documentos HTML, navegación y recursos locales</strong>, además de controles funcionales de la vista previa en un navegador real. No sustituye IT01–IT08 ni mide cobertura del backend inexistente. El lector ofrece el capítulo 11 y conserva la vista de acceso para inspección visual.</p>
-<p>Estado del código principal: <strong>pendiente de implementación; cobertura no medible</strong>. Estado de integraciones externas, carga, seguridad dinámica y recuperación: <strong>no ejecutadas</strong>. El resultado local se genera al ejecutar la suite; no se deduce de este plan.</p>
+<p>Las suites ejecutables están descritas en <a href="../../tests/README.md">tests/README.md</a>: pytest (dominio, casos de uso, HTTP, PostgreSQL con RLS y reglas de arquitectura), Jest (lógica web, borde Cloudflare y reglas de negocio de la API), Playwright (recorridos End to End) y k6 (carga). <code>tests/calidad-local.mjs</code> revisa además la integración entre documentos HTML, navegación y recursos locales.</p>
+<p>Los resultados medidos de la primera versión (cobertura por servicio, carga hasta 2 000 usuarios, caída de una réplica y matriz de seguridad) están en <a href="../07-sprint2/06-pruebas-automatizadas-y-ci.md">Pruebas y CI/CD</a> y <a href="../07-sprint2/07-validacion-atributos-calidad.md">Validación de atributos de calidad</a>.</p>
 <h2>11.6 Fuentes técnicas</h2>
 <ul>
 <li><a href="https://docs.pytest.org/en/stable/how-to/mark.html">pytest: marcadores y selección de grupos</a>.</li>

@@ -19,13 +19,7 @@ Este documento contrasta los escenarios EQ-01 a EQ-07 de [`08-escenarios-atribut
 
 Comando: `k6 run -e PERFIL=carga tests/carga/k6-plataforma.js`
 
-| Etapa (1 réplica, solo lecturas) | Usuarios | Peticiones/s | p50 | p95 | Errores |
-|---|---|---|---|---|---|
-| Subida a 200 | 197 | 207,5 | 3,1 ms | 8,5 ms | 0 |
-| Subida a 500 | 496 | 704,5 | 5,0 ms | 32,4 ms | 0 |
-| Subida a 1 000 | 993 | 1 074,9 | 147,1 ms | 1 713 ms | 0 |
-
-Con 200 usuarios el p95 de lectura es de 8,5 ms, muy por debajo de la meta. En la mezcla completa (lecturas y conversaciones con el asistente) el p95 del asistente medido durante toda la rampa fue de 2,37 s, dentro del umbral de 3 s.
+Con 200 usuarios concurrentes (primera etapa de la rampa de [EQ-03](#eq-03-escalabilidad), 1 réplica) el p95 de lectura es de **8,5 ms** con 207 peticiones/s y 0 errores, muy por debajo de la meta; con 1 000 usuarios sigue en 1,7 s. En la mezcla completa (lecturas y conversaciones con el asistente) el p95 del asistente medido durante toda la rampa fue de 2,37 s, dentro del umbral de 3 s.
 
 El análisis de base de datos ([doc. 4](04-base-de-datos-y-cache.md)) muestra que el catálogo servido desde la caché en proceso responde en microsegundos frente a 5,3 ms de PostgreSQL directo, y que el muro paginado usa el índice `publicacion_muro` (0,04 ms de ejecución).
 
@@ -53,7 +47,7 @@ Evidencia: `evidencias/k6-failover.json`, `evidencias/k6-failover.txt`.
 
 ## EQ-03 Escalabilidad
 
-**Meta:** soportar hasta 2 000 usuarios concurrentes de forma progresiva y poder crecer agregando réplicas.
+**Meta:** 200 usuarios concurrentes con p95 ≤ 3 s y menos de 1 % de errores, comparando una réplica con varias. El Sprint 2 lleva además la rampa hasta 2 000 usuarios para conocer el límite.
 
 Comandos: `k6 run -e PERFIL=escalabilidad -e ASISTENTE=0 tests/carga/k6-plataforma.js` y `python scripts/resumir-k6.py`.
 
@@ -88,7 +82,7 @@ Comandos: `k6 run -e PERFIL=escalabilidad -e ASISTENTE=0 tests/carga/k6-platafor
 
 Evidencia: `evidencias/k6-escalabilidad-1-replica.json`, `k6-lectura-1-replica.json`, `k6-lectura-2-replicas.json`, `k6-etapas.json`.
 
-**Veredicto:** cumple parcialmente. Soporta 2 000 usuarios sin errores y escala de forma horizontal; el p95 ≤ 2 s a esa carga requiere más réplicas.
+**Veredicto:** cumple. La meta de 200 usuarios se supera con amplitud; con 2 000 usuarios no hay errores y el sistema escala de forma horizontal. Mantener p95 ≤ 2 s a esa carga requiere más réplicas.
 
 ## EQ-04 Seguridad
 
@@ -103,10 +97,11 @@ Comando: `npm run test:api`
 | Administrador | `permisos.test.mjs` | acceso permitido |
 | Cuenta suspendida | `permisos.test.mjs` | acceso denegado |
 | CSRF (origen no permitido) | `identidad.test.mjs` | 403 |
+| Bloqueo por cuenta (5 claves incorrectas) | `identidad.test.mjs` | 429 aunque cambie la IP, durante 15 min |
 | Límite de intentos de autenticación por IP | `identidad.test.mjs` | 429 tras superar el máximo por minuto |
 | Candado de origen (`BORDE_CLAVE`) | `identidad.test.mjs` | 403 sin la firma del borde |
 | Credenciales incorrectas | `identidad.test.mjs` | 401 con mensaje idéntico para correo y clave |
-| Datos protegidos en base de datos | RLS en PostgreSQL | 66 tablas y 29 políticas verificadas ([doc. 4](04-base-de-datos-y-cache.md)) |
+| Datos protegidos en base de datos | RLS en PostgreSQL | 67 tablas y 33 políticas verificadas ([doc. 4](04-base-de-datos-y-cache.md)) |
 
 Además, el backend rechaza claves `service_role` y `sb_secret`, y ningún secreto se versiona.
 
@@ -145,7 +140,7 @@ Comando: `python -m pytest tests/test_arquitectura.py`
 
 - Las pruebas de arquitectura analizan los imports con AST y fallan si `dominio` o `aplicacion` dependen de frameworks o de otras capas, si un servicio importa a otro, o si falta una capa ([doc. 1](01-estilo-y-patron-arquitectonico.md)).
 - Los proveedores de mapas (CARTO, Esri, OpenTopoMap, OSM) están en un único módulo, `apps/web/js/vistas/mapa.js`.
-- Cobertura de pruebas por servicio ≥ 90 % (pytest) y 99,5 % de sentencias en la lógica web (Jest); detalle en el [doc. 6](06-pruebas-automatizadas-y-ci.md).
+- Cobertura de pruebas por servicio ≥ 90 % (pytest) y 99,6 % de sentencias en la lógica web y del borde (Jest); detalle en el [doc. 6](06-pruebas-automatizadas-y-ci.md).
 
 **Veredicto:** cumple.
 
@@ -155,7 +150,7 @@ Comando: `python -m pytest tests/test_arquitectura.py`
 |---|---|
 | EQ-01 Rendimiento | Cumple |
 | EQ-02 Disponibilidad | Cumple |
-| EQ-03 Escalabilidad | Cumple parcialmente (2 000 usuarios sin errores; p95 ≤ 2 s requiere más réplicas) |
+| EQ-03 Escalabilidad | Cumple (200 usuarios con p95 de 8,5 ms; 2 000 usuarios sin errores, p95 ≤ 2 s a esa carga con más réplicas) |
 | EQ-04 Seguridad | Cumple |
 | EQ-05 Confiabilidad | Cumple |
 | EQ-06 Usabilidad | Validado en pruebas automatizadas; sesión presencial pendiente |

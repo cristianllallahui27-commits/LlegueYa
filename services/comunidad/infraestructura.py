@@ -27,9 +27,10 @@ class RepositorioMemoria:
         p = self.pubs.get(id)
         return p if p and p.visible_para(viewer) else None
 
-    def publicaciones(self, viewer, desde, limite, lugar=None, autor=None):
+    def publicaciones(self, viewer, desde, limite, lugar=None, autor=None, con_foto=False):
         items = [p for p in self.pubs.values() if p.visible_para(viewer)
-                 and (lugar is None or p.lugar_slug == lugar) and (autor is None or p.autor.id == autor)]
+                 and (lugar is None or p.lugar_slug == lugar) and (autor is None or p.autor.id == autor)
+                 and (not con_foto or p.foto_id)]
         items.sort(key=lambda p: p.creado_en, reverse=True)
         return items[desde:desde + limite]
 
@@ -67,6 +68,17 @@ class RepositorioMemoria:
 
     def likes_de(self, usuario, tipo, ids):
         return {o for u, t, o in self.likes if u == usuario and t == tipo and o in ids}
+
+    def likes_por_autor(self, autor_ids=None):
+        r = {}
+        for u, t, o in self.likes:
+            p = self.pubs.get(o) if t == 'publicacion' else None
+            if p is not None and u != p.autor.id and p.estado == 'publicado' and (autor_ids is None or p.autor.id in autor_ids):
+                r[p.autor.id] = r.get(p.autor.id, 0) + 1
+        return r
+
+    def autor_de(self, autor_id):
+        return self._autores.get(autor_id)
 
     def marcar_guardado(self, usuario, publicacion, activo):
         s = self.guardas.setdefault(usuario, [])
@@ -226,11 +238,12 @@ class RepositorioPostgres:
             return self._pub(f) if f else None
         return self._run(viewer, q)
 
-    def publicaciones(self, viewer, desde, limite, lugar=None, autor=None):
+    def publicaciones(self, viewer, desde, limite, lugar=None, autor=None, con_foto=False):
         def q(c):
             c.execute(self.SELECT_PUB + """ where (%s::text is null or p.lugar_slug=%s) and (%s::uuid is null or p.autor_id=%s::uuid)
+                      and (not %s or p.foto_id is not null)
                       and p.estado in ('publicado','en_revision') order by p.creado_en desc offset %s limit %s""",
-                      (lugar, lugar, autor, autor, desde, limite))
+                      (lugar, lugar, autor, autor, con_foto, desde, limite))
             return [self._pub(f) for f in c.fetchall()]
         return self._run(viewer, q)
 
@@ -290,6 +303,23 @@ class RepositorioPostgres:
             c.execute("""select objetivo_id::text, count(*)::int from comunidad.like
                          where objetivo_tipo=%s and objetivo_id = any(%s::uuid[]) group by objetivo_id""", (tipo, ids))
             return dict(c.fetchall())
+        return self._run(None, q)
+
+    def likes_por_autor(self, autor_ids=None):
+        def q(c):
+            c.execute("""select p.autor_id::text, count(*)::int from comunidad.like l
+                         join comunidad.publicacion p on p.id = l.objetivo_id
+                         where l.objetivo_tipo='publicacion' and p.estado='publicado' and l.usuario_id <> p.autor_id
+                           and (%s::uuid[] is null or p.autor_id = any(%s::uuid[])) group by p.autor_id""",
+                      (autor_ids, autor_ids))
+            return dict(c.fetchall())
+        return self._run(None, q)
+
+    def autor_de(self, autor_id):
+        def q(c):
+            c.execute("select usuario_id::text, coalesce(nombre_visible,'Viajero'), avatar_url from comunidad.autor where usuario_id=%s::uuid", (autor_id,))
+            f = c.fetchone()
+            return Autor(f[0], f[1], f[2]) if f else None
         return self._run(None, q)
 
     def likes_de(self, usuario, tipo, ids):

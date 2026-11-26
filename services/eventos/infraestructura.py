@@ -41,3 +41,13 @@ class RepositorioMemoria:
     def suscribir(self, usuario, evento_id, activa):
         s = self.subs.setdefault(usuario, set())
         (s.add if activa else s.discard)(evento_id)
+
+    def guardar(self, evento):
+        for i, e in enumerate(self.eventos):
+            if e.id == evento.id:
+                self.eventos[i] = evento
+                return
+        self.eventos.append(evento)
+
+    def eliminar(self, evento_id):
+        self.eventos = [e for e in self.eventos if e.id != evento_id]

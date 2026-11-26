@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional
 
-TIPOS = ('arqueologico', 'natural', 'cultural', 'camping', 'aventura', 'otro')
+TIPOS = ('arqueologico', 'natural', 'cultural', 'gastronomia', 'artesania', 'camping', 'aventura', 'otro')
 
 
 class LugarNoEncontrado(Exception):
@@ -59,6 +59,11 @@ class Lugar:
     fuente_url: str = ''
     revisado_en: Optional[date] = None
     demostracion: bool = True
+    # Entrada: costo de ingreso (texto libre, p. ej. «S/ 10 adultos · S/ 5 estudiantes» o «Gratis»)
+    # y dónde se compra: 'lugar' (en el mismo lugar), 'web', 'ambos' o '' si no se sabe.
+    entrada_costo: str = ''
+    entrada_compra: str = ''
+    entrada_url: str = ''
 
     def __post_init__(self):
         if self.tipo not in TIPOS:

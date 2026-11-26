@@ -13,9 +13,18 @@ import * as calendario from './vistas/calendario.js';
 import * as lugar from './vistas/lugar.js';
 import * as perfil from './vistas/perfil.js';
 import * as admin from './vistas/admin.js';
+import { confirmar } from './confirmar.js';
+import { montarPerfil, pintarPerfil } from './perfilmenu.js';
+import { montarGuardia, revalidarSesion } from './guardia.js';
 import * as servicios from './vistas/servicios.js';
+import * as legal from './vistas/legal.js';
+import * as terminales from './vistas/terminales.js';
+import { montarCampanita } from './notificaciones.js';
+import { montarNavAnimada } from './navanimada.js';
+import { mostrarGuiaSiEsNueva } from './guia.js';
+import { abrirPuerta, cerrarPuerta, debeMostrarse, prepararPuerta, puertaActiva, volverDeLegal } from './puerta.js';
 
-const VISTAS = { inicio, explorar, mapa, calendario, servicios, lugar, 'mi-espacio': perfil, admin, 'nueva-clave': acceso };
+const VISTAS = { inicio, explorar, mapa, terminales, calendario, servicios, lugar, 'mi-espacio': perfil, admin, 'nueva-clave': acceso, legal };
 const ctx = { favoritos: new Set(), lugares: new Map(), abrirComentarios, abrirReporte: acceso.abrirReporte };
 const $ = id => document.getElementById(id);
 
@@ -26,6 +35,17 @@ async function navegar() {
     if (a.dataset.ruta === ruta.vista) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
   const vista = $('vista');
+  // Sin sesión solo se ve la puerta de acceso (y, si se pide, la página de privacidad y términos).
+  if (puertaActiva()) {
+    if (ruta.vista === 'legal' && document.body.classList.contains('puerta-legal')) {
+      await legal.render(vista, ruta, ctx);
+      vista.prepend(el('button', { class: 'boton boton-principal', type: 'button', onclick: () => { volverDeLegal(); abrirPuerta(); } }, 'Volver a entrar'));
+      return;
+    }
+    document.body.classList.remove('puerta-legal');
+    if (!$('dialogo-acceso').open) abrirPuerta();
+    return;
+  }
   if (ruta.vista === 'willaq-uma') {
     vaciar(vista, el('section', {}, el('h1', { class: 'titulo-vista' }, 'Willaq Uma'),
       el('p', { class: 'bajada' }, 'Tu sabio guía. Su nombre recuerda al Willaq Umu, el consejero sabio del mundo inca. No organiza tu viaje por ti: te recomienda según lo que te gusta, con los lugares, fiestas y experiencias publicados en LlegueYa, y te avisa cuando algo no está publicado.'),
@@ -37,6 +57,7 @@ async function navegar() {
   }
   window.scrollTo({ top: 0 });
   try {
+    if (ruta.vista === 'admin') await revalidarSesion();
     await VISTAS[ruta.vista].render(vista, ruta, ctx);
   } catch (e) {
     vaciar(vista, error('No pudimos mostrar esta sección. Recarga la página.'));
@@ -46,37 +67,11 @@ async function navegar() {
 
 // ---------------------------------------------------------------- Cuenta (columna lateral)
 function pintarCuenta() {
-  const tarjeta = $('tarjeta-cuenta');
   const u = estado.usuario;
   document.querySelectorAll('.solo-admin').forEach(n => { n.hidden = !(u && u.admin); });
-  if (u) {
-    vaciar(tarjeta,
-      el('div', { class: 'cuenta-fila' }, avatar(u), el('div', {}, el('strong', {}, u.nombre), el('span', {}, u.admin ? 'Administración de LlegueYa' : 'Viajero de LlegueYa'))),
-      el('div', { class: 'post-pie' },
-        el('a', { class: 'boton boton-borde', href: '#/mi-espacio' }, 'Mi espacio'),
-        el('form', { action: '/api/v1/auth/logout', method: 'post' }, el('button', { class: 'boton boton-texto', type: 'submit' }, 'Cerrar sesión'))));
-    return;
-  }
-  const activas = cuentasActivas();
-  vaciar(tarjeta,
-    el('h2', {}, 'Únete a la comunidad viajera'),
-    el('p', {}, 'Comparte fotos, guarda lugares y conversa con Willaq Uma.'),
-    el('button', { class: 'boton boton-principal', type: 'button', disabled: !activas || null, onclick: () => pedirAcceso() }, 'Entrar'),
-    el('button', { class: 'boton boton-borde', type: 'button', disabled: !activas || null, onclick: () => pedirAcceso('', 'registro') }, 'Crear cuenta'),
-    activas ? null : el('p', { class: 'nota' }, mensajeEstadoAcceso(null, false)));
+  pintarPerfil();
 }
 
-async function pintarEventosLaterales() {
-  const lista = $('lateral-eventos');
-  try {
-    const { items } = await api.eventos();
-    vaciar(lista, items.slice(0, 3).map(e => {
-      const p = partesFecha(e.inicio);
-      return el('li', {}, el('span', { class: 'dia', 'aria-hidden': 'true' }, p.dia, el('small', {}, p.mesCorto)),
-        el('div', {}, el('strong', {}, e.titulo), el('span', {}, e.lugar)));
-    }));
-  } catch { vaciar(lista, el('li', {}, 'No se pudo cargar el calendario.')); }
-}
 
 async function cargarFavoritos() {
   ctx.favoritos.clear();
@@ -115,6 +110,7 @@ function prepararCrear() {
     const datos = new FormData(form);
     if (!archivo.files[0]) datos.delete('foto');
     if (!String(datos.get('texto') || '').trim() && !archivo.files[0]) { estadoForm.textContent = 'Escribe algo o agrega una foto.'; return; }
+    if (!(await confirmar({ titulo: 'Publicar', mensaje: 'Tu publicación se enviará para revisión y la verán los viajeros cuando se apruebe.', aceptar: 'Publicar' }))) return;
     const enviar = form.querySelector('button[type="submit"]');
     enviar.disabled = true; estadoForm.textContent = 'Publicando…';
     try {
@@ -201,7 +197,7 @@ function prepararComentarios() {
 function prepararDialogos() {
   document.querySelectorAll('dialog').forEach(d => {
     d.querySelectorAll('[data-cerrar]').forEach(b => b.addEventListener('click', () => d.close()));
-    d.addEventListener('click', ev => { if (ev.target === d) d.close(); });
+    d.addEventListener('click', ev => { if (ev.target === d && !(d.id === 'dialogo-acceso' && puertaActiva())) d.close(); });
   });
 }
 
@@ -209,17 +205,34 @@ export async function iniciar() {
   const estadoUrl = new URLSearchParams(location.search).get('estado');
   if (estadoUrl) history.replaceState(null, '', '/' + location.hash);
   prepararDialogos();
+  prepararPuerta();
   prepararCrear();
   prepararComentarios();
   acceso.prepararAcceso();
   acceso.prepararReporte();
   iniciarWillaq();
   alCambiarSesion(pintarCuenta);
+  alCambiarSesion(u => { if (u) cerrarPuerta(); });
   await cargarSesion();
+  if (debeMostrarse()) {
+    const avisos = ['error', 'configuracion', 'suspendida', 'enlace-vencido'].includes(estadoUrl) ? mensajeEstadoAcceso(estadoUrl, true) : null;
+    await abrirPuerta(avisos, estadoUrl === 'enlace-vencido' ? 'recuperar' : 'bienvenida');
+    window.addEventListener('hashchange', navegar);
+    return;
+  }
   await cargarFavoritos();
   try { (await api.lugares({ limite: 48 })).items.forEach(l => ctx.lugares.set(l.slug, l)); } catch { /* el muro mostrará el error */ }
-  pintarEventosLaterales();
+  const refrescarAvisos = montarCampanita();
+  if (refrescarAvisos) refrescarAvisos();
+  alCambiarSesion(() => refrescarAvisos && refrescarAvisos());
+  document.addEventListener('ly:avatar', pintarCuenta);
+  montarGuardia();
+  montarPerfil();
+  montarNavAnimada();
 
+  let saludo = null;
+  try { saludo = sessionStorage.getItem('ly_saludo'); sessionStorage.removeItem('ly_saludo'); } catch { /* */ }
+  if (saludo && estado.usuario) avisar(saludo === '¡Hola de nuevo!' ? `¡Hola, ${estado.usuario.nombre.split(' ')[0]}!` : saludo);
   if (estadoUrl === 'bienvenido' && estado.usuario) {
     avisar(`¡Hola, ${estado.usuario.nombre.split(' ')[0]}!`);
     let volver = null;
@@ -230,6 +243,20 @@ export async function iniciar() {
   }
   window.addEventListener('hashchange', navegar);
   await navegar();
+  mostrarGuiaSiEsNueva(estado.usuario);   // primera vez de esta cuenta: guía de 3 pasos
 }
 
 iniciar();
+
+// Aviso informativo de cookies (solo las necesarias): se muestra una vez y se recuerda en este navegador.
+(() => {
+  const aviso = document.getElementById('aviso-cookies');
+  let visto = false;
+  try { visto = localStorage.getItem('ly:cookies') === '1'; } catch { /* sin almacenamiento: se muestra siempre */ }
+  if (!aviso || visto) return;
+  aviso.hidden = false;
+  document.getElementById('aviso-cookies-ok').addEventListener('click', () => {
+    aviso.hidden = true;
+    try { localStorage.setItem('ly:cookies', '1'); } catch { /* nada que guardar */ }
+  });
+})();

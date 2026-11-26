@@ -37,7 +37,7 @@ La vista pública incluye portada, nombre, tipo/categoría verificada, zona gene
 
 Sin venta de entradas, reservas, QR, aforo, mensajería privada, videos ni WhatsApp/Telegram. Se abren enlaces de venta verificados. El pago de publicidad es externo y revisado administrativamente. El correo es una integración opcional por definir.
 
-La documentación describe diseño y requisitos; no hay aplicación implementada. El SDD define Supabase, Docker, Cloudflare, Gemini y propuestas técnicas de APIs/mapa. Tarifas, versiones exactas, capacidad y políticas pendientes se identifican antes de implementar o prestar el servicio.
+Este documento define requisitos y reglas del producto. El SDD precisa Supabase, Docker, Cloudflare y las propuestas técnicas de APIs y mapa; la primera versión implementada se describe en [Desarrollo](../06-desarrollo/README.md). Tarifas, capacidad y políticas comerciales se fijan antes de prestar el servicio.
 
 ## 6. Especificación y trazabilidad
 

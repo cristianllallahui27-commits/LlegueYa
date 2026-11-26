@@ -3,7 +3,8 @@ import hashlib
 import secrets
 import time
 from typing import Protocol
-from .dominio import CLAVE_INCORRECTA, CUENTA_SUSPENDIDA, AuthError, Credencial, Usuario, validar_clave, validar_correo, validar_nombre
+from .dominio import (CLAVE_INCORRECTA, CODIGO_BLOQUEADO, CUENTA_BLOQUEADA, CUENTA_SUSPENDIDA, AuthError, Credencial, Usuario, validar_clave,
+                      validar_codigo, validar_correo, validar_nombre)
 
 
 class ProveedorIdentidad(Protocol):
@@ -14,13 +15,19 @@ class ProveedorIdentidad(Protocol):
     async def registrar(self, correo: str, clave: str, nombre: str, challenge: str): ...
     async def entrar_con_clave(self, correo: str, clave: str) -> Credencial: ...
     async def recuperar(self, correo: str, challenge: str) -> None: ...
+    async def verificar_codigo(self, correo: str, codigo: str) -> Credencial: ...
+    async def reenviar_codigo(self, correo: str) -> None: ...
     async def cambiar_clave(self, token: str, clave: str) -> None: ...
+    async def refrescar(self, refresco: str) -> Credencial: ...
 
 
 def par_pkce():
     verifier = secrets.token_urlsafe(48)
     challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).decode().rstrip('=')
     return verifier, challenge
+
+
+DURACION_SESION = 7 * 24 * 3600   # con refresh token la sesión dura una semana; sin él, lo que dure el token (máx. 1 h)
 
 
 class Acceso:
@@ -32,6 +39,8 @@ class Acceso:
         self.sesiones = {}
         self.suspendidos = {}   # usuario_id -> motivo (decisión administrativa)
         self.conocidos = {}     # usuario_id -> Usuario (cuentas que ya entraron; para el panel admin)
+        self.fallos_codigo = {}  # correo -> (fallos, hasta) de códigos de verificación
+        self.fallos_clave = {}   # correo -> (fallos, hasta): bloqueo por cuenta contra adivinar claves
 
     def limpiar(self):
         now = self.reloj()
@@ -67,8 +76,29 @@ class Acceso:
         if credencial.segundos <= 0 or len(self.sesiones) >= 1000:
             raise AuthError()
         session = secrets.token_urlsafe(32)
-        self.sesiones[session] = (credencial.token, self.reloj() + min(credencial.segundos, 3600))
+        self._guardar(session, credencial)
         return session
+
+    def _guardar(self, session, credencial, expira=None):
+        """sesiones[id] = (token, fin de la sesión, refresh token, vencimiento del token)."""
+        ahora = self.reloj()
+        if expira is None:
+            expira = ahora + (DURACION_SESION if credencial.refresco else min(credencial.segundos, 3600))
+        self.sesiones[session] = (credencial.token, expira, credencial.refresco, ahora + max(credencial.segundos - 60, 30))
+
+    async def _renovar(self, session, item):
+        """Pide un token nuevo con el refresh token. Devuelve el token o None si no se pudo."""
+        refrescar = getattr(self.proveedor, 'refrescar', None)
+        if len(item) < 3 or not item[2] or refrescar is None:
+            return None
+        try:
+            credencial = await refrescar(item[2])
+        except AuthError:
+            return None
+        if not credencial.refresco:
+            credencial = type(credencial)(credencial.token, credencial.segundos, item[2])
+        self._guardar(session, credencial, expira=item[1])
+        return credencial.token
 
     # --- correo y clave ----------------------------------------------------
     async def registrar(self, correo, clave, nombre):
@@ -81,11 +111,54 @@ class Acceso:
         self.flujos.pop(flow, None)
         return 'sesion', await self._abrir(credencial)
 
+    async def verificar_correo(self, correo, codigo):
+        """Activa la cuenta con el código que llegó al correo y abre la sesión.
+
+        Supabase ya limita los intentos; además cortamos a los 5 fallos por correo durante 10 minutos.
+        """
+        correo, codigo = validar_correo(correo), validar_codigo(codigo)
+        ahora = self.reloj()
+        fallos, hasta = self.fallos_codigo.get(correo, (0, 0))
+        if hasta <= ahora:
+            fallos = 0
+        if fallos >= 5:
+            raise AuthError(CODIGO_BLOQUEADO)
+        try:
+            credencial = await self.proveedor.verificar_codigo(correo, codigo)
+        except AuthError:
+            self.fallos_codigo[correo] = (fallos + 1, ahora + 600)
+            raise
+        self.fallos_codigo.pop(correo, None)
+        return await self._abrir(credencial)
+
+    async def reenviar_codigo(self, correo):
+        await self.proveedor.reenviar_codigo(validar_correo(correo))
+
+    INTENTOS_CLAVE = 5
+    BLOQUEO_CLAVE = 15 * 60
+
     async def entrar(self, correo, clave):
+        """Correo y clave. Tras 5 claves incorrectas la cuenta se bloquea 15 minutos (aunque cambie la IP)."""
         correo = validar_correo(correo)
+        ahora = self.reloj()
+        fallos, hasta = self.fallos_clave.get(correo, (0, 0))
+        if hasta <= ahora:
+            fallos = 0
+        if fallos >= self.INTENTOS_CLAVE:
+            raise AuthError(CUENTA_BLOQUEADA)
         if not isinstance(clave, str) or not clave or len(clave) > 72:
             raise AuthError(CLAVE_INCORRECTA)
-        return await self._abrir(await self.proveedor.entrar_con_clave(correo, clave))
+        try:
+            credencial = await self.proveedor.entrar_con_clave(correo, clave)
+        except AuthError as ex:
+            if ex.mensaje == CLAVE_INCORRECTA:
+                fallos += 1
+                self.fallos_clave[correo] = (fallos, ahora + self.BLOQUEO_CLAVE)
+                if fallos >= self.INTENTOS_CLAVE:
+                    raise AuthError(CUENTA_BLOQUEADA) from ex
+            raise
+        self.fallos_clave.pop(correo, None)
+        return await self._abrir(credencial)
 
     async def recuperar(self, correo):
         """Envía el enlace para crear una clave nueva. Responde igual exista o no la cuenta."""
@@ -104,11 +177,17 @@ class Acceso:
         item = self.sesiones.get(session)
         if not item:
             raise AuthError()
+        token = item[0]
+        if len(item) > 3 and self.reloj() >= item[3]:
+            token = await self._renovar(session, item) or token   # el token de Supabase vence cada hora
         try:
-            usuario = await self.proveedor.usuario(item[0])
+            usuario = await self.proveedor.usuario(token)
         except AuthError:
-            self.salir(session)
-            raise
+            nuevo = await self._renovar(session, self.sesiones.get(session, item))
+            if nuevo is None:
+                self.salir(session)
+                raise
+            usuario = await self.proveedor.usuario(nuevo)
         if usuario.id in self.suspendidos:
             self.salir(session)
             raise AuthError()

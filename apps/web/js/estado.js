@@ -23,10 +23,13 @@ export async function cargarSesion() {
 // Abre el diálogo de acceso en la pestaña pedida: 'entrar', 'registro' o 'recuperar'.
 export function pedirAcceso(motivo, pestana = 'entrar', aviso = null) {
   const dialogo = document.getElementById('dialogo-acceso');
-  document.getElementById('acceso-motivo').textContent = motivo
+  const nodoMotivo = document.getElementById('acceso-motivo');
+  delete nodoMotivo.dataset.original;
+  nodoMotivo.textContent = motivo
     || 'Con tu cuenta puedes dar me gusta, comentar, conversar con Willaq Uma y compartir tus fotos.';
-  document.getElementById('acceso-google').hidden = !estado.metodos.google;
-  document.getElementById('acceso-correo').hidden = !estado.metodos.correo;
+  // Google solo aparece si está configurado; el correo, si las cuentas con correo están activas.
+  document.querySelectorAll('.acceso-google-form, .acceso-con-google').forEach(n => { n.hidden = !estado.metodos.google; });
+  document.querySelectorAll('.solo-correo').forEach(n => { n.hidden = !estado.metodos.correo; });
   document.getElementById('acceso-estado').textContent = aviso || mensajeEstadoAcceso(null, cuentasActivas()) || '';
   document.dispatchEvent(new CustomEvent('ly:acceso-pestana', { detail: pestana }));
   // Recordamos a dónde volver tras el acceso (solo rutas internas).

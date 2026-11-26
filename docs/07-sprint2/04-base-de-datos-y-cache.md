@@ -2,7 +2,7 @@
 
 ## 4.1 Modelo de datos y aislamiento
 
-- **Un esquema por servicio** en Supabase PostgreSQL (`identidad`, `catalogo`, `comunidad`, `eventos`, `publicidad`, `recomendaciones`, `asistente`): 66 tablas, **todas con RLS activado**.
+- **Un esquema por servicio** en Supabase PostgreSQL (`identidad`, `catalogo`, `comunidad`, `eventos`, `publicidad`, `recomendaciones`, `asistente`): 67 tablas, **todas con RLS activado**, y 33 políticas de acceso.
 - **Un rol por servicio** (`svc_catalogo`, `svc_comunidad`…) sin permiso de login. El backend se conecta con un login propio (`llegueya_catalogo`…) y hace `set local role svc_*` en cada transacción. El login solo no puede leer tablas.
 - **Contexto por transacción:** cada consulta fija `app.usuario_id` y, si la sesión es de administración, `app.es_admin`. Las políticas RLS deciden con esos dos valores. Se usa `set_config(..., true)`, así que se borran al terminar la transacción y no se filtran a la siguiente conexión del *pool*.
 - **El backend nunca usa** `postgres` ni la clave `service_role`.

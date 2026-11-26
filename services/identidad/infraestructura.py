@@ -1,6 +1,6 @@
 from urllib.parse import urlencode
 import httpx
-from .dominio import CLAVE_INCORRECTA, CORREO_REGISTRADO, AuthError, Credencial, Usuario
+from .dominio import CLAVE_INCORRECTA, CODIGO_INVALIDO, CORREO_REGISTRADO, AuthError, Credencial, Usuario
 
 # Códigos de error de Supabase Auth → mensaje claro para el usuario.
 MENSAJES = {
@@ -15,6 +15,9 @@ MENSAJES = {
     'email_address_invalid': 'Ese correo no es válido.',
     'signup_disabled': 'El registro con correo está desactivado por ahora.',
     'same_password': 'La nueva clave debe ser distinta de la anterior.',
+    'otp_expired': CODIGO_INVALIDO,
+    'otp_disabled': CODIGO_INVALIDO,
+    'over_email_send_rate_limit_resend': 'Ya te enviamos un código hace poco. Espera un minuto y vuelve a pedirlo.',
 }
 
 
@@ -53,7 +56,8 @@ class Supabase:
         token, seconds = data.get('access_token'), data.get('expires_in')
         if not isinstance(token, str) or not token or type(seconds) is not int:
             raise AuthError()
-        return Credencial(token, seconds)
+        refresco = data.get('refresh_token')
+        return Credencial(token, seconds, refresco if isinstance(refresco, str) and 0 < len(refresco) < 512 else None)
 
     async def registrar(self, correo, clave, nombre, challenge):
         destino = urlencode({'redirect_to': self.origin + '/api/v1/auth/callback'})
@@ -63,6 +67,13 @@ class Supabase:
         # Con «Confirm email» activo Supabase no devuelve sesión: llega un correo con el enlace.
         return self._credencial(data) if data.get('access_token') else None
 
+    async def verificar_codigo(self, correo, codigo):
+        """Código de 6 dígitos del correo de confirmación (plantilla con {{ .Token }}). Devuelve la sesión."""
+        return self._credencial(await self.request('POST', 'verify', body={'type': 'email', 'email': correo, 'token': codigo}))
+
+    async def reenviar_codigo(self, correo):
+        await self.request('POST', 'resend', body={'type': 'signup', 'email': correo})
+
     async def entrar_con_clave(self, correo, clave):
         return self._credencial(await self.request('POST', 'token?grant_type=password', body={'email': correo, 'password': clave}))
 
@@ -70,6 +81,9 @@ class Supabase:
         destino = urlencode({'redirect_to': self.origin + '/api/v1/auth/recuperacion'})
         await self.request('POST', 'recover?' + destino, body={
             'email': correo, 'code_challenge': challenge, 'code_challenge_method': 's256'})
+
+    async def refrescar(self, refresco):
+        return self._credencial(await self.request('POST', 'token?grant_type=refresh_token', body={'refresh_token': refresco}))
 
     async def cambiar_clave(self, token, clave):
         await self.request('PUT', 'user', token=token, body={'password': clave})

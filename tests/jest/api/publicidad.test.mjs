@@ -9,7 +9,8 @@ describe('Negocios verificados (RF30-RF33, EQ-05)', () => {
   beforeAll(async () => {
     admin = await comoAdmin();
     artesana = await Cliente.conCuenta(undefined, 'Taller Jiménez');
-    plan = (await new Cliente().get('/api/v1/publicidad/planes')).json.planes[0].id;
+    // Plan Premium: el nivel que muestra contacto completo a quien tiene sesión.
+    plan = (await new Cliente().get('/api/v1/publicidad/planes')).json.planes.find(p => p.nivel === 'premium').id;
   });
 
   const solicitud = extra => ({
@@ -29,6 +30,10 @@ describe('Negocios verificados (RF30-RF33, EQ-05)', () => {
     for (const requisito of Object.keys(s.requisitos)) {
       await admin.put(`/api/v1/publicidad/admin/solicitudes/${s.id}/requisitos`, { requisito, cumple: true });
     }
+    const sinPago = await admin.post(`/api/v1/publicidad/admin/solicitudes/${s.id}/decision`, { aprobar: true });
+    expect(sinPago.status).toBe(422);
+    expect(sinPago.json.detail).toMatch(/pago/);
+    expect((await admin.post(`/api/v1/publicidad/admin/solicitudes/${s.id}/pago`, { referencia: 'OP-2026-0001' })).status).toBe(200);
     expect((await admin.post(`/api/v1/publicidad/admin/solicitudes/${s.id}/decision`, { aprobar: true })).status).toBe(200);
     const visible = (await dir()).find(n => n.id === s.id);
     expect(visible.contacto).toBeNull();

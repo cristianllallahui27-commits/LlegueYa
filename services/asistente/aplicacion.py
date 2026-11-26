@@ -30,12 +30,25 @@ from .dominio import (  # noqa: F401  (se reexportan para quien importe desde ap
     raiz,
 )
 
+# Qué rubros del directorio verificado responde cada tema (nunca se recomienda nada de fuera de LlegueYa).
+RUBROS_POR_TEMA = {
+    'comida': ('restaurante',),
+    'paquete': ('operador', 'transporte'),
+    'hospedaje': ('hospedaje',),
+}
+NOMBRE_TEMA = {'comida': 'restaurantes', 'paquete': 'paquetes o agencias', 'hospedaje': 'hospedajes'}
+# Los negocios con plan superior se recomiendan primero y con más detalle (siempre solo lo publicado en LlegueYa).
+PRIORIDAD_PLAN = {'premium': 2, 'plus': 1, 'basico': 0}
+
+
 class WillaqUma:
     MAX_PREGUNTA = 500
 
     def __init__(self, lugares: Callable[[], list], eventos: Callable[[], list],
-                 experiencias: Callable[[], list] = lambda: []):
+                 experiencias: Callable[[], list] = lambda: [],
+                 negocios: Callable[[], list] = lambda: [], transporte: Callable[[], dict] = lambda: {}):
         self.lugares, self.eventos, self.experiencias = lugares, eventos, experiencias
+        self.negocios, self.transporte = negocios, transporte   # solo lo publicado y verificado en LlegueYa
 
     def presentacion(self) -> Respuesta:
         return Respuesta(list(PRESENTACION), sugerencias=[
@@ -64,6 +77,8 @@ class WillaqUma:
             return self._eventos(texto, elegir)
 
         encontrados, por_nombre = self._buscar(pregunta)
+        if temas & RUBROS_POR_TEMA.keys():
+            return self._negocios(temas, encontrados if por_nombre else [], elegir)
         gustos = [g for g in GUSTOS if g in contenido]
         if encontrados and por_nombre:
             return self._sobre_lugares(encontrados, temas, autenticado, elegir)
@@ -72,7 +87,7 @@ class WillaqUma:
         if encontrados:
             return self._sobre_lugares(encontrados, temas, autenticado, elegir)
 
-        for tema in ('comida', 'altura', 'clima'):
+        for tema in ('altura', 'clima'):
             if tema in temas:
                 return Respuesta(
                     [elegir(['Buena pregunta.', 'Te cuento.', 'Claro.']), EXTRAS[tema]],
@@ -128,6 +143,67 @@ class WillaqUma:
         por_nombre = bool(puntuados) and puntuados[0][2]
         return [l for _, l, _ in puntuados[:3]], por_nombre
 
+    def _negocios(self, temas, lugares, elegir):
+        slugs = {l.slug for l in lugares}
+        parrafos, vistos, nombres = [], set(), []
+        for tema in [t for t in RUBROS_POR_TEMA if t in temas]:
+            rubros = RUBROS_POR_TEMA[tema]
+            # Primero Premium, luego Plus y al final Básico (el orden estable respeta el del directorio).
+            todos = sorted((n for n in self.negocios() if n.rubro in rubros),
+                           key=lambda n: -PRIORIDAD_PLAN.get(getattr(n, 'nivel', 'basico'), 0))
+            cercanos = [n for n in todos if n.lugar_slug in slugs] if slugs else []
+            elegidos = (cercanos or todos)[:4]
+            if not elegidos:
+                parrafos.append(f'Todavía no hay {NOMBRE_TEMA[tema]} verificados en LlegueYa. Solo te recomiendo '
+                                'negocios que ya están publicados aquí; apenas se sumen, te los mostraré.')
+                continue
+            parrafos.append(elegir([f'Esto hay publicado y verificado en LlegueYa ({NOMBRE_TEMA[tema]}):',
+                                    f'Estos {NOMBRE_TEMA[tema]} están verificados en LlegueYa:']))
+            for n in elegidos:
+                if n.id in vistos:
+                    continue
+                vistos.add(n.id)
+                nombres.append({'nombre': n.negocio, 'rubro': n.rubro})
+                parrafos.append(self._linea_negocio(n))
+        return Respuesta(parrafos, negocios=nombres,
+                         lugares=[{'slug': l.slug, 'nombre': l.nombre} for l in lugares],
+                         fuentes=[{'nombre': 'Servicios verificados de LlegueYa', 'url': '#/servicios'}],
+                         sugerencias=self._sugerencias())
+
+    @staticmethod
+    def _linea_negocio(n) -> str:
+        """Cuanto mayor es el plan del negocio, más detalle comparte Willaq Uma (solo lo que el negocio publicó)."""
+        nivel = getattr(n, 'nivel', 'basico')
+        precio = lambda o: o['nombre'] + (f" (desde S/ {o['precio_desde']})" if o.get('precio_desde') is not None else '')
+        cuantas = {'premium': 4, 'plus': 3}.get(nivel, 2)
+        linea = ('★ ' if nivel == 'premium' else '') + n.negocio + (f', {n.direccion}' if n.direccion else '')
+        descripcion = n.descripcion if nivel != 'basico' or len(n.descripcion) <= 160 else n.descripcion[:157].rstrip() + '…'
+        linea += f': {descripcion}'
+        ofertas = '; '.join(precio(o) for o in n.ofertas[:cuantas])
+        if ofertas:
+            linea += f' Ofrece {ofertas}.'
+        if nivel in ('plus', 'premium'):
+            if getattr(n, 'whatsapp', ''):
+                linea += f' WhatsApp: +{n.whatsapp}.'
+            fotos, videos = len(getattr(n, 'fotos', [])), len(getattr(n, 'videos', []))
+            if fotos or videos:
+                linea += ' En su ficha hay ' + ' y '.join(
+                    x for x in (f'{fotos} fotos' if fotos else '', f'{videos} video' + ('s' if videos > 1 else '') if videos else '') if x) + '.'
+        if nivel == 'premium':
+            if getattr(n, 'horario', ''):
+                linea += f' Horario: {n.horario}.'
+            capacidad = [f'{n.habitaciones} habitaciones' if getattr(n, 'habitaciones', None) else '',
+                         f'aforo para {n.capacidad}' if getattr(n, 'capacidad', None) else '']
+            if any(capacidad):
+                linea += ' Tiene ' + ' y '.join(c for c in capacidad if c) + '.'
+            if getattr(n, 'servicios', []):
+                linea += ' Incluye: ' + ', '.join(n.servicios[:6]) + '.'
+            if getattr(n, 'carta', []):
+                linea += ' De su carta: ' + '; '.join(precio(o) for o in n.carta[:3]) + '.'
+            if getattr(n, 'contacto', ''):
+                linea += f' Teléfono: {n.contacto}.'
+        return linea
+
     def _experiencias_de(self, slugs) -> list:
         return [e for e in self.experiencias() if e.lugar_slug in slugs and e.texto]
 
@@ -181,11 +257,25 @@ class WillaqUma:
         if autenticado:
             if 'llegar' in temas and principal.como_llegar:
                 parrafos.append('Para llegar: ' + principal.como_llegar)
+                t = self.transporte().get(principal.slug)
+                if t:
+                    parrafos.append('Terminales donde subir: ' + '; '.join(
+                        f"{p['nombre']} ({p['referencia']})" for p in t['paraderos']) +
+                        f". Pasaje aproximado: {t['tarifa']} Tiempo: {t['tiempo']}")
             elif principal.recomendaciones:
                 parrafos.append('Un consejo: ' + principal.recomendaciones[0][0].lower() + principal.recomendaciones[0][1:])
         else:
             requiere = True
             parrafos.append('Si inicias sesión con Google te cuento cómo llegar y los consejos completos.')
+        # Entrada: siempre que la pidan y, si se paga, aunque no la pidan (para que nadie se lleve sorpresas).
+        costo = getattr(principal, 'entrada_costo', '')
+        compra = getattr(principal, 'entrada_compra', '')
+        if costo and ('entrada' in temas or compra):
+            donde = {'lugar': ' Se paga en el mismo lugar.', 'web': ' Se compra por internet.',
+                     'ambos': ' Se paga en el lugar o por internet.'}.get(compra, '')
+            enlace = f" Compra anticipada: {principal.entrada_url}" if getattr(principal, 'entrada_url', '') else ''
+            nota = '' if costo.lower().startswith('libre') else ' Es un precio referencial: confírmalo antes de ir.'
+            parrafos.append(f'Entrada: {costo}{donde}{enlace}{nota}')
         otros = lugares[1:]
         if otros:
             parrafos.append('También te puede interesar: ' + ', '.join(o.nombre for o in otros) + '.')

@@ -29,6 +29,11 @@ class RecuperarEntrada(BaseModel):
 class ClaveEntrada(BaseModel):
     clave: str = Field(max_length=100)
 
+
+class CodigoEntrada(BaseModel):
+    correo: str = Field(max_length=254)
+    codigo: str = Field(max_length=20)
+
 # La cookie de sesión se envía a toda la API para que Comunidad, Catálogo y
 # Eventos puedan pedir a Identidad quién es el usuario. Sigue siendo HttpOnly.
 RUTA_COOKIE = '/api'
@@ -41,7 +46,7 @@ def crear_router(acceso, origin, es_admin=lambda correo: False, google_activo=Tr
     limite = limite or LimiteSimple(maximo=int(os.getenv('AUTH_LIMITE_MINUTO', '10')), ventana=60)
 
     def poner_sesion(response, session):
-        response.set_cookie('ly_session', session, max_age=3600, httponly=True, secure=secure, samesite='lax', path=RUTA_COOKIE)
+        response.set_cookie('ly_session', session, max_age=7 * 24 * 3600, httponly=True, secure=secure, samesite='lax', path=RUTA_COOKIE)
 
     def poner_flujo(response, flow, segundos):
         response.set_cookie('ly_flow', flow, max_age=segundos, httponly=True, secure=secure, samesite='lax', path='/api/v1/auth')
@@ -77,9 +82,39 @@ def crear_router(acceso, origin, es_admin=lambda correo: False, google_activo=Tr
             response = JSONResponse({'estado': 'sesion'})
             poner_sesion(response, valor)
             return response
-        response = JSONResponse({'estado': 'confirmar', 'detail': 'Te enviamos un correo para confirmar tu cuenta. Ábrelo en este mismo navegador.'})
+        response = JSONResponse({'estado': 'confirmar', 'detail': 'Te enviamos un código de verificación a tu correo. Escríbelo aquí para activar tu cuenta (revisa también spam).'})
         poner_flujo(response, valor, 24 * 3600)
         return response
+
+    @router.post('/api/v1/auth/verificar')
+    async def verificar(request: Request, e: CodigoEntrada):
+        r = bloqueado(request)
+        if r:
+            return r
+        try:
+            session = await acceso.verificar_correo(e.correo, e.codigo)
+        except (AuthError, DatosInvalidos) as ex:
+            return error(ex)
+        acceso.salir(request.cookies.get('ly_session'))
+        response = JSONResponse({'estado': 'sesion'})
+        poner_sesion(response, session)
+        response.delete_cookie('ly_flow', path='/api/v1/auth')
+        return response
+
+    @router.post('/api/v1/auth/reenviar')
+    async def reenviar(request: Request, e: RecuperarEntrada):
+        r = bloqueado(request)
+        if r:
+            return r
+        try:
+            await acceso.reenviar_codigo(e.correo)
+        except DatosInvalidos as ex:
+            return error(ex)
+        except AuthError as ex:
+            # Límites de envío sí se informan; si la cuenta existe o no, no.
+            if ex.mensaje != AuthError().mensaje:
+                return error(ex)
+        return {'detail': 'Si el correo está pendiente de confirmar, te llegará un código nuevo.'}
 
     @router.post('/api/v1/auth/entrar')
     async def entrar(request: Request, e: EntradaCorreo):

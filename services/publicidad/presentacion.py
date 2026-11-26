@@ -1,20 +1,45 @@
 """API de Publicidad: planes públicos, solicitudes del negocio y panel administrativo."""
 from typing import Optional
-from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, File, Request, UploadFile
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 from services.compartido.sesion import VerificadorSesion
-from .aplicacion import Publicidad
-from .dominio import REQUISITOS, RUBROS, NoEncontrada, ReglaPublicidad
+from .aplicacion import FOTO_MAX_BYTES, Publicidad
+from .dominio import NIVELES, REQUISITOS, RUBROS, NoEncontrada, ReglaPublicidad
 
 SESION = {'detail': 'Inicia sesión para continuar.', 'requiere_sesion': True}
 SOLO_ADMIN = {'detail': 'Solo administración puede hacer esto.'}
 
 
 def plan_json(p):
-    return {'id': p.id, 'nombre': p.nombre, 'descripcion': p.descripcion, 'precio': str(p.precio), 'moneda': 'PEN',
+    return {'id': p.id, 'nombre': p.nombre, 'descripcion': p.descripcion, 'precio': str(p.precio), 'moneda': p.moneda,
             'duracion_dias': p.duracion_dias, 'destacado': p.destacado, 'activo': p.activo,
-            'gratuidad_inicial': p.gratuidad_inicial}
+            'gratuidad_inicial': p.gratuidad_inicial, 'nivel': p.nivel, 'nivel_nombre': NIVELES[p.nivel].nombre}
+
+
+def nivel_json(n):
+    return {'id': n.id, 'nombre': n.nombre, 'lema': n.lema, 'beneficios': n.beneficios(),
+            'limites': {'fotos': n.fotos, 'videos': n.videos, 'ofertas': n.ofertas, 'descripcion': n.descripcion,
+                        'contacto': n.contacto, 'completo': n.completo, 'carta': n.carta, 'testimonios': n.testimonios,
+                        'servicios': n.servicios, 'capacidad': n.capacidad}}
+
+
+def extras_json(s, nivel, con_contacto):
+    """Campos que dependen del nivel del plan. WhatsApp solo con sesión."""
+    data = {'fotos': s.fotos[:nivel.fotos], 'videos': s.videos[:nivel.videos]}
+    if nivel.contacto:
+        data['whatsapp'] = s.whatsapp if con_contacto else None
+    if nivel.completo:
+        data['horario'] = s.horario
+    if nivel.carta:
+        data['carta'] = [oferta_json(o) for o in s.carta]
+    if nivel.servicios:
+        data['servicios'] = s.servicios
+    if nivel.capacidad:
+        data.update({'habitaciones': s.habitaciones, 'capacidad': s.capacidad})
+    if nivel.testimonios:
+        data['testimonios'] = s.testimonios
+    return data
 
 
 def solicitud_json(s, pub, admin=False):
@@ -23,7 +48,10 @@ def solicitud_json(s, pub, admin=False):
             'direccion': s.direccion, 'lat': s.lat, 'lon': s.lon, 'ofertas': [oferta_json(o) for o in s.ofertas],
             'plan': plan_json(pub.plan_de(s)), 'estado': s.estado, 'pago': s.pago, 'monto': str(s.monto),
             'requisitos': s.requisitos, 'motivo': s.motivo, 'creada_en': s.creada_en.isoformat(),
-            'inicio': s.inicio.isoformat() if s.inicio else None, 'fin': s.fin.isoformat() if s.fin else None}
+            'inicio': s.inicio.isoformat() if s.inicio else None, 'fin': s.fin.isoformat() if s.fin else None,
+            'fotos': s.fotos, 'videos': s.videos, 'whatsapp': s.whatsapp, 'horario': s.horario,
+            'carta': [oferta_json(o) for o in s.carta], 'servicios': s.servicios, 'habitaciones': s.habitaciones,
+            'capacidad': s.capacidad, 'testimonios': s.testimonios, 'nivel': pub.nivel(s)}
     if admin:
         data.update({'solicitante': s.solicitante, 'usuario_id': s.usuario_id, 'referencia_pago': s.referencia_pago})
     return data
@@ -35,19 +63,31 @@ def oferta_json(o):
 
 
 def negocio_json(s, pub, con_sesion):
-    """Ficha pública del directorio. El contacto se muestra solo con sesión (SDD)."""
+    """Ficha pública según el nivel del plan. El contacto (Plus y Premium) se muestra solo con sesión (SDD)."""
+    nivel = NIVELES[pub.nivel(s)]
+    contacto = con_sesion and nivel.contacto
     return {'id': s.id, 'negocio': s.negocio, 'rubro': s.rubro, 'rubro_nombre': RUBROS[s.rubro],
             'descripcion': s.descripcion, 'direccion': s.direccion, 'lat': s.lat, 'lon': s.lon,
-            'ofertas': [oferta_json(o) for o in s.ofertas], 'lugar_slug': s.lugar_slug,
-            'patrocinado': s.vigente(pub.reloj()), 'verificado': True,
-            'contacto': s.contacto if con_sesion else None, 'enlace': s.enlace if con_sesion else None,
-            'requiere_sesion': not con_sesion}
+            'ofertas': [oferta_json(o) for o in s.ofertas[:nivel.ofertas]], 'lugar_slug': s.lugar_slug,
+            'patrocinado': s.vigente(pub.reloj()), 'verificado': True, 'nivel': nivel.id, 'nivel_nombre': nivel.nombre,
+            'contacto': s.contacto if contacto and nivel.completo else None,
+            'enlace': s.enlace if contacto and nivel.completo else None,
+            'requiere_sesion': nivel.contacto and not con_sesion, **extras_json(s, nivel, contacto)}
 
 
 def anuncio_json(s, pub):
-    return {'id': s.id, 'negocio': s.negocio, 'rubro': RUBROS[s.rubro], 'descripcion': s.descripcion,
-            'contacto': s.contacto, 'enlace': s.enlace, 'lugar_slug': s.lugar_slug,
-            'destacado': pub.plan_de(s).destacado, 'verificado': True}
+    nivel = pub.nivel(s)
+    n = NIVELES[nivel]
+    data = {'id': s.id, 'negocio': s.negocio, 'rubro': RUBROS[s.rubro], 'descripcion': s.descripcion,
+            'contacto': s.contacto if n.completo else None, 'enlace': s.enlace if n.completo else None,
+            'whatsapp': s.whatsapp if n.contacto else None, 'lugar_slug': s.lugar_slug,
+            'foto': s.fotos[0] if s.fotos else None,
+            'destacado': nivel == 'premium', 'nivel': nivel, 'verificado': True}
+    if nivel != 'basico':   # más detalle cuanto mayor es el plan
+        data.update({'direccion': s.direccion, 'ofertas': [oferta_json(o) for o in s.ofertas]})
+    if nivel == 'premium':
+        data.update({'lat': s.lat, 'lon': s.lon})
+    return data
 
 
 class SolicitudEntrada(BaseModel):
@@ -62,6 +102,15 @@ class SolicitudEntrada(BaseModel):
     lat: Optional[float] = None
     lon: Optional[float] = None
     ofertas: list = Field(default_factory=list, max_length=20)
+    fotos: list = Field(default_factory=list, max_length=10)
+    videos: list = Field(default_factory=list, max_length=3)
+    whatsapp: str = Field(default='', max_length=20)
+    horario: str = Field(default='', max_length=140)
+    carta: list = Field(default_factory=list, max_length=40)
+    servicios: list = Field(default_factory=list, max_length=20)
+    habitaciones: Optional[int] = None
+    capacidad: Optional[int] = None
+    testimonios: list = Field(default_factory=list, max_length=6)
 
 
 class PlanEntrada(BaseModel):
@@ -70,10 +119,17 @@ class PlanEntrada(BaseModel):
     precio: str = Field(max_length=12)
     duracion_dias: int = Field(ge=1, le=365)
     destacado: bool = False
+    nivel: Optional[str] = Field(default=None, max_length=10)
+    moneda: str = Field(default='PEN', max_length=3)
 
 
-class ActivoEntrada(BaseModel):
-    activo: bool
+class PlanCambio(BaseModel):
+    activo: Optional[bool] = None
+    precio: Optional[str] = Field(default=None, max_length=12)
+    moneda: Optional[str] = Field(default=None, max_length=3)
+    duracion_dias: Optional[int] = Field(default=None, ge=1, le=365)
+    nombre: Optional[str] = Field(default=None, max_length=80)
+    descripcion: Optional[str] = Field(default=None, max_length=320)
 
 
 class RequisitoEntrada(BaseModel):
@@ -112,7 +168,25 @@ def crear_router(pub: Publicidad, verificar: VerificadorSesion) -> APIRouter:
 
     @router.get('/planes')
     def planes():
-        return {'planes': [plan_json(p) for p in pub.planes()]}
+        return {'planes': [plan_json(p) for p in pub.planes()], 'niveles': [nivel_json(n) for n in NIVELES.values()]}
+
+    @router.post('/fotos')
+    async def subir_foto(request: Request, foto: UploadFile = File(...)):
+        u = await verificar(request)
+        if u is None:
+            return JSONResponse(SESION, status_code=401)
+        try:
+            url = pub.subir_foto(u.id, await foto.read(FOTO_MAX_BYTES + 1))
+        except ReglaPublicidad as ex:
+            return error(ex)
+        return JSONResponse({'url': url}, status_code=201)
+
+    @router.get('/fotos/{nombre}')
+    def ver_foto(nombre: str):
+        r = pub.foto(nombre[:60])
+        if r is None:
+            return JSONResponse({'detail': 'Foto no disponible.'}, status_code=404)
+        return Response(r[0], media_type=r[1], headers={'Cache-Control': 'public, max-age=86400'})
 
     @router.get('/anuncios')
     def anuncios():
@@ -135,7 +209,8 @@ def crear_router(pub: Publicidad, verificar: VerificadorSesion) -> APIRouter:
             return JSONResponse(SESION, status_code=401)
         try:
             s = pub.solicitar(u.id, u.nombre, e.negocio, e.rubro, e.descripcion, e.contacto, e.plan_id, e.enlace,
-                              e.lugar_slug, e.direccion, e.lat, e.lon, e.ofertas)
+                              e.lugar_slug, e.direccion, e.lat, e.lon, e.ofertas, e.fotos, e.videos, e.whatsapp,
+                              e.horario, e.carta, e.servicios, e.habitaciones, e.capacidad, e.testimonios)
         except (ReglaPublicidad, NoEncontrada) as ex:
             return error(ex)
         return JSONResponse(solicitud_json(s, pub), status_code=201)
@@ -162,18 +237,18 @@ def crear_router(pub: Publicidad, verificar: VerificadorSesion) -> APIRouter:
         if r:
             return r
         try:
-            return JSONResponse(plan_json(pub.crear_plan(e.nombre, e.descripcion, e.precio, e.duracion_dias, e.destacado)), status_code=201)
+            return JSONResponse(plan_json(pub.crear_plan(e.nombre, e.descripcion, e.precio, e.duracion_dias, e.destacado, nivel=e.nivel, moneda=e.moneda)), status_code=201)
         except ReglaPublicidad as ex:
             return error(ex)
 
     @router.put('/admin/planes/{pid}')
-    async def activar(pid: str, request: Request, e: ActivoEntrada):
+    async def activar(pid: str, request: Request, e: PlanCambio):
         _, r = await admin(request)
         if r:
             return r
         try:
-            return plan_json(pub.activar_plan(pid[:40], e.activo))
-        except NoEncontrada as ex:
+            return plan_json(pub.editar_plan(pid[:40], **e.model_dump()))
+        except (NoEncontrada, ReglaPublicidad) as ex:
             return error(ex)
 
     @router.put('/admin/solicitudes/{sid}/requisitos')

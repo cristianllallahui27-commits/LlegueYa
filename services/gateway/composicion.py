@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from services.asistente.aplicacion import Experiencia, WillaqUma
 from services.asistente.presentacion import crear_router as router_asistente
-from services.catalogo.composicion import crear_catalogo
+from services.catalogo.composicion import crear_catalogo, crear_terminales
 from services.catalogo.presentacion import crear_router as router_catalogo
 from services.compartido.documentacion import publicar_documentacion
 from services.compartido.seguridad import aplicar_seguridad
@@ -23,7 +23,7 @@ from services.identidad.composicion import ROOT, leer_configuracion
 from services.identidad.presentacion import crear_router as router_identidad, verificador_local
 from services.compartido.sesion import lista_admin
 from services.publicidad.aplicacion import Publicidad
-from services.publicidad.infraestructura import RepositorioMemoria as PublicidadMemoria
+from services.publicidad.infraestructura import AlmacenCarpeta, RepositorioMemoria as PublicidadMemoria
 from services.publicidad.presentacion import crear_router as router_publicidad
 from services.recomendaciones.aplicacion import Viajes
 from services.recomendaciones.infraestructura import RepositorioMemoria as ViajesMemoria
@@ -37,6 +37,7 @@ def crear_app(configuracion=None):
     es_admin = lista_admin(os.getenv('ADMIN_CORREOS', ''))
     verificar = verificador_local(acceso, es_admin)
     catalogo = crear_catalogo(os.getenv('DB_CATALOGO_DSN', ''), float(os.getenv('CATALOGO_CACHE_TTL', '60')))
+    terminales = crear_terminales(os.getenv('DB_CATALOGO_DSN', ''))
     calendario = Calendario(EventosMemoria())
     comunidad = crear_comunidad()
 
@@ -45,15 +46,17 @@ def crear_app(configuracion=None):
         return [Experiencia(v.publicacion.id, v.publicacion.autor.nombre, v.publicacion.texto, v.publicacion.lugar_slug)
                 for v in comunidad.muro(None, 0, 30) if v.publicacion.estado == 'publicado']
 
-    asistente = WillaqUma(lambda: catalogo.repositorio.listar(), lambda: calendario.proximos(), experiencias)
+    carpeta_negocios = os.getenv('PUBLICIDAD_FOTOS_DIR') or ROOT / 'data' / 'fotos' / 'negocios'
+    publicidad = Publicidad(PublicidadMemoria(), almacen=AlmacenCarpeta(carpeta_negocios))
+    asistente = WillaqUma(lambda: catalogo.repositorio.listar(), lambda: calendario.proximos(), experiencias,
+                          negocios=lambda: publicidad.directorio(), transporte=lambda: terminales.por_lugar())
 
     app = FastAPI(title='LlegueYa', docs_url=None, redoc_url=None, openapi_url=None)
     aplicar_seguridad(app, origin)
-    publicidad = Publicidad(PublicidadMemoria())
     viajes = Viajes(ViajesMemoria(), lambda slug: catalogo.repositorio.obtener(slug))
     google_activo = os.getenv('SUPABASE_GOOGLE_ACTIVO', 'false').lower() == 'true'
     app.include_router(router_identidad(acceso, origin, es_admin, google_activo), tags=['Identidad'])
-    app.include_router(router_catalogo(catalogo, verificar), tags=['Catálogo'])
+    app.include_router(router_catalogo(catalogo, verificar, terminales), tags=['Catálogo'])
     app.include_router(router_comunidad(comunidad, verificar), tags=['Comunidad'])
     app.include_router(router_eventos(calendario, verificar), tags=['Eventos'])
     app.include_router(router_asistente(asistente, verificar), tags=['Asistente'])

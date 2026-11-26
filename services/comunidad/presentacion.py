@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 from services.compartido.sesion import VerificadorSesion
 from .aplicacion import Comunidad
-from .dominio import FOTO_BYTES_MAXIMO, MOTIVOS_REPORTE, Autor, NoEncontrado, ReglaVulnerada
+from .dominio import FOTO_BYTES_MAXIMO, MOTIVOS_REPORTE, NIVELES, Autor, NoEncontrado, ReglaVulnerada, nivel_de_confianza
 
 SESION_REQUERIDA = {'detail': 'Inicia sesión para participar.', 'requiere_sesion': True}
 
@@ -14,12 +14,18 @@ def autor_json(a):
     return {'id': a.id, 'nombre': a.nombre, 'avatar': a.avatar}
 
 
+def reputacion_json(likes):
+    nivel = nivel_de_confianza(likes)
+    return {'likes': likes, 'nivel': nivel, 'etiqueta': NIVELES.get(nivel)}
+
+
 def pub_json(v):
     p = v.publicacion
     return {'id': p.id, 'autor': autor_json(p.autor), 'texto': p.texto, 'lugar_slug': p.lugar_slug,
             'foto_url': f'/api/v1/comunidad/fotos/{p.foto_id}' if p.foto_id else None,
             'estado': p.estado, 'creado_en': p.creado_en.isoformat(), 'likes': v.likes,
-            'me_gusta': v.me_gusta, 'comentarios': v.comentarios, 'guardada': v.guardada}
+            'me_gusta': v.me_gusta, 'comentarios': v.comentarios, 'guardada': v.guardada,
+            'autor_reputacion': reputacion_json(v.autor_likes)}
 
 
 def com_json(v):
@@ -59,11 +65,15 @@ def crear_router(comunidad: Comunidad, verificar: VerificadorSesion) -> APIRoute
 
     @router.get('/muro')
     async def muro(request: Request, desde: int = Query(0, ge=0), limite: int = Query(10, ge=1, le=30),
-                   lugar: Optional[str] = Query(None, max_length=80)):
+                   lugar: Optional[str] = Query(None, max_length=80), con_foto: bool = Query(False)):
         u = await verificar(request)
-        vistas = comunidad.muro(u.id if u else None, desde, limite, lugar)
+        vistas = comunidad.muro(u.id if u else None, desde, limite, lugar, con_foto=con_foto)
         return {'items': [pub_json(v) for v in vistas], 'desde': desde, 'limite': limite,
                 'siguiente': desde + limite if len(vistas) == limite else None}
+
+    @router.get('/destacados')
+    def destacados():
+        return {'viajeros': [{'autor': autor_json(a), 'reputacion': reputacion_json(n)} for a, n in comunidad.destacados()]}
 
     @router.post('/publicaciones')
     async def publicar(request: Request, texto: str = Form('', max_length=2400),
@@ -141,7 +151,8 @@ def crear_router(comunidad: Comunidad, verificar: VerificadorSesion) -> APIRoute
         u = await verificar(request)
         if u is None:
             return JSONResponse(SESION_REQUERIDA, status_code=401)
-        return {'publicaciones': [pub_json(v) for v in comunidad.muro(u.id, 0, 30, autor=u.id)],
+        return {'reputacion': reputacion_json(comunidad.reputacion(u.id)),
+                'publicaciones': [pub_json(v) for v in comunidad.muro(u.id, 0, 30, autor=u.id)],
                 'guardadas': [pub_json(v) for v in comunidad.guardadas(u.id)]}
 
     @router.get('/fotos/{fid}')

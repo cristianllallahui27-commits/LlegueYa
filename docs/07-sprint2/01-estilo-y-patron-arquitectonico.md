@@ -27,8 +27,8 @@ flowchart LR
 | Decisión del Sprint 1 | Cómo está implementada | Dónde verlo |
 |---|---|---|
 | Siete servicios con límites propios | Un paquete Python por servicio: `services/identidad`, `catalogo`, `comunidad`, `eventos`, `publicidad`, `recomendaciones`, `asistente` | `services/` |
-| Despliegue independiente | Cada servicio con base de datos o API propia tiene su `composicion.crear_app()`. La misma imagen Docker arranca uno u otro con `SERVICIO=gateway\|identidad\|catalogo\|comunidad` | `Dockerfile`, `compose.yaml` |
-| Entrada API estable | El **gateway** compone los servicios bajo `/api/v1/...` en un solo origen (desarrollo y despliegue pequeño). En `compose.yaml`, nginx enruta por prefijo hacia contenedores separados, con Catálogo en 2 réplicas | `services/gateway/composicion.py`, `infra/nginx/llegueya.conf` |
+| Despliegue independiente | Identidad, Catálogo y Comunidad tienen su propio `composicion.crear_app()` y se ejecutan solos con `uvicorn services.<servicio>.composicion:crear_app --factory`. La imagen Docker empaqueta el gateway; `compose.yaml` la levanta junto a PostgreSQL con volumen y *healthcheck* | `services/*/composicion.py`, `Dockerfile`, `compose.yaml` |
+| Entrada API estable | El **gateway** compone los servicios bajo `/api/v1/...` en un solo origen. Para servicios separados, nginx enruta por prefijo (`/api/v1/catalogo` → Catálogo, con réplicas) y el Worker de Cloudflare balancea los backends | `services/gateway/composicion.py`, `infra/nginx/llegueya.conf`, `infra/cloudflare/borde/` |
 | Datos propios por servicio | Un esquema PostgreSQL por servicio, un rol `svc_*` por servicio y RLS en todas las tablas. Ningún servicio lee tablas de otro | `supabase/migrations/`, `tests/test_postgres.py` |
 | Identidad como dueña de la sesión | Los demás servicios reciben un `VerificadorSesion` (puerto) y nunca leen datos de Identidad: en proceso usan `verificador_local` y separados usan `VerificadorHttp` | `services/compartido/sesion.py` |
 | Escalar por demanda | Réplicas detrás del Worker de Cloudflare, con afinidad de sesión y *failover* | `infra/cloudflare/borde/` |
@@ -64,12 +64,12 @@ flowchart TB
 | Servicio | Dominio (`dominio.py`) | Puertos (en `aplicacion.py`) | Adaptadores (`infraestructura.py`) |
 |---|---|---|---|
 | Identidad | `Usuario`, `Credencial`, `AuthError`, reglas de correo, clave y nombre | `ProveedorIdentidad` | `Supabase` (Auth REST con PKCE) |
-| Catálogo | `Lugar`, `Foto`, `TIPOS`, `crear_slug`, límites de Ayacucho | `RepositorioLugares`, `RepositorioFavoritos` | `RepositorioPostgres`, `RepositorioMemoria`, `RepositorioEnCache`, `FavoritosPostgres` |
+| Catálogo | `Lugar`, `Foto`, `Terminal`, `TIPOS`, `crear_slug`, límites de Ayacucho | `RepositorioLugares`, `RepositorioFavoritos`, `RepositorioTerminales` | `RepositorioPostgres`, `RepositorioMemoria`, `RepositorioEnCache`, `FavoritosPostgres`, `TerminalesPostgres`; rutas y búsqueda de sitios con OSRM y Photon (`geo.py`) |
 | Comunidad | `Publicacion`, `Comentario`, `Autor`, `Reporte`, reglas de texto y foto | `RepositorioComunidad`, `AlmacenFotos` | `RepositorioPostgres`, `RepositorioMemoria`, `AlmacenLocal` |
 | Eventos | `Evento` | `RepositorioEventos` | `RepositorioMemoria` |
-| Publicidad | `Plan`, `Solicitud`, `RUBROS`, `REQUISITOS`, reglas de precio y ubicación | `RepositorioPublicidad` | `RepositorioMemoria` |
+| Publicidad | `Plan`, `Solicitud`, `Nivel` (Básico, Plus, Premium), `RUBROS`, `REQUISITOS`, reglas de precio y ubicación | `RepositorioPublicidad`, `AlmacenFotos` | `RepositorioMemoria`, `AlmacenCarpeta` |
 | Recomendaciones | `Viaje`, `PlanInvalido` | `RepositorioViajes` | `RepositorioMemoria` |
-| Asistente | `Respuesta`, `Experiencia`, vocabulario (`TEMAS`, `GUSTOS`), `normalizar` | Funciones de lectura que entrega la composición (catálogo, calendario, comunidad) | — (usa los puertos de los otros servicios) |
+| Asistente | `Respuesta`, `Experiencia`, vocabulario (`TEMAS`, `GUSTOS`), `normalizar` | Funciones de lectura que entrega la composición (catálogo, transporte, calendario, comunidad y negocios verificados) | — (usa los puertos de los otros servicios) |
 
 La regla no solo está escrita: `tests/test_arquitectura.py` la revisa en cada ejecución del CI.
 
@@ -108,7 +108,7 @@ sequenceDiagram
     P-->>N: 201 + JSON
 ```
 
-Cambiar PostgreSQL por memoria, o el disco local por R2, solo toca `composicion.py` e `infraestructura.py`. Las mismas pruebas de aplicación pasan con ambos adaptadores (`tests/test_plataforma.py` en memoria y `tests/test_postgres.py` en PostgreSQL real).
+Cambiar PostgreSQL por memoria, o el disco local por un almacén de objetos, solo toca `composicion.py` e `infraestructura.py`. Las mismas pruebas de aplicación pasan con ambos adaptadores (`tests/test_plataforma.py` en memoria y `tests/test_postgres.py` en PostgreSQL real).
 
 ## 1.4 Frontend y borde
 

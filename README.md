@@ -10,13 +10,13 @@ Los proveedores publican perfiles, fotos de sus servicios y paquetes propios. La
 
 ## Código y guía de desarrollo
 
-La web funciona como una red social de viajeros: muro con historias de destinos, publicaciones con foto, me gusta, comentarios en hilo, guardados, explorar, fichas de lugares con galería, mapa, calendario de fiestas y **Willaq Uma**, el asistente que responde con el contenido publicado en la plataforma. Backend en `services/` (Identidad, Catálogo, Comunidad, Eventos y Asistente) y web en `apps/web/`.
+La web funciona como una red social de viajeros: muro con historias de destinos, publicaciones con foto, me gusta, comentarios en hilo, guardados, explorar, fichas de lugares con galería, mapa, calendario de fiestas y **Willaq Uma**, el asistente que responde con el contenido publicado en la plataforma. Backend en `services/` (Identidad, Catálogo, Comunidad, Eventos, Publicidad, Recomendaciones y Asistente) y web en `apps/web/`.
 
-[Ejecutar localmente](docs/06-desarrollo/README.md) · [Configurar Google](docs/06-desarrollo/GOOGLE-SUPABASE.md) · [DNS, CDN y despliegue](docs/06-desarrollo/DESPLIEGUE-DNS-CDN.md) · [Criterios de evaluación](docs/06-desarrollo/CRITERIOS-EVALUACION.md) · [Guía de prompts](prompts/README.md). Publicidad y Recomendaciones siguen en diseño.
+[Estructura y Postman](docs/06-desarrollo/ESTRUCTURA-Y-POSTMAN.md) · [Ejecutar localmente](docs/06-desarrollo/README.md) · [Configurar Google](docs/06-desarrollo/GOOGLE-SUPABASE.md) · [DNS, CDN y despliegue](docs/06-desarrollo/DESPLIEGUE-DNS-CDN.md) · [Criterios de evaluación](docs/06-desarrollo/CRITERIOS-EVALUACION.md) · [Guía de prompts](prompts/README.md).
 
 ## Base de datos
 
-[Tablas, migraciones y configuración Supabase](supabase/README.md). 64 tablas aplicadas en el proyecto remoto; la migración `20261117000100_plataforma_social.sql` añade 2 tablas (66), permisos RLS de Catálogo y Comunidad, y `supabase/seed/` carga los lugares de demostración.
+[Tablas, migraciones y configuración Supabase](supabase/README.md): siete esquemas privados, 67 tablas con RLS forzado y 33 políticas de acceso; `supabase/seed/` carga los lugares de demostración.
 
 ## Arquitectura
 
@@ -28,7 +28,7 @@ El [modelo C4](modelo-c4/README.md) presenta contexto, contenedores y una base S
 
 [Leer el SDD con navegación](docs/05-sdd/index.html) · [Índice editable](docs/05-sdd/README.md) · [Índice de documentación](docs/README.md).
 
-La plataforma incluye perfil editable, colecciones privadas, movilidad independiente de paquetes y un mapa con arrastre/zoom y marcadores, sin solicitar ubicación del usuario. El chatbot se integra con Gemini y respeta datos autorizados y presupuesto calculado.
+La plataforma incluye perfil editable, colecciones privadas, terminales y movilidad independiente de paquetes, y un mapa con capas, marcadores y rutas; la ubicación se usa solo si la persona la activa y nunca se envía al servidor. Willaq Uma responde únicamente con lo publicado y verificado en LlegueYa.
 
 ## Documentación
 
@@ -44,7 +44,7 @@ La plataforma incluye perfil editable, colecciones privadas, movilidad independi
 
 ## Límites y estado
 
-El repositorio contiene la documentación de análisis y diseño y una implementación funcional de Identidad, Catálogo, Comunidad, Eventos y el asistente Willaq Uma, con pruebas unitarias, de integración, End to End, de carga y CI/CD. Los lugares cargados son datos de demostración identificados en la interfaz. El [SDD](docs/05-sdd/README.md) define Supabase, Docker, Cloudflare, Gemini y las propuestas técnicas complementarias; hosting, capacidad y versiones exactas se concretarán antes de implementar. Las metas de calidad son propuestas para validar.
+El repositorio contiene la documentación de análisis y diseño (Sprint 1) y la primera versión funcional de los siete servicios con su panel de administración (Sprint 2), con pruebas unitarias, de integración, End to End, de carga y CI/CD. Los lugares cargados son datos de demostración identificados en la interfaz. Las metas de calidad y sus mediciones están en [Sprint 2](docs/07-sprint2/README.md).
 
 LlegueYa no vende ni cobra entradas, no realiza reservas ni emite QR. Orienta hacia enlaces de venta verificados. Los pagos externos de publicidad se registran y revisan administrativamente; no se incorpora pasarela automática. La bandeja de avisos es web y el canal de correo queda por definir. No se incluyen WhatsApp ni Telegram.
 

@@ -37,7 +37,7 @@ Límites del plan gratuito que nos importan: 100 000 peticiones al día al Worke
 
 ## 2. Backends
 
-El backend es la misma imagen Docker del repositorio (`Dockerfile`, `SERVICIO=gateway`). Opciones, de la más simple a la más robusta:
+El backend es la imagen Docker del repositorio (`Dockerfile`, que arranca el gateway con todos los servicios). Opciones, de la más simple a la más robusta:
 
 1. **Dos servicios en Render** (u otro hosting con Docker) creados desde el repositorio: `llegueya-api-1` y `llegueya-api-2`. Cada uno con las variables de la sección 5.
 2. **Tu PC o un VPS con Cloudflare Tunnel**: no abre puertos. Plantilla en `infra/cloudflare/tunel/config.yml`. Sirve para la demo, pero la PC debe quedar encendida.
@@ -105,7 +105,7 @@ Para mostrar el failover: apaga un backend, recarga la web varias veces y mira `
 
 ## 8. Despliegue continuo
 
-`.github/workflows/ci.yml` ya lo hace: prueba el Worker (cobertura ≥90 %) junto con el resto y, en `main`, el job **desplegar** dispara el *deploy hook* de los backends y publica el Worker con `cloudflare/wrangler-action`. Solo hay que crear dos secretos en GitHub → Settings → Secrets → Actions:
+`.github/workflows/ci.yml` prueba el Worker (cobertura ≥90 %) junto con el resto y, en `main`, el job **desplegar** dispara el *deploy hook* de los backends y publica el Worker con `cloudflare/wrangler-action`. Para publicar el Worker se crean dos secretos en GitHub → Settings → Secrets → Actions:
 
 - `CLOUDFLARE_API_TOKEN`: Cloudflare → My Profile → API Tokens → plantilla «Edit Cloudflare Workers».
 - `CLOUDFLARE_ACCOUNT_ID`: aparece en la página de Workers & Pages.

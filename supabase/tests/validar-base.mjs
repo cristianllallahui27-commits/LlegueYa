@@ -16,9 +16,9 @@ try{
   const sql=await fs.readFile(path.join(root,'supabase/migrations',f),'utf8');
   await test('Aplicar '+f,()=>db.exec(sql));
  }
- await test('66 tablas con RLS activado y forzado',async()=>{
+ await test('67 tablas con RLS activado y forzado',async()=>{
   const {rows}=await db.query(`select count(*)::int as total, count(*) filter(where c.relrowsecurity and c.relforcerowsecurity)::int as rls from pg_class c join pg_namespace n on n.oid=c.relnamespace where c.relkind='r' and ${scope}`);
-  assert.deepEqual(rows[0],{total:66,rls:66});
+  assert.deepEqual(rows[0],{total:67,rls:67});
  });
  await test('Ninguna FK cruza servicios',async()=>{
   const {rows}=await db.query(`select count(*)::int as total from pg_constraint c join pg_class t on t.oid=c.conrelid join pg_class f on f.oid=c.confrelid join pg_namespace n on n.oid=t.relnamespace where c.contype='f' and t.relnamespace<>f.relnamespace and ${scope}`);

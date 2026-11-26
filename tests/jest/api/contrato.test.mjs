@@ -14,7 +14,7 @@ describe('OpenAPI / Swagger', () => {
 
   test('cada operación tiene resumen, grupo y declara si requiere sesión', () => {
     const ops = Object.entries(contrato.paths).flatMap(([ruta, m]) => Object.entries(m).map(([metodo, op]) => ({ ruta, metodo, op })));
-    expect(ops.length).toBeGreaterThanOrEqual(55);
+    expect(ops.length).toBeGreaterThanOrEqual(80);
     for (const { op } of ops) {
       expect(op.summary.length).toBeGreaterThan(5);
       expect(op.tags).toHaveLength(1);
@@ -25,7 +25,8 @@ describe('OpenAPI / Swagger', () => {
   test('los GET públicos documentados responden (no hay rutas fantasma)', async () => {
     const c = new Cliente();
     const publicos = Object.entries(contrato.paths)
-      .filter(([ruta, m]) => m.get && !ruta.includes('{') && m.get.security.length === 0).map(([ruta]) => ruta);
+      .filter(([ruta, m]) => m.get && !ruta.includes('{') && m.get.security.length === 0
+        && !(m.get.parameters || []).some(p => p.required)).map(([ruta]) => ruta);
     for (const ruta of publicos) {
       const r = await c.get(ruta);
       expect([200, 303, 307]).toContain(r.status);

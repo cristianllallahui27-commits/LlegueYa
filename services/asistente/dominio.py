@@ -14,10 +14,7 @@ me mas mi muy no o para pero por que quiero quisiera recomiendas sabes se si sob
 puedo puedes ir visitar conocer lugar lugares favor dime cuentame hola buenas'''.split())
 
 EXTRAS = {
-    # Conocimiento general, solo cuando el catálogo no cubre el tema. Se marca como tal.
-    'comida': ('Todavía no tenemos restaurantes verificados en LlegueYa, pero te dejo lo que suele recomendarse '
-               'en Ayacucho: la puca picante, el qapchi con papas, el mondongo por las mañanas y, de postre, '
-               'un muyuchi en los portales de la Plaza Mayor.'),
+    # Conocimiento general (no son negocios ni lugares): solo altura y clima. Se marca como tal.
     'altura': ('Huamanga está alrededor de los 2760 m de altura y lugares como la Pampa de Ayacucho superan los '
                '3000 m. El primer día camina sin apuro, toma bastante agua y deja las caminatas largas para después.'),
     'clima': ('En los Andes de Ayacucho la temporada seca va más o menos de mayo a octubre; de enero a marzo '
@@ -27,8 +24,14 @@ EXTRAS = {
 TEMAS = {
     'evento': ('fiesta', 'fiestas', 'evento', 'eventos', 'festividad', 'calendario', 'raymi', 'semana santa',
                'aniversario', 'celebra', 'carnaval'),
+    'entrada': ('entrada', 'entradas', 'boleto', 'boletos', 'ticket', 'tickets', 'cuesta', 'cuanto cuesta', 'costo',
+                'precio', 'cobran', 'gratis', 'ingreso', 'pagar'),
     'llegar': ('llegar', 'llego', 'transporte', 'bus', 'colectivo', 'combi', 'como voy', 'movilidad', 'terminal'),
-    'comida': ('comer', 'comida', 'plato', 'platos', 'gastronomia', 'restaurante', 'almorzar', 'probar'),
+    'comida': ('comer', 'comida', 'plato', 'platos', 'gastronomia', 'restaurante', 'restaurantes', 'almorzar', 'cenar',
+               'desayunar', 'probar'),
+    'paquete': ('paquete', 'paquetes', 'tour', 'tours', 'agencia', 'agencias', 'excursion', 'excursiones', 'contratar',
+                'guia turistico', 'operador'),
+    'hospedaje': ('hotel', 'hoteles', 'hospedaje', 'hostal', 'hostales', 'dormir', 'alojamiento', 'donde quedarme'),
     'altura': ('altura', 'soroche', 'altitud', 'mal de altura'),
     'clima': ('clima', 'lluvia', 'llueve', 'temporada', 'epoca', 'frio', 'cuando ir', 'mejor mes'),
     'saludo': ('hola', 'allillanchu', 'buenas', 'buenos dias', 'buenas tardes', 'que tal'),
@@ -67,7 +70,8 @@ PRESENTACION = (
     'Mi nombre viene del Willaq Umu, el consejero sabio del mundo inca. Mi tarea es que vivas Ayacucho cómodo y '
     'a tu manera: puedo armarte un plan de viaje por días y tú decides si lo aceptas, lo cambias o lo dejas.',
     'Para aconsejarte me baso en lo que hay en esta aplicación: los lugares del catálogo, las fiestas del '
-    'calendario y las experiencias que comparten otros viajeros. Si algo no está publicado, te lo diré con honestidad.',
+    'calendario, los negocios verificados (restaurantes, hospedajes, agencias y paquetes) y las experiencias que '
+    'comparten otros viajeros. No recomiendo nada de afuera: si algo no está publicado, te lo diré con honestidad.',
     'Cuéntame qué te gusta o cuántos días tienes, y empezamos.',
 )
 DIAS_EN_TEXTO = {'un': 1, 'una': 1, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4, 'cinco': 5}
@@ -113,6 +117,7 @@ class Respuesta:
     fuentes: list = field(default_factory=list)      # [{nombre, url}]
     sugerencias: list = field(default_factory=list)  # preguntas rápidas
     experiencias: list = field(default_factory=list) # [{autor, texto, lugar_slug}] reales de la comunidad
+    negocios: list = field(default_factory=list)     # [{nombre, rubro}] verificados en LlegueYa
     plan: Optional[dict] = None                      # propuesta de viaje que el usuario puede aceptar
     dato_general: bool = False
     requiere_sesion: bool = False

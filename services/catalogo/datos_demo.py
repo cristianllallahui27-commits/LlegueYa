@@ -132,4 +132,57 @@ LUGARES = (
         recomendaciones=('Evita la temporada de lluvias (enero a marzo): el agua pierde su color.',
                          'Lleva calzado de trekking y sal temprano.'),
         altitud_m=3600, fuente='Guía del viajero Ayacucho · PROMPERÚ', fuente_url=GUIA, revisado_en=REVISADO),
+    Lugar(
+        id='c1a1e0de-0009-4000-8000-000000000009', slug='picanterias-de-huamanga',
+        nombre='Picanterías de Huamanga', tipo='gastronomia', destino='Huamanga', zona='Centro y barrios tradicionales',
+        resumen='Donde se prueba la cocina ayacuchana: puca picante, mondongo, patachi y chicharrón con mote.',
+        descripcion=('Las picanterías son locales familiares de comida criolla y andina, famosas por sus guisos '
+                     'picantes y sus sopas contundentes. Suelen abrir al mediodía y cerrar temprano, porque la '
+                     'cocina se prepara cada día. Pregunta por el plato del día y por la chicha de jora.'),
+        lat=None, lon=None, fotos=(),
+        como_llegar='Pregunta en tu hospedaje por las picanterías más cercanas y llega temprano al almuerzo.',
+        recomendaciones=('Prueba el puca picante y el mondongo.', 'Lleva efectivo: no todos los locales aceptan tarjeta.'),
+        altitud_m=2761, fuente='Referencia general de gastronomía ayacuchana (sin local verificado)', fuente_url='', revisado_en=REVISADO),
+    Lugar(
+        id='c1a1e0de-000a-4000-8000-00000000000a', slug='mercado-central-huamanga',
+        nombre='Mercados de Huamanga', tipo='gastronomia', destino='Huamanga', zona='Centro de Huamanga',
+        resumen='Desayunos con jugo y pan, frutas, quesos y tamales: la forma más barata y rápida de comer como local.',
+        descripcion=('Los mercados de la ciudad concentran puestos de desayuno, jugos, queso fresco, tamales y comida '
+                     'del día a precios populares. Es un buen lugar para conocer los productos de la zona.'),
+        lat=None, lon=None, fotos=(),
+        como_llegar='Están en el centro de la ciudad; se llega caminando desde la Plaza Mayor.',
+        recomendaciones=('Ve temprano: lo mejor se acaba antes del mediodía.',),
+        altitud_m=2761, fuente='Referencia general (sin local verificado)', fuente_url='', revisado_en=REVISADO),
+    Lugar(
+        id='c1a1e0de-000b-4000-8000-00000000000b', slug='barrio-de-artesanos-santa-ana',
+        nombre='Barrio de artesanos de Santa Ana', tipo='artesania', destino='Huamanga', zona='Barrio de Santa Ana',
+        resumen='Talleres de retablos, tejidos y piedra de Huamanga, donde se ve cómo se hace cada pieza.',
+        descripcion=('Santa Ana es conocido por sus talleres de artesanos. Puedes ver retablos ayacuchanos, tejidos '
+                     'y trabajos en piedra de Huamanga, y conversar con quienes los elaboran.'),
+        lat=None, lon=None, fotos=(),
+        como_llegar='Está a pocas cuadras del centro; consulta la ruta en tu hospedaje.',
+        recomendaciones=('Compra directo al artesano y pregunta el nombre de la técnica.',),
+        altitud_m=2761, fuente='Referencia general (sin local verificado)', fuente_url='', revisado_en=REVISADO),
 )
+
+
+# Entrada (referencial, consultada el 23/11/2026; siempre se pide confirmar antes de viajar).
+# Fuentes: SERNANP (tarifa del Santuario Pampa de Ayacucho), Whichmuseum (Museo de sitio Wari),
+# operadores turísticos Nomades/Denomades (Vilcashuamán y Millpu). Los espacios públicos son de ingreso libre.
+ENTRADAS = {
+    'plaza-mayor-huamanga': ('Libre: es un espacio público.', ''),
+    'catedral-de-ayacucho': ('Libre. Respeta los horarios de misa.', ''),
+    'arco-del-triunfo': ('Libre: está en la vía pública.', ''),
+    'complejo-arqueologico-wari': ('Con boleto (incluye el museo de sitio). Referencia: S/ 6 adultos · S/ 3 universitarios · escolares gratis.', 'lugar'),
+    'santuario-pampa-de-ayacucho': ('Con boleto (SERNANP). Referencia: S/ 5 nacionales · S/ 3 pobladores de Ayacucho · S/ 8 extranjeros.', 'lugar'),
+    'pueblo-de-quinua': ('Libre para recorrer el pueblo; algunos talleres o museos pueden cobrar aparte.', ''),
+    'vilcashuaman': ('Con boleto. Referencia: S/ 5 residentes en el Perú · S/ 7 no residentes.', 'lugar'),
+    'aguas-turquesas-de-millpu': ('Con boleto (lo cobra la comunidad). Referencia: S/ 10 peruanos · S/ 15 extranjeros.', 'lugar'),
+    'picanterias-de-huamanga': ('Libre: pagas solo lo que consumes.', ''),
+    'mercado-central-huamanga': ('Libre: pagas solo lo que compras.', ''),
+    'barrio-de-artesanos-santa-ana': ('Libre: los talleres se visitan sin costo; pagas lo que compras.', ''),
+}
+
+from dataclasses import replace as _reemplazar  # noqa: E402
+LUGARES = tuple(_reemplazar(l, entrada_costo=ENTRADAS[l.slug][0], entrada_compra=ENTRADAS[l.slug][1])
+                if l.slug in ENTRADAS else l for l in LUGARES)

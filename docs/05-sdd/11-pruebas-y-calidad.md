@@ -1,6 +1,6 @@
 # 11 · Plan de pruebas y puertas de calidad
 
-> Estado de implementación (29/10/2026): existe una primera capacidad de Identidad con Google y pruebas locales. Consultar [estado real y ejecución](../06-desarrollo/README.md). Las descripciones de producto y pruebas futuras de esta línea base no acreditan que todos los servicios estén implementados.
+> Este SDD es la línea base de diseño. Lo implementado, cómo ejecutarlo y las mediciones de la primera versión están en [Desarrollo](../06-desarrollo/README.md) y en [Sprint 2](../07-sprint2/README.md).
 
 [Índice](README.md) · [Trazabilidad](10-trazabilidad-y-validacion.md)
 
@@ -54,11 +54,11 @@ Herramientas propuestas: pytest y coverage.py para Python; Playwright para naveg
 
 Cada ejecución conserva fecha, revisión Git y estado de cambios, versiones, entorno, casos aprobados/fallidos/omitidos, duración, cobertura por servicio, incidencias y artefactos saneados. No se guardan tokens, cookies, correos reales ni cuerpos privados. Los reportes voluminosos y capturas se generan en `reports/` (ignorado); el resumen aceptado puede referenciarse en esta documentación. Una ejecución vacía o un reporte de otra revisión bloquea la entrega.
 
-## 11.5 Comprobaciones disponibles hoy
+## 11.5 Comprobaciones ejecutables
 
-El código ejecutable de comprobación está en [tests/README.md](../../tests/README.md). Verifica la integración **entre documentos HTML, navegación y recursos locales**, además de controles funcionales de la vista previa en un navegador real. No sustituye IT01–IT08 ni mide cobertura del backend inexistente. El lector ofrece el capítulo 11 y conserva la vista de acceso para inspección visual.
+Las suites ejecutables están descritas en [tests/README.md](../../tests/README.md): pytest (dominio, casos de uso, HTTP, PostgreSQL con RLS y reglas de arquitectura), Jest (lógica web, borde Cloudflare y reglas de negocio de la API), Playwright (recorridos End to End) y k6 (carga). `tests/calidad-local.mjs` revisa además la integración entre documentos HTML, navegación y recursos locales.
 
-Estado del código principal: **pendiente de implementación; cobertura no medible**. Estado de integraciones externas, carga, seguridad dinámica y recuperación: **no ejecutadas**. El resultado local se genera al ejecutar la suite; no se deduce de este plan.
+Los resultados medidos de la primera versión (cobertura por servicio, carga hasta 2 000 usuarios, caída de una réplica y matriz de seguridad) están en [Pruebas y CI/CD](../07-sprint2/06-pruebas-automatizadas-y-ci.md) y [Validación de atributos de calidad](../07-sprint2/07-validacion-atributos-calidad.md).
 
 ## 11.6 Fuentes técnicas
 

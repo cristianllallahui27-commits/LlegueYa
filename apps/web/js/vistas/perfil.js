@@ -1,9 +1,15 @@
 import { api } from '../api.js';
-import { avatar, error, foto, postViajero, vacio } from '../componentes.js';
+import { avatar, error, foto, insigniaConfianza, postViajero, vacio } from '../componentes.js';
+import { confirmar } from '../confirmar.js';
 import { avisar, el, icono, vaciar } from '../dom.js';
 import { estado, pedirAcceso } from '../estado.js';
-import { limpiarOfertas, precioSoles } from '../util.js';
-import { selectorUbicacion } from './mapa.js';
+import { precioPlan } from '../util.js';
+import { formularioNegocio, galeria } from './negocio.js';
+import { cambiarSonido, sonar, sonidoActivo } from '../sonido.js';
+import { abrirGuia } from '../guia.js';
+import { borrarIntereses, tieneIntereses } from '../preferencias.js';
+import { PERSONAS, dibujoPersona, guardarAvatar, leerAvatar, reducirFoto } from '../avatarlocal.js';
+import { TIPOS } from '../util.js';
 
 function miViaje(viajes, recargar) {
   if (!viajes.length) {
@@ -14,81 +20,88 @@ function miViaje(viajes, recargar) {
   return viajes.map(v => el('article', { class: 'tarjeta plan-viaje plan-guardado' },
     el('div', { class: 'admin-cabecera' }, el('h3', { class: 'crece' }, v.titulo),
       el('button', { class: 'boton boton-texto', type: 'button', onclick: async () => {
-        if (!confirm('¿Quitar este plan de tu espacio?')) return;
+        if (!(await confirmar({ titulo: 'Quitar plan', mensaje: 'Se quitará este plan de tu espacio.', aceptar: 'Quitar', peligro: true }))) return;
         try { await api.eliminarViaje(v.id); avisar('Plan quitado'); recargar(); } catch (e) { avisar(e.message); }
       } }, 'Quitar')),
     el('ol', {}, v.dias.map(d => el('li', {}, el('strong', {}, `Día ${d.numero} · ${d.titulo}`),
       d.lugares.length ? el('ul', {}, d.lugares.map(l => el('li', {}, el('a', { href: `#/lugar/${l.slug}` }, l.nombre), ` — ${l.resumen}`))) : el('p', {}, 'Día libre'))))));
 }
 
-function editorOfertas() {
-  const lista = el('div', { class: 'ofertas-editor' });
-  const agregar = el('button', { class: 'boton boton-borde', type: 'button' }, icono('mas'), 'Agregar producto o servicio');
-  const fila = () => {
-    const n = lista.children.length + 1;
-    const f = el('div', { class: 'oferta-fila' },
-      el('input', { name: 'oferta_nombre', 'aria-label': `Producto o servicio ${n}`, placeholder: 'Retablo pequeño, tour a Wari…', maxlength: 80 }),
-      el('input', { name: 'oferta_precio', 'aria-label': `Precio desde (S/) ${n}`, placeholder: 'Desde S/', type: 'number', min: 0, step: '0.01' }),
-      el('input', { name: 'oferta_detalle', 'aria-label': `Detalle ${n}`, placeholder: 'Detalle (opcional)', maxlength: 200 }),
-      el('button', { class: 'boton-icono', type: 'button', 'aria-label': `Quitar fila ${n}`, onclick: () => { f.remove(); agregar.hidden = false; } }, icono('cerrar')));
-    lista.append(f);
-    agregar.hidden = lista.children.length >= 8;
-  };
-  agregar.addEventListener('click', fila);
-  fila();
-  return [lista, agregar];
-}
-
-function formularioNegocio(rubros, planes, alEnviar) {
-  const requisitos = el('ul', { class: 'requisitos lectura' });
-  const rubro = el('select', { id: 'neg-rubro', name: 'rubro', required: true },
-    el('option', { value: '' }, 'Elige el rubro'), rubros.map(r => el('option', { value: r.id }, r.nombre)));
-  rubro.addEventListener('change', () => {
-    const r = rubros.find(x => x.id === rubro.value);
-    vaciar(requisitos, r ? r.requisitos.map(q => el('li', {}, q)) : []);
-  });
-  const form = el('form', { class: 'tarjeta form-plan' },
-    el('h3', { class: 'titulo-bloque' }, 'Registrar o promocionar mi negocio'),
-    el('p', { class: 'nota' }, 'Artesanos, movilidad, agencias, hospedajes y restaurantes. LlegueYa verifica cada negocio antes de mostrarlo en Servicios y artesanía, para que el viajero viva una buena experiencia.'),
-    el('label', { class: 'etiqueta', for: 'neg-nombre' }, 'Nombre del negocio'), el('input', { id: 'neg-nombre', name: 'negocio', required: true, maxlength: 120 }),
-    el('label', { class: 'etiqueta', for: 'neg-rubro' }, 'Rubro'), rubro,
-    el('p', { class: 'nota' }, 'Te pediremos:'), requisitos,
-    el('label', { class: 'etiqueta', for: 'neg-desc' }, 'Qué ofreces'), el('textarea', { id: 'neg-desc', name: 'descripcion', rows: 3, required: true, maxlength: 1000 }),
-    el('fieldset', { class: 'grupo' }, el('legend', { class: 'etiqueta' }, 'Productos y servicios con precio'), editorOfertas()),
-    el('label', { class: 'etiqueta', for: 'neg-direccion' }, 'Dirección'), el('input', { id: 'neg-direccion', name: 'direccion', maxlength: 200, placeholder: 'Jr. 28 de Julio 100, Huamanga' }),
-    el('fieldset', { class: 'grupo' }, el('legend', { class: 'etiqueta' }, 'Ubicación en el mapa'), selectorUbicacion({ ayuda: 'Toca el mapa donde está tu local. Puedes arrastrar el pin.' })),
-    el('label', { class: 'etiqueta', for: 'neg-contacto' }, 'Contacto (teléfono o correo)'), el('input', { id: 'neg-contacto', name: 'contacto', required: true, maxlength: 120 }),
-    el('label', { class: 'etiqueta', for: 'neg-enlace' }, 'Página o red social (opcional)'), el('input', { id: 'neg-enlace', name: 'enlace', type: 'url', placeholder: 'https://', maxlength: 200 }),
-    el('label', { class: 'etiqueta', for: 'neg-plan' }, 'Plan'),
-    el('select', { id: 'neg-plan', name: 'plan_id', required: true }, planes.map(p =>
-      el('option', { value: p.id }, `${p.nombre} · ${precioSoles(p.precio)} · ${p.duracion_dias} días`))),
-    el('button', { class: 'boton boton-principal', type: 'submit' }, 'Enviar solicitud'));
-  form.addEventListener('submit', async ev => {
-    ev.preventDefault();
-    const fd = new FormData(form);
-    const nombres = fd.getAll('oferta_nombre'), precios = fd.getAll('oferta_precio'), detalles = fd.getAll('oferta_detalle');
-    const ofertas = limpiarOfertas(nombres.map((nombre, i) => ({ nombre, precio_desde: precios[i], detalle: detalles[i] })));
-    const d = Object.fromEntries(['negocio', 'rubro', 'descripcion', 'direccion', 'contacto', 'enlace', 'plan_id'].map(k => [k, fd.get(k) || '']));
-    if (fd.get('lat')) { d.lat = Number(fd.get('lat')); d.lon = Number(fd.get('lon')); }
-    d.ofertas = ofertas;
-    try { await api.solicitarPromocion(d); avisar('Solicitud enviada. Te avisaremos cuando la revisemos.'); alEnviar(); }
-    catch (e) { avisar(e.message); }
-  });
-  return form;
-}
-
-function miNegocio(solicitudes, rubros, planes, recargar) {
+function miNegocio(solicitudes, rubros, planes, niveles, recargar) {
   const estados = { pendiente: 'En verificación', aprobada: 'Aprobada · patrocinado', rechazada: 'Rechazada' };
   return [
     solicitudes.map(s => el('article', { class: 'tarjeta admin-fila' },
       el('div', { class: 'admin-cabecera' }, icono('tienda'), el('div', { class: 'crece' }, el('strong', {}, s.negocio), el('span', {}, s.rubro_nombre)),
         el('span', { class: `etiqueta-estado ${s.estado === 'pendiente' ? 'revision' : s.estado === 'rechazada' ? 'demo' : ''}` }, estados[s.estado])),
-      el('p', { class: 'nota' }, `Plan ${s.plan.nombre} · ${precioSoles(s.plan.precio)}`,
+      galeria(s.fotos, s.negocio),
+      el('p', { class: 'nota' }, `Plan ${s.plan.nombre} · ${precioPlan(s.plan)}`,
         s.pago === 'pendiente' ? ' · Pago pendiente: te contactaremos para coordinarlo.' : ''),
       s.motivo ? el('p', { class: 'nota' }, `Motivo: ${s.motivo}`) : null,
       s.fin ? el('p', { class: 'nota' }, `Patrocinado hasta el ${new Date(s.fin).toLocaleDateString('es-PE')}`) : null)),
-    formularioNegocio(rubros, planes, recargar),
+    formularioNegocio(rubros, planes, niveles, recargar),
   ];
+}
+
+function miCuenta(u) {
+  const vista = el('div', { class: 'avatar-vista' }, avatar(u, 'avatar avatar-grande'));
+  const repintar = () => vaciar(vista, avatar(u, 'avatar avatar-grande'));
+  const iconos = el('div', { class: 'avatar-iconos', role: 'group', 'aria-label': 'Elige tu personaje' }, PERSONAS.map(([id, nombre]) =>
+    el('button', { class: 'icono-opcion persona-opcion', type: 'button', 'aria-label': `Personaje ${PERSONAS.findIndex(x => x[0] === id) + 1}`,
+      onclick: async () => { if (!(await confirmar({ titulo: 'Cambiar foto de perfil', mensaje: 'Usarás este personaje como tu foto de perfil.', aceptar: 'Guardar cambios' }))) return; try { guardarAvatar(u.id, { tipo: 'persona', persona: id }); repintar(); avisar('Foto de perfil actualizada'); } catch (e) { avisar(e.message); } } },
+      dibujoPersona(id))));
+  const archivo = el('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp', hidden: true });
+  archivo.addEventListener('change', async () => {
+    if (!archivo.files[0]) return;
+    if (!(await confirmar({ titulo: 'Cambiar foto de perfil', mensaje: 'Esta foto se verá como tu foto de perfil en este navegador.', aceptar: 'Guardar cambios' }))) { archivo.value = ''; return; }
+    try { guardarAvatar(u.id, { tipo: 'foto', data: await reducirFoto(archivo.files[0]) }); repintar(); avisar('Foto de perfil actualizada'); }
+    catch (e) { avisar(e.message); }
+  });
+  const f1 = el('input', { id: 'clave-nueva', type: 'password', autocomplete: 'new-password', minlength: 8, required: true });
+  const f2 = el('input', { id: 'clave-repite', type: 'password', autocomplete: 'new-password', minlength: 8, required: true });
+  const nota = el('p', { class: 'nota', role: 'status', 'aria-live': 'polite' });
+  const form = el('form', { class: 'tarjeta form-plan', novalidate: true },
+    el('h3', { class: 'titulo-bloque' }, 'Cambiar mi clave'),
+    el('label', { class: 'etiqueta', for: 'clave-nueva' }, 'Clave nueva'), f1,
+    el('label', { class: 'etiqueta', for: 'clave-repite' }, 'Repite la clave'), f2,
+    nota, el('button', { class: 'boton boton-secundario', type: 'submit' }, 'Guardar clave'),
+    el('p', { class: 'nota' }, '¿La olvidaste? Cierra sesión y usa «Recuperar clave»: te enviamos un enlace al correo.'));
+  form.addEventListener('submit', async ev => {
+    ev.preventDefault();
+    if (f1.value !== f2.value) { nota.textContent = 'Las dos claves deben ser iguales.'; return; }
+    if (!(await confirmar({ titulo: 'Cambiar tu clave', mensaje: 'Tu clave actual dejará de funcionar y usarás la nueva para entrar.', aceptar: 'Guardar clave' }))) return;
+    nota.textContent = 'Guardando…';
+    try { const r = await api.nuevaClave(f1.value); nota.textContent = (r.detail || 'Tu clave se actualizó.') + ' Si los avisos de seguridad están activados en el servidor, también te llegará un correo.'; form.reset(); }
+    catch (e) { nota.textContent = e.message; }
+  });
+  const casillaSonido = el('input', { type: 'checkbox', checked: sonidoActivo() || null });
+  casillaSonido.addEventListener('change', async () => {
+    const activo = casillaSonido.checked;
+    if (!(await confirmar({ titulo: 'Sonido al navegar', mensaje: activo ? 'Sonará una nota suave de quena al cambiar de sección.' : 'La navegación quedará en silencio.', aceptar: 'Guardar cambios' }))) { casillaSonido.checked = !activo; return; }
+    cambiarSonido(activo);
+    if (activo) sonar(2);
+    avisar(activo ? 'Sonido activado' : 'Sonido apagado');
+  });
+  const preferencias = el('section', { class: 'tarjeta form-plan' },
+    el('h3', { class: 'titulo-bloque' }, 'Preferencias'),
+    el('label', { class: 'casilla' }, casillaSonido, 'Sonido suave al cambiar de sección (nota de quena)'),
+    el('p', { class: 'nota' }, 'Se guarda en este navegador. Suena bajito y solo cuando tú tocas el menú.'),
+    el('button', { class: 'boton boton-borde', type: 'button', onclick: () => abrirGuia(u) }, icono('explorar'), 'Ver la guía de LlegueYa'),
+    el('p', { class: 'nota' }, 'Tu muro se ordena según los lugares que abres, los tipos que filtras y los destinos que buscas. Eso se guarda solo en este navegador y nunca se envía a LlegueYa.'),
+    el('button', { class: 'boton boton-texto', type: 'button', onclick: async () => {
+      if (!tieneIntereses()) { avisar('Aún no hay intereses guardados en este navegador.'); return; }
+      if (!(await confirmar({ titulo: 'Borrar mis intereses', mensaje: 'Tu muro volverá a mostrarse sin preferencias hasta que explores de nuevo.', aceptar: 'Borrar', peligro: true }))) return;
+      borrarIntereses(); avisar('Intereses borrados');
+    } }, 'Borrar mis intereses'));
+  return el('div', {},
+    preferencias,
+    el('section', { class: 'tarjeta form-plan' },
+      el('h3', { class: 'titulo-bloque' }, 'Mi foto de perfil'), vista,
+      el('p', { class: 'nota' }, 'Elige un personaje o sube una foto tuya. Se guarda en este navegador.'),
+      iconos,
+      el('div', { class: 'post-pie' },
+        el('button', { class: 'boton boton-borde', type: 'button', onclick: () => archivo.click() }, icono('foto'), 'Subir mi foto'), archivo,
+        el('button', { class: 'boton boton-texto', type: 'button', onclick: async () => { if (!(await confirmar({ titulo: 'Quitar foto de perfil', mensaje: 'Volverás a tu foto de cuenta o a tus iniciales.', aceptar: 'Quitar', peligro: true }))) return; guardarAvatar(u.id, null); repintar(); avisar('Volviste a tu foto de cuenta o iniciales'); } }, 'Quitar'))),
+    form);
 }
 
 function rejillaLugares(items) {
@@ -124,7 +137,8 @@ export async function render(vista, ruta, ctx) {
     ['Mis lugares', () => favoritos.items.length ? rejillaLugares(favoritos.items)
       : vacio('Sin lugares guardados', 'Guarda lugares desde Explorar para armar tu viaje.', el('a', { class: 'boton boton-secundario', href: '#/explorar' }, 'Explorar'))],
     ['Mi viaje', () => miViaje(viajes.items, () => render(vista, { ...ruta, filtros: { pestana: 'viaje' } }, ctx))],
-    ['Mi negocio', () => miNegocio(solicitudes.items, rubros.rubros, planes.planes, () => render(vista, { ...ruta, filtros: { pestana: 'negocio' } }, ctx))],
+    ['Mi cuenta', () => miCuenta(u)],
+    ['Mi negocio', () => miNegocio(solicitudes.items, rubros.rubros, planes.planes, planes.niveles, () => render(vista, { ...ruta, filtros: { pestana: 'negocio' } }, ctx))],
   ];
   const barra = el('div', { class: 'pestanas', role: 'tablist' });
   const elegir = i => {
@@ -135,13 +149,14 @@ export async function render(vista, ruta, ctx) {
 
   vaciar(vista, el('section', {},
     el('header', { class: 'perfil-cabecera' }, avatar(u),
-      el('div', {}, el('h1', {}, u.nombre),
+      el('div', {}, el('h1', {}, u.nombre), insigniaConfianza(mio.reputacion),
         el('ul', { class: 'perfil-numeros' },
           el('li', {}, el('b', {}, mio.publicaciones.length), el('span', {}, 'publicaciones')),
           el('li', {}, el('b', {}, mio.guardadas.length), el('span', {}, 'guardados')),
-          el('li', {}, el('b', {}, favoritos.items.length), el('span', {}, 'lugares'))))),
-    el('form', { action: '/api/v1/auth/logout', method: 'post' },
-      el('button', { class: 'boton boton-borde', type: 'submit' }, icono('salir'), 'Cerrar sesión')),
+          el('li', {}, el('b', {}, favoritos.items.length), el('span', {}, 'lugares')),
+          el('li', {}, el('b', {}, mio.reputacion ? mio.reputacion.likes : 0), el('span', {}, 'me gusta recibidos'))))),
     el('br'), barra, panel));
-  elegir({ viaje: 3, negocio: 4 }[ruta.filtros && ruta.filtros.pestana] || 0);
+  const cab = vista.querySelector('.perfil-cabecera');
+  document.addEventListener('ly:avatar', () => { if (cab.isConnected) cab.firstElementChild.replaceWith(avatar(u)); });
+  elegir({ viaje: 3, cuenta: 4, negocio: 5 }[ruta.filtros && ruta.filtros.pestana] || 0);
 }

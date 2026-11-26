@@ -55,7 +55,7 @@ Lo que **no** recomiendo: Cloudflare D1 o una base NoSQL. Partiría los datos en
 |---|---|---|
 | Cloudflare Workers | 100 000 peticiones/día a `/api` (estáticos ilimitados) | Unos 1 000–2 000 usuarios activos al día con uso normal; el catálogo cacheado no gasta backend |
 | Supabase Free | 500 MB de base, 1 GB de archivos, 50 000 usuarios activos al mes, se pausa tras 7 días sin uso | Texto de miles de publicaciones cabe en 500 MB; **las fotos no**: van a R2 |
-| Backend (1 réplica pequeña) | Depende del hosting: hay que medirlo con `tests/carga/k6-plataforma.js` (perfil `carga`, 50 usuarios simultáneos, meta p95 < 800 ms) apuntando al dominio | Con 2 réplicas detrás del Worker se reparte la carga; anota el resultado en el informe |
+| Backend (1 réplica pequeña) | En una máquina de 2 CPU, ≈ 750 peticiones/s y p95 ≤ 2 s hasta unos 1 000 usuarios ([mediciones](../07-sprint2/07-validacion-atributos-calidad.md#eq-03-escalabilidad)); en el hosting elegido se repite con `tests/carga/k6-plataforma.js` | Con 2 réplicas detrás del Worker el rendimiento sube un 43 % |
 
 Antes de la presentación conviene abrir el proyecto Supabase o hacer una consulta para que no esté pausado.
 

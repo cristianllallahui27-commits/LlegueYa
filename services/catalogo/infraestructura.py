@@ -2,6 +2,7 @@
 import time
 from datetime import date
 from typing import Optional
+from .terminales import Terminal
 from .dominio import Foto, Lugar
 
 
@@ -25,6 +26,10 @@ class RepositorioMemoria:
 
     def cambiar_estado(self, lugar_id, estado):
         self._estados[lugar_id] = estado
+
+    def eliminar(self, lugar_id):
+        self._lugares.pop(lugar_id, None)
+        self._estados.pop(lugar_id, None)
 
 
 class FavoritosMemoria:
@@ -119,10 +124,15 @@ class RepositorioEnCache:
         self.repositorio.cambiar_estado(lugar_id, estado)
         self.invalidar()
 
+    def eliminar(self, lugar_id):
+        self.repositorio.eliminar(lugar_id)
+        self.invalidar()
+
 
 SQL_LUGARES = """
 select l.id::text, l.slug, l.nombre, l.tipo, d.nombre as destino, coalesce(l.zona, d.zona), l.resumen, l.descripcion,
        l.lat::float, l.lon::float, l.como_llegar, l.recomendaciones, l.altitud_m, l.fuente_url, l.revisado_en,
+       l.entrada_costo, l.entrada_compra, l.entrada_url,
        coalesce(json_agg(json_build_object('url', f.url, 'autor', f.autor, 'licencia', f.licencia,
                 'fuente_url', f.fuente_url, 'descripcion', f.descripcion) order by f.orden)
                 filter (where f.id is not null), '[]') as fotos
@@ -185,16 +195,19 @@ class RepositorioPostgres:
                            returning id""", (l.destino,))
             destino_id = cur.fetchone()[0]
             cur.execute("""insert into catalogo.lugar(id, destino_id, tipo, nombre, descripcion, lat, lon, estado, fuente_url,
-                               revisado_en, slug, zona, resumen, como_llegar, recomendaciones, altitud_m)
-                           values (%s,%s,%s,%s,%s,%s,%s,'publicado',%s,%s,%s,%s,%s,%s,%s,%s)
+                               revisado_en, slug, zona, resumen, como_llegar, recomendaciones, altitud_m,
+                               entrada_costo, entrada_compra, entrada_url)
+                           values (%s,%s,%s,%s,%s,%s,%s,'publicado',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                            on conflict (id) do update set destino_id = excluded.destino_id, tipo = excluded.tipo,
                                nombre = excluded.nombre, descripcion = excluded.descripcion, lat = excluded.lat,
                                lon = excluded.lon, estado = 'publicado', fuente_url = excluded.fuente_url,
                                revisado_en = excluded.revisado_en, zona = excluded.zona, resumen = excluded.resumen,
                                como_llegar = excluded.como_llegar, recomendaciones = excluded.recomendaciones,
-                               altitud_m = excluded.altitud_m, actualizado_en = now(), version = catalogo.lugar.version + 1""",
+                               altitud_m = excluded.altitud_m, entrada_costo = excluded.entrada_costo,
+                               entrada_compra = excluded.entrada_compra, entrada_url = excluded.entrada_url, actualizado_en = now(), version = catalogo.lugar.version + 1""",
                         (l.id, destino_id, l.tipo, l.nombre, l.descripcion, l.lat, l.lon, l.fuente_url or None,
-                         l.revisado_en, l.slug, l.zona, l.resumen, l.como_llegar, list(l.recomendaciones), l.altitud_m))
+                         l.revisado_en, l.slug, l.zona, l.resumen, l.como_llegar, list(l.recomendaciones), l.altitud_m,
+                         l.entrada_costo, l.entrada_compra, l.entrada_url))
             cur.execute('delete from catalogo.foto_externa where lugar_id = %s', (l.id,))
             for i, f in enumerate(l.fotos):
                 cur.execute("""insert into catalogo.foto_externa(lugar_id, orden, url, autor, licencia, fuente_url, descripcion)
@@ -205,10 +218,17 @@ class RepositorioPostgres:
         self._admin(lambda cur: cur.execute(
             'update catalogo.lugar set estado = %s, actualizado_en = now() where id = %s', (estado, lugar_id)))
 
+    def eliminar(self, lugar_id):
+        def q(cur):
+            cur.execute('delete from catalogo.foto_externa where lugar_id = %s', (lugar_id,))
+            cur.execute("delete from catalogo.favorito where objetivo_tipo = 'lugar' and objetivo_id = %s", (lugar_id,))
+            cur.execute('delete from catalogo.lugar where id = %s', (lugar_id,))
+        self._admin(q)
+
     @staticmethod
     def _a_lugar(f) -> Lugar:
         (id_, slug, nombre, tipo, destino, zona, resumen, descripcion, lat, lon,
-         como_llegar, recomendaciones, altitud, fuente_url, revisado, fotos) = f
+         como_llegar, recomendaciones, altitud, fuente_url, revisado, entrada_costo, entrada_compra, entrada_url, fotos) = f
         return Lugar(
             id=id_, slug=slug, nombre=nombre, tipo=tipo, destino=destino, zona=zona,
             resumen=resumen or '', descripcion=descripcion, lat=lat, lon=lon,
@@ -216,5 +236,56 @@ class RepositorioPostgres:
             recomendaciones=tuple(recomendaciones or ()), altitud_m=altitud,
             fuente='Fuentes públicas citadas en la ficha', fuente_url=fuente_url or '',
             revisado_en=revisado.date() if hasattr(revisado, 'date') else revisado,
-            demostracion=False,
+            demostracion=False, entrada_costo=entrada_costo or '', entrada_compra=entrada_compra or '',
+            entrada_url=entrada_url or '',
         )
+
+
+# ------------------------------------------------------------------ Terminales y paraderos
+class TerminalesMemoria:
+    def __init__(self, iniciales=()):
+        self._datos = {t.id: t for t in iniciales}
+
+    def listar(self):
+        return list(self._datos.values())
+
+    def guardar(self, terminal):
+        self._datos[terminal.id] = terminal
+
+    def eliminar(self, terminal_id):
+        self._datos.pop(terminal_id, None)
+
+
+class TerminalesPostgres:
+    """Tabla catalogo.terminal (una fila por terminal; el detalle en jsonb). Escribir exige app.es_admin."""
+
+    def __init__(self, dsn, conectar=None):
+        self.dsn = dsn
+        if conectar is None:
+            import psycopg
+            conectar = psycopg.connect
+        self.conectar = conectar
+
+    def _con(self, fn, admin=False):
+        with self.conectar(self.dsn) as conn, conn.cursor() as cur:
+            cur.execute('set local role svc_catalogo')
+            if admin:
+                cur.execute("select set_config('app.es_admin', 'true', true)")
+            return fn(cur)
+
+    def listar(self):
+        def q(cur):
+            cur.execute('select id, datos from catalogo.terminal order by nombre')
+            return [Terminal(id=i, **d) for i, d in cur.fetchall()]
+        return self._con(q)
+
+    def guardar(self, t):
+        import json
+        datos = {k: v for k, v in t.__dict__.items() if k != 'id'}
+        self._con(lambda cur: cur.execute(
+            """insert into catalogo.terminal(id, nombre, datos) values (%s, %s, %s::jsonb)
+               on conflict (id) do update set nombre = excluded.nombre, datos = excluded.datos, actualizado_en = now()""",
+            (t.id, t.nombre, json.dumps(datos, ensure_ascii=False))), admin=True)
+
+    def eliminar(self, terminal_id):
+        self._con(lambda cur: cur.execute('delete from catalogo.terminal where id = %s', (terminal_id,)), admin=True)

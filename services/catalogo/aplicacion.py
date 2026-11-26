@@ -3,6 +3,7 @@
 La regla de acceso del SDD vive aquí: sin sesión solo hay vista previa;
 el detalle (galería completa, cómo llegar, recomendaciones) exige sesión.
 """
+import unicodedata
 import uuid
 from dataclasses import dataclass
 from datetime import date
@@ -17,6 +18,7 @@ class RepositorioLugares(Protocol):
     def listar_admin(self) -> list: ...                      # [(Lugar, estado)] incluidos los retirados
     def guardar(self, lugar: Lugar) -> None: ...              # crea o reemplaza (publicado)
     def cambiar_estado(self, lugar_id: str, estado: str) -> None: ...
+    def eliminar(self, lugar_id: str) -> None: ...            # baja definitiva
 
 
 @dataclass(frozen=True)
@@ -81,13 +83,22 @@ class Catalogo:
 
     def destinos(self) -> list:
         """Destinos con su portada, para la barra de historias."""
-        vistos = {}
+        def norma(t):
+            return unicodedata.normalize('NFD', (t or '').lower()).encode('ascii', 'ignore').decode()
+
+        vistos, propia = {}, set()
         for l in self.repositorio.listar():
             if l.destino not in vistos:
                 vistos[l.destino] = {'nombre': l.destino, 'portada': l.portada, 'lugares': 0}
-            vistos[l.destino]['lugares'] += 1
-            if vistos[l.destino]['portada'] is None:
-                vistos[l.destino]['portada'] = l.portada
+            d = vistos[l.destino]
+            d['lugares'] += 1
+            # Manda la foto del lugar que lleva el nombre del destino («Pueblo de Quinua» para Quinua);
+            # si no hay, la del primer lugar con foto.
+            if l.portada and l.destino not in propia and norma(l.destino) in norma(l.nombre):
+                d['portada'] = l.portada
+                propia.add(l.destino)
+            elif d['portada'] is None:
+                d['portada'] = l.portada
         return list(vistos.values())
 
     # ------------------------------------------------------------ Administración del catálogo
@@ -119,8 +130,25 @@ class Catalogo:
                 return estado
         raise LugarNoEncontrado(slug)
 
+    def eliminar_lugar(self, slug: str) -> str:
+        """Baja definitiva (a diferencia de retirar, no se puede volver a publicar)."""
+        for l, _ in self.repositorio.listar_admin():
+            if l.slug == slug:
+                self.repositorio.eliminar(l.id)
+                return l.nombre
+        raise LugarNoEncontrado(slug)
+
+    def eliminar_demostracion(self) -> int:
+        """Borra todos los lugares marcados como datos de demostración. Devuelve cuántos."""
+        demo = [l for l, _ in self.repositorio.listar_admin() if l.demostracion]
+        for l in demo:
+            self.repositorio.eliminar(l.id)
+        return len(demo)
+
 
 MAX_FOTOS = 8
+PREFIJO_FOTOS_PROPIAS = '/api/v1/catalogo/fotos/'
+
 MAX_RECOMENDACIONES = 8
 
 
@@ -136,9 +164,28 @@ def _texto(datos, clave, minimo, maximo, nombre=None):
 
 def _url(valor, etiqueta):
     v = str(valor or '').strip()
-    if v and (not v.startswith('https://') or len(v) > 500 or ' ' in v):
+    if v and (not (v.startswith('https://') or v.startswith(PREFIJO_FOTOS_PROPIAS)) or len(v) > 500 or ' ' in v):
         raise DatosLugarInvalidos(f'{etiqueta} debe ser un enlace https://')
     return v
+
+
+COMPRA_ENTRADA = ('', 'lugar', 'web', 'ambos')
+
+
+def entrada_valida(datos: dict):
+    """Costo de ingreso y dónde comprarlo. Si se compra por web, hace falta el enlace https."""
+    costo = str(datos.get('entrada_costo') or '').strip()
+    if len(costo) > 160:
+        raise DatosLugarInvalidos('El costo de la entrada admite hasta 160 caracteres.')
+    compra = str(datos.get('entrada_compra') or '').strip()
+    if compra not in COMPRA_ENTRADA:
+        raise DatosLugarInvalidos('Elige dónde se compra la entrada.')
+    url = _url(datos.get('entrada_url'), 'El enlace de compra de entradas')
+    if compra in ('web', 'ambos') and not url:
+        raise DatosLugarInvalidos('Pega el enlace de la página donde se compran las entradas.')
+    if url and url.startswith(PREFIJO_FOTOS_PROPIAS):
+        raise DatosLugarInvalidos('El enlace de compra debe ser una página web (https://).')
+    return costo, compra, (url if compra in ('web', 'ambos') else '')
 
 
 def construir_lugar(datos: dict, id_: str, slug: str, hoy: date) -> Lugar:
@@ -176,15 +223,17 @@ def construir_lugar(datos: dict, id_: str, slug: str, hoy: date) -> Lugar:
         url = _url(f.get('url'), f'La foto {i}')
         if not url:
             continue
-        autor = str(f.get('autor') or '').strip()[:120]
-        licencia = str(f.get('licencia') or '').strip()[:80]
+        propia = url.startswith(PREFIJO_FOTOS_PROPIAS)
+        autor = str(f.get('autor') or '').strip()[:120] or ('LlegueYa' if propia else '')
+        licencia = str(f.get('licencia') or '').strip()[:80] or ('Foto propia' if propia else '')
         if not autor or not licencia:
-            raise DatosLugarInvalidos(f'La foto {i} necesita autor y licencia: el SDD exige citar la fuente.')
+            raise DatosLugarInvalidos(f'La foto {i} es de otra web: indica autor y licencia para citar la fuente.')
         fotos.append(Foto(url=url, autor=autor, licencia=licencia,
                           fuente_url=_url(f.get('fuente_url'), f'La fuente de la foto {i}') or url,
                           descripcion=str(f.get('descripcion') or '').strip()[:200]))
     if len(fotos) > MAX_FOTOS:
         raise DatosLugarInvalidos(f'Hasta {MAX_FOTOS} fotos por lugar.')
+    costo, compra, url_entrada = entrada_valida(datos)
     return Lugar(
         id=id_, slug=slug, nombre=_texto(datos, 'nombre', 3, 120), tipo=tipo,
         destino=_texto(datos, 'destino', 2, 120), zona=_texto(datos, 'zona', 0, 120) or _texto(datos, 'destino', 2, 120),
@@ -192,4 +241,5 @@ def construir_lugar(datos: dict, id_: str, slug: str, hoy: date) -> Lugar:
         lat=lat, lon=lon, fotos=tuple(fotos), como_llegar=_texto(datos, 'como_llegar', 0, 1000, 'cómo llegar'),
         recomendaciones=tuple(recomendaciones), altitud_m=altitud,
         fuente='Registrado por administración de LlegueYa', fuente_url=_url(datos.get('fuente_url'), 'La fuente'),
-        revisado_en=hoy, demostracion=False)
+        revisado_en=hoy, demostracion=False,
+        entrada_costo=costo, entrada_compra=compra, entrada_url=url_entrada)

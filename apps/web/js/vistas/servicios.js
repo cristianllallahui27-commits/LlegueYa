@@ -6,6 +6,7 @@ import { el, icono, vaciar } from '../dom.js';
 import { estado, pedirAcceso } from '../estado.js';
 import { enlaceComoLlegar, precioSoles } from '../util.js';
 import { crearMapa, marcarNegocio } from './mapa.js';
+import { botonWhatsapp, extrasNegocio, galeria } from './negocio.js';
 
 const ORDEN = ['artesania', 'operador', 'transporte', 'hospedaje', 'restaurante', 'otro'];
 
@@ -18,18 +19,25 @@ function contacto(n) {
     return el('button', { class: 'boton boton-texto', type: 'button', onclick: () => pedirAcceso('Inicia sesión para ver el contacto de los negocios.') },
       icono('candado'), 'Inicia sesión para ver el contacto');
   }
-  return el('p', { class: 'negocio-contacto' }, el('strong', {}, 'Contacto: '), n.contacto,
+  // Básico: solo dirección y mapa. Plus: botón de WhatsApp. Premium: además teléfono y página.
+  if (!n.whatsapp && !n.contacto) return null;
+  return el('p', { class: 'negocio-contacto' }, botonWhatsapp(n.whatsapp, n.negocio),
+    n.contacto ? [el('strong', {}, ' Teléfono: '), n.contacto] : null,
     n.enlace ? [' · ', el('a', { href: n.enlace, target: '_blank', rel: 'noopener noreferrer' }, 'Página del negocio')] : null);
 }
 
 export function fichaNegocio(n, alUbicar) {
-  return el('article', { class: 'tarjeta negocio', id: `negocio-${n.id}` },
+  const nivel = n.nivel || 'basico';
+  return el('article', { class: `tarjeta negocio negocio-${nivel}`, id: `negocio-${n.id}` },
+    galeria(n.fotos, n.negocio),
     el('header', { class: 'negocio-cabecera' },
       el('span', { class: 'negocio-icono', 'aria-hidden': 'true' }, icono('tienda')),
       el('div', { class: 'crece' }, el('h2', {}, n.negocio),
         el('span', { class: 'post-meta' }, n.rubro_nombre, n.direccion ? ` · ${n.direccion}` : '')),
-      el('span', { class: 'etiqueta-estado verificado', title: 'LlegueYa revisó sus requisitos' }, icono('escudo'), 'Verificado')),
+      nivel !== 'basico' ? el('span', { class: `etiqueta-estado nivel-plan nivel-${nivel}` }, icono('estrella', 'ico ico-mini'), n.nivel_nombre) : null,
+      el('span', { class: 'etiqueta-estado verificado' }, icono('escudo'), 'Verificado')),
     el('p', {}, n.descripcion),
+    extrasNegocio(n),
     n.ofertas.length ? el('ul', { class: 'ofertas' }, n.ofertas.map(o => el('li', {},
       el('span', {}, el('strong', {}, o.nombre), o.detalle ? el('small', {}, o.detalle) : null),
       el('span', { class: 'oferta-precio' }, precio(o))))) : null,

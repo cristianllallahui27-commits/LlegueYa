@@ -1,16 +1,36 @@
 """API HTTP del Catálogo (adaptador de entrada)."""
 import hashlib
 import json
+import os
+import re
+import uuid
+from pathlib import Path
 from typing import Optional
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, File, Query, Request, UploadFile
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 from services.compartido.sesion import VerificadorSesion
 from .aplicacion import Catalogo
+from .geo import crear_router_geo
+from .transporte import crear_router_transporte
 from .dominio import DatosLugarInvalidos, LugarNoEncontrado, TIPOS
 
 # Respuestas públicas: el navegador guarda 60 s y el CDN (Cloudflare) 5 min.
 CACHE_PUBLICA = 'public, max-age=60, s-maxage=300, stale-while-revalidate=60'
+
+# Fotos que sube administración desde su computadora (desarrollo local: carpeta data/fotos/catalogo).
+CARPETA_FOTOS = Path(os.getenv('CATALOGO_FOTOS_DIR') or Path(__file__).resolve().parents[2] / 'data' / 'fotos' / 'catalogo')
+FOTO_MAX_BYTES = 5 * 1024 * 1024
+FORMATOS_FOTO = {b'\xff\xd8\xff': ('jpg', 'image/jpeg'), b'\x89PNG\r\n\x1a\n': ('png', 'image/png'), b'RIFF': ('webp', 'image/webp')}
+NOMBRE_FOTO = re.compile(r'^[0-9a-f]{32}\.(jpg|png|webp)$')
+
+
+def detectar_formato(datos: bytes):
+    """Valida por los primeros bytes (no por la extensión que declara el navegador)."""
+    for firma, formato in FORMATOS_FOTO.items():
+        if datos.startswith(firma) and (firma != b'RIFF' or datos[8:12] == b'WEBP'):
+            return formato
+    return None
 
 
 def foto_json(f):
@@ -33,6 +53,7 @@ def detalle(l):
         'como_llegar': l.como_llegar, 'recomendaciones': list(l.recomendaciones),
         'altitud_m': l.altitud_m, 'fuente': l.fuente, 'fuente_url': l.fuente_url,
         'revisado_en': l.revisado_en.isoformat() if l.revisado_en else None,
+        'entrada': {'costo': l.entrada_costo, 'compra': l.entrada_compra, 'url': l.entrada_url},
     })
     return data
 
@@ -73,13 +94,16 @@ class LugarEntrada(BaseModel):
     recomendaciones: list[str] = Field(default_factory=list, max_length=8)
     fuente_url: str = Field('', max_length=500)
     fotos: list[FotoEntrada] = Field(default_factory=list, max_length=8)
+    entrada_costo: str = Field('', max_length=160)
+    entrada_compra: str = Field('', max_length=10)
+    entrada_url: str = Field('', max_length=500)
 
 
 class EstadoEntrada(BaseModel):
     publicado: bool
 
 
-def crear_router(catalogo: Catalogo, verificar: VerificadorSesion) -> APIRouter:
+def crear_router(catalogo: Catalogo, verificar: VerificadorSesion, terminales=None) -> APIRouter:
     router = APIRouter(prefix='/api/v1/catalogo')
 
     @router.get('/lugares')
@@ -105,6 +129,9 @@ def crear_router(catalogo: Catalogo, verificar: VerificadorSesion) -> APIRouter:
                                 headers={'Cache-Control': 'private, no-store', 'Vary': 'Cookie'})
         return JSONResponse({**vista_previa(ficha.lugar), 'requiere_sesion': True},
                             headers={'Cache-Control': 'private, no-store', 'Vary': 'Cookie'})
+
+    router.include_router(crear_router_geo())
+    router.include_router(crear_router_transporte(terminales, verificar))
 
     @router.get('/mapa')
     def mapa(request: Request):
@@ -179,5 +206,49 @@ def crear_router(catalogo: Catalogo, verificar: VerificadorSesion) -> APIRouter:
             return {'slug': slug, 'estado': catalogo.cambiar_estado_lugar(slug[:80], entrada.publicado)}
         except LugarNoEncontrado:
             return JSONResponse({'detail': 'No encontramos ese lugar.'}, status_code=404)
+
+    @router.delete('/admin/lugares/{slug}')
+    async def admin_eliminar(slug: str, request: Request):
+        r = await solo_admin(request)
+        if r:
+            return r
+        try:
+            nombre = catalogo.eliminar_lugar(slug[:80])
+        except LugarNoEncontrado:
+            return JSONResponse({'detail': 'No encontramos ese lugar.'}, status_code=404)
+        return {'slug': slug, 'eliminado': nombre}
+
+    @router.delete('/admin/demostracion')
+    async def admin_quitar_demostracion(request: Request):
+        r = await solo_admin(request)
+        if r:
+            return r
+        return {'eliminados': catalogo.eliminar_demostracion()}
+
+    @router.post('/admin/fotos')
+    async def admin_subir_foto(request: Request, foto: UploadFile = File(...)):
+        r = await solo_admin(request)
+        if r:
+            return r
+        datos = await foto.read(FOTO_MAX_BYTES + 1)
+        if len(datos) > FOTO_MAX_BYTES:
+            return JSONResponse({'detail': 'La foto supera los 5 MB.'}, status_code=413)
+        formato = detectar_formato(datos)
+        if formato is None:
+            return JSONResponse({'detail': 'Solo se aceptan fotos JPG, PNG o WebP.'}, status_code=422)
+        nombre = f'{uuid.uuid4().hex}.{formato[0]}'
+        CARPETA_FOTOS.mkdir(parents=True, exist_ok=True)
+        (CARPETA_FOTOS / nombre).write_bytes(datos)
+        return JSONResponse({'url': f'/api/v1/catalogo/fotos/{nombre}'}, status_code=201)
+
+    @router.get('/fotos/{nombre}')
+    def foto_propia(nombre: str):
+        if not NOMBRE_FOTO.match(nombre):
+            return JSONResponse({'detail': 'Foto no disponible.'}, status_code=404)
+        ruta = CARPETA_FOTOS / nombre
+        if not ruta.is_file():
+            return JSONResponse({'detail': 'Foto no disponible.'}, status_code=404)
+        mime = {'jpg': 'image/jpeg', 'png': 'image/png', 'webp': 'image/webp'}[nombre.rsplit('.', 1)[1]]
+        return Response(ruta.read_bytes(), media_type=mime, headers={'Cache-Control': 'public, max-age=86400'})
 
     return router

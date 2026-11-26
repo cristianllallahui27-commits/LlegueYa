@@ -2,6 +2,7 @@
 
 export const TIPOS = {
   arqueologico: 'Arqueología', natural: 'Naturaleza', cultural: 'Historia y cultura',
+  gastronomia: 'Dónde comer', artesania: 'Artesanía',
   camping: 'Camping', aventura: 'Aventura', otro: 'Otros',
 };
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -74,7 +75,7 @@ export function leerRuta(hash) {
   const [ruta, consulta = ''] = String(hash || '').replace(/^#\/?/, '').split('?');
   const [vista, ...resto] = ruta.split('/');
   const filtros = Object.fromEntries(new URLSearchParams(consulta));
-  const validas = ['inicio', 'explorar', 'mapa', 'calendario', 'servicios', 'willaq-uma', 'mi-espacio', 'lugar', 'admin', 'nueva-clave'];
+  const validas = ['inicio', 'explorar', 'mapa', 'terminales', 'calendario', 'servicios', 'willaq-uma', 'mi-espacio', 'lugar', 'admin', 'nueva-clave', 'legal'];
   if (!validas.includes(vista)) return { vista: 'inicio', parametro: null, filtros: {} };
   const parametro = resto.join('/') || null;
   if (vista === 'lugar' && !/^[a-z0-9-]{1,80}$/.test(parametro || '')) return { vista: 'inicio', parametro: null, filtros: {} };
@@ -122,9 +123,9 @@ export function esCorreoInstitucional(correo) {
 }
 
 // Ofertas de un negocio: descarta filas vacías y normaliza el precio (vacío = «consultar»).
-export function limpiarOfertas(filas) {
+export function limpiarOfertas(filas, maximo = 8) {
   return (filas || []).map(f => ({ nombre: String(f.nombre || '').trim(), precio_desde: String(f.precio_desde ?? '').trim(), detalle: String(f.detalle || '').trim() }))
-    .filter(f => f.nombre).slice(0, 8);
+    .filter(f => f.nombre).slice(0, maximo);
 }
 
 // ---------------------------------------------------------------- Burbuja de Willaq Uma
@@ -174,7 +175,31 @@ export function precioSoles(monto) {
 }
 
 // Ruta en Google Maps hasta un punto (la abre el visitante; LlegueYa no conoce su ubicación).
-export function enlaceComoLlegar(lat, lon) {
+// Con el nombre de un lugar turístico, Google encuentra el sitio exacto (si solo recibe coordenadas,
+// muestra la dirección de la calle más cercana, que confunde). Los negocios van con coordenadas.
+export function enlaceComoLlegar(lat, lon, nombre = '') {
   const n = v => Number(v).toFixed(6);
-  return `https://www.google.com/maps/dir/?api=1&destination=${n(lat)},${n(lon)}`;
+  const destino = nombre ? encodeURIComponent(`${nombre}, Ayacucho, Perú`) : `${n(lat)},${n(lon)}`;
+  return `https://www.google.com/maps/dir/?api=1&destination=${destino}`;
+}
+
+// Evita decir dos veces lo mismo: quita de la descripción las frases cuyas palabras clave ya están en el resumen.
+export function sinRepetir(texto, resumen) {
+  const claves = frase => (String(frase).toLowerCase().match(/[a-záéíóúñü]{5,}/g) || []);
+  const conocidas = new Set(claves(resumen));
+  const frases = String(texto || '').match(/[^.!?]+[.!?]+/g) || [String(texto || '')];
+  const utiles = frases.map(f => f.trim()).filter(f => {
+    const k = claves(f);
+    return !k.length || k.filter(w => conocidas.has(w)).length / k.length < .5;
+  });
+  return utiles.length ? utiles : frases.map(f => f.trim());
+}
+
+// Precio de un plan en soles o dólares, con su periodo ("/ mes", "/ año").
+export function precioPlan(plan) {
+  const n = Number(plan.precio);
+  if (n === 0) return 'Gratis';
+  const simbolo = plan.moneda === 'USD' ? 'US$' : 'S/';
+  const periodo = { 30: 'mes', 31: 'mes', 365: 'año', 366: 'año' }[plan.duracion_dias] || `${plan.duracion_dias} días`;
+  return `${simbolo} ${n.toFixed(2).replace(/\.00$/, '')} / ${periodo}`;
 }

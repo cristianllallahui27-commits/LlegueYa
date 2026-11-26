@@ -86,7 +86,7 @@ erDiagram
     ASISTENTE_CONVERSACION ||--o{ ASISTENTE_MENSAJE : contiene
 ```
 
-Los prefijos indican el esquema propietario. El gráfico muestra relaciones locales representativas. Las referencias entre dominios son ids remotos y no se dibujan como claves foráneas. El diccionario es la definición lógica. La línea base DDL está en [supabase/migrations](../../supabase/README.md), con 64 tablas; su aplicación remota se verifica por separado.
+Los prefijos indican el esquema propietario. El gráfico muestra relaciones locales representativas. Las referencias entre dominios son ids remotos y no se dibujan como claves foráneas. El diccionario es la definición lógica. La línea base DDL está en [supabase/migrations](../../supabase/README.md), con 67 tablas; su aplicación remota se verifica con la consulta de esa guía.
 
 ## 4.5 Acceso a PostgreSQL y RLS
 

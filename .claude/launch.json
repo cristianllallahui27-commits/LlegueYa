@@ -1,0 +1,20 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "llegueya",
+      "runtimeExecutable": ".venv\\Scripts\\python.exe",
+      "runtimeArgs": ["-m", "uvicorn", "services.gateway.composicion:crear_app", "--factory", "--host", "127.0.0.1", "--port", "8000", "--no-access-log"],
+      "env": { "COMUNIDAD_AUTOPUBLICAR": "true" },
+      "port": 8000
+    },
+    {
+      "name": "llegueya-pruebas",
+      "runtimeExecutable": ".venv\\Scripts\\python.exe",
+      "runtimeArgs": ["-m", "uvicorn", "tests.servidor_e2e:app", "--host", "127.0.0.1", "--port", "8010", "--no-access-log"],
+      "env": { "PUBLICIDAD_FOTOS_DIR": "tmp/fotos-negocios-e2e" },
+      "port": 8010,
+      "url": "http://127.0.0.1:8010"
+    }
+  ]
+}
