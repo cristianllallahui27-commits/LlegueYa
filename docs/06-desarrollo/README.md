@@ -55,7 +55,7 @@ $env:APP_ORIGIN="http://127.0.0.1:8010"; .\.venv\Scripts\python.exe -m uvicorn t
 | Puerta de cobertura | `python -m coverage json` y `python scripts/comprobar-cobertura.py` | Los 9 paquetes de `services/` ≥ 90 % de líneas y de ramas |
 | Lógica web, borde y API (Jest) | `npm run test:cobertura` | 28 pruebas unitarias y 59 de API; 100 % de líneas en `util.js` y `logica.js` |
 | Contrato OpenAPI | `python scripts/exportar-openapi.py --check` | 80 operaciones, al día con el código |
-| End to End (Playwright) | servidor de pruebas en 8010 + `node tests/web-navegador.mjs` | 23 recorridos en Chromium, incluida la vista móvil |
+| End to End (Playwright) | servidor de pruebas en 8010 + `node tests/web-navegador.mjs` | 21 recorridos en Chromium, incluida la vista móvil |
 | Carga (k6) | `k6 run -e BASE_URL=http://127.0.0.1:8010 -e PERFIL=escalabilidad tests/carga/k6-plataforma.js` | Hasta 2 000 usuarios sin errores ([resultados](../07-sprint2/07-validacion-atributos-calidad.md)) |
 | Base de datos | `node supabase/tests/validar-base.mjs` | Migraciones, RLS y permisos validados |
 

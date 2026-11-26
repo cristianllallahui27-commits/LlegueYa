@@ -92,7 +92,7 @@ Trazabilidad: RF05-RF09, RF13, RF16-RF18, RF21; RC07; DA04 y DA08; ADR-003, ADR-
 | Respuesta | Permitir completar las tareas y distinguir la orientación turística de una compra externa. |
 | Medida | **Meta:** al menos 4 de 5 participantes completan las tareas sin ayuda y reconocen que LlegueYa no cobra la entrada. Es un criterio de la sesión, no una estimación de toda la población. |
 | Verificación | Observar tareas, registrar éxitos, errores y solicitudes de ayuda; documentar perfil y dispositivo. |
-| Resultado | Validado con 23 recorridos Playwright en escritorio y móvil; la sesión con participantes se registra aparte ([EQ-06](../07-sprint2/07-validacion-atributos-calidad.md#eq-06-usabilidad)). |
+| Resultado | Validado con 21 recorridos Playwright en escritorio y móvil; la sesión con participantes se registra aparte ([EQ-06](../07-sprint2/07-validacion-atributos-calidad.md#eq-06-usabilidad)). |
 
 Trazabilidad: RF02-RF04, RF14-RF16; RC01; DA03 y DA06.
 

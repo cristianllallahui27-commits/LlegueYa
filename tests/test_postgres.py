@@ -8,6 +8,7 @@ import os
 import uuid
 from pathlib import Path
 import pytest
+from services.catalogo.datos_demo import LUGARES
 
 URL = os.getenv('TEST_DATABASE_URL')
 pytestmark = pytest.mark.skipif(not URL, reason='TEST_DATABASE_URL no configurada')
@@ -59,7 +60,7 @@ def test_catalogo_lee_solo_publicados_con_fotos(dsn):
     from services.catalogo.aplicacion import Catalogo
     repo = RepositorioPostgres(dsn['catalogo'])
     lugares = repo.listar()
-    assert len(lugares) == 8
+    assert len(lugares) == len(LUGARES)          # el seed se genera desde datos_demo.LUGARES
     wari = repo.obtener('complejo-arqueologico-wari')
     assert wari.portada.licencia == 'CC0 1.0' and wari.zona.startswith('A 22 km')
     assert repo.obtener('aguas-turquesas-de-millpu').lat is None
@@ -176,7 +177,7 @@ def test_catalogo_admin_con_rls(dsn):
     cat.guardar_lugar({**LUGAR_NUEVO, 'fotos': [], 'resumen': 'Resumen editado del mirador.'}, l.slug)
     assert repo.obtener(l.slug).fotos == () and repo.obtener(l.slug).resumen == 'Resumen editado del mirador.'
     cat.cambiar_estado_lugar(l.slug, False)
-    assert repo.obtener(l.slug) is None and len(repo.listar()) == 8
+    assert repo.obtener(l.slug) is None and len(repo.listar()) == len(LUGARES)
     assert (l.slug, 'retirado') in {(x.slug, e) for x, e in repo.listar_admin()}
     cat.cambiar_estado_lugar(l.slug, True)
     assert repo.obtener(l.slug) is not None

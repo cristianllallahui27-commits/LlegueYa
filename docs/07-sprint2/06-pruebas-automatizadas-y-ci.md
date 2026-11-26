@@ -9,7 +9,7 @@
 | Unidad e integración (Python) | pytest | Dominio, casos de uso y rutas HTTP de cada servicio, incluidos mapas y rutas con proveedores dobles | `tests/test_*.py` |
 | Base de datos | pytest + PostgreSQL 16 | Migraciones reales, RLS por rol, repositorios Postgres | `tests/test_postgres.py` |
 | Arquitectura | pytest | Regla de dependencias de Clean Architecture y separación entre servicios | `tests/test_arquitectura.py` |
-| Extremo a extremo | Playwright | 23 recorridos reales en Chromium: registro, recuperación de clave, publicar, reportar, administración, mapa y móvil | `tests/web-navegador.mjs` |
+| Extremo a extremo | Playwright | 21 recorridos reales en Chromium: puerta de acceso, registro, recuperación de clave, publicar, reportar, administración, mapa y móvil | `tests/web-navegador.mjs` |
 | Carga | k6 | Rendimiento y escalabilidad hasta 2 000 usuarios concurrentes | `tests/carga/k6-plataforma.js` |
 
 Las pruebas de API con Jest levantan solas el backend (`tests/jest/api/servidor.mjs`) con un doble de Supabase Auth. No necesitan internet ni crean cuentas reales. Cada cliente de prueba entra como si viniera del Worker de Cloudflare, con su propia IP, así que también se ejercita el candado de origen.
@@ -31,23 +31,23 @@ python -m coverage run -m pytest tests -q && python -m coverage json && python s
 | Jest · unidad | 28 | Todas pasan | `util.js` 100 % líneas · 99 % ramas; `logica.js` (borde) 100 % líneas · 93 % ramas |
 | Jest · API | 59 | Todas pasan | Ejercita 54 de las 80 operaciones de OpenAPI; las demás (Google, código de verificación, fotos, terminales, eventos de administración, mapas…) las cubren pytest y E2E |
 | pytest (incluye PostgreSQL y arquitectura) | 235 | Todas pasan | ≥ 90 % de líneas y ramas en **cada** servicio (tabla abajo) |
-| Playwright E2E | 23 pasos | Todos pasan | — |
+| Playwright E2E | 21 pasos | Todos pasan | — |
 
 Umbral obligatorio: **90 % de líneas y ramas**. Jest lo exige en `jest.config.mjs` (`coverageThreshold`) y Python en `scripts/comprobar-cobertura.py`. Si alguno baja, el CI falla.
 
 | Servicio (pytest) | Líneas | Ramas |
 |---|---|---|
 | asistente | 99.0 % | 90.8 % |
-| catalogo | 99.3 % | 98.4 % |
+| catalogo | 96.9 % | 95.5 % |
 | compartido | 100 % | 100 % |
-| comunidad | 99.0 % | 95.4 % |
+| comunidad | 94.1 % | 91.2 % |
 | eventos | 95.9 % | 93.3 % |
 | gateway | 98.5 % | 93.8 % |
 | identidad | 98.0 % | 90.9 % |
 | publicidad | 99.1 % | 96.7 % |
 | recomendaciones | 100 % | 100 % |
 
-Los adaptadores PostgreSQL (`infraestructura.py` de Catálogo y Comunidad) se miden en el CI, donde corre PostgreSQL 16.
+Medición con PostgreSQL 16, como en el CI: incluye los adaptadores PostgreSQL de Catálogo y Comunidad.
 
 El reporte HTML de Jest queda en `reports/jest-coverage/index.html`, y su resumen en [`evidencias/jest-cobertura.json`](evidencias/jest-cobertura.json).
 

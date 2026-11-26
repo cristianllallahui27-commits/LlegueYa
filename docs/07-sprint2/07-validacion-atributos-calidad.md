@@ -126,7 +126,7 @@ Además, el backend rechaza claves `service_role` y `sb_secret`, y ningún secre
 
 **Meta:** un visitante completa las tareas principales sin ayuda, también en móvil.
 
-Comando: `node tests/web-navegador.mjs` contra `tests.servidor_e2e` en el puerto 8010 (Playwright, 23 flujos con navegador real, incluida la vista móvil).
+Comando: `node tests/web-navegador.mjs` contra `tests.servidor_e2e` en el puerto 8010 (Playwright, 21 flujos con navegador real, incluida la vista móvil).
 
 Las tareas cubiertas incluyen entrar, explorar lugares, ver el mapa, conversar con el asistente, publicar, comentar y administrar. La sesión con participantes reales (tiempo y éxito por tarea) se realiza de forma presencial y se registra aparte; las cifras de usabilidad siguen siendo propuestas por validar con usuarios.
 

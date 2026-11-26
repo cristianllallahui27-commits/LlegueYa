@@ -17,6 +17,27 @@ const errores = []; page.on('pageerror', e => errores.push(e.message));
 // Sin red externa en la prueba: fotos y teselas caen al respaldo ilustrado.
 await page.route(/wikimedia|openstreetmap|googleusercontent|cartocdn|arcgisonline|opentopomap/, r => r.abort());
 const pasos = [];
+// Primera visita después de entrar: guía de bienvenida y aviso de cookies.
+const cerrarAvisos = async p => {
+  const guia = p.locator('dialog.guia');
+  await guia.waitFor({ timeout: 5000 }).then(() => guia.getByRole('button', { name: 'Saltar' }).click()).catch(() => {});
+  const cookies = p.locator('#aviso-cookies-ok');
+  if (await cookies.isVisible()) await cookies.click();
+};
+// Toda acción que guarda, publica o borra pide confirmación en una ventana propia.
+const confirmarEn = async (p, texto) => {
+  const d = p.locator('dialog.confirmar');
+  await d.waitFor();
+  if (texto) await d.locator('.confirmar-campo').fill(texto);
+  await d.locator('.confirmar-acciones button').last().click();
+  await d.waitFor({ state: 'detached' });
+};
+const entrarConGoogle = async (p, nombre) => {
+  await p.locator('#acceso-bienvenida .acceso-google-form').click();
+  await p.locator('#puerta').waitFor({ state: 'hidden' });
+  await p.locator('dialog.guia .guia-saludo', { hasText: `¡Hola, ${nombre.split(' ')[0]}!` }).waitFor();
+  await cerrarAvisos(p);
+};
 const paso = async (nombre, fn) => { await fn(); pasos.push(nombre); console.log('✔', nombre); };
 
 // Imagen JPG mínima válida generada al vuelo (cabecera JPEG).
@@ -24,11 +45,23 @@ const foto = path.join(out, 'e2e-foto.jpg');
 await fs.writeFile(foto, Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(2000, 7)]));
 
 try {
-  await paso('Visitante ve historias y lugares del catálogo', async () => {
+  await paso('Sin sesión solo se ve la puerta de acceso con fotos del catálogo', async () => {
     await page.goto(BASE + '/#/inicio');
-    await page.locator('.historia').first().waitFor();
-    assert.ok(await page.locator('.post.lugar').count() >= 6);
-    assert.ok(await page.locator('.marca-logo').first().evaluate(e => e.complete && e.naturalWidth > 0));
+    await page.locator('#puerta').waitFor();
+    assert.ok(await page.locator('#dialogo-acceso').evaluate(d => d.open));
+    await page.locator('#puerta-fondo img').first().waitFor({ state: 'attached' });
+    assert.ok(await page.locator('.puerta-marca img').evaluate(e => e.complete && e.naturalWidth > 0));
+    await page.keyboard.press('Escape');                       // la puerta no se puede cerrar
+    assert.ok(await page.locator('#dialogo-acceso').evaluate(d => d.open));
+    await page.goto(BASE + '/#/explorar');                     // ninguna sección se ve sin cuenta
+    assert.ok(await page.locator('#puerta').isVisible());
+  });
+  await paso('Acceso con Google (doble) abre la aplicación', async () => {
+    await entrarConGoogle(page, 'Viajera de Prueba');
+    await page.locator('.perfil-flotante [data-perfil]').click();
+    await page.locator('#perfil-menu', { hasText: 'Viajera de Prueba' }).getByText('Administración').waitFor();
+    await page.keyboard.press('Escape');
+    await page.mouse.click(700, 20);
   });
   await paso('Explorar filtra por tipo y busca', async () => {
     await page.goto(BASE + '/#/explorar');
@@ -42,29 +75,13 @@ try {
     await page.waitForTimeout(400);
     assert.equal(await page.locator('.celda').count(), 1);
   });
-  await paso('Ficha sin sesión oculta «cómo llegar» y pide acceso', async () => {
-    await page.goto(BASE + '/#/lugar/complejo-arqueologico-wari');
-    await page.getByRole('heading', { name: 'Complejo Arqueológico Wari' }).waitFor();
-    assert.equal(await page.getByRole('heading', { name: 'Cómo llegar', exact: true }).count(), 0);
-    await page.locator('.post-pie').first().waitFor();
-  });
-  await paso('Me gusta sin sesión abre el diálogo de Google', async () => {
-    await page.goto(BASE + '/#/inicio');
-    await page.locator('.post.lugar .accion[aria-label="Guardar lugar"]').first().click();
-    assert.ok(await page.locator('#dialogo-acceso').evaluate(d => d.open));
-    await page.locator('#dialogo-acceso [data-cerrar]').click();
-  });
-  await paso('Acceso con Google (doble) muestra al usuario', async () => {
-    await page.locator('#tarjeta-cuenta').getByRole('button', { name: 'Entrar' }).click();
-    await page.locator('#acceso-bienvenida .acceso-google-form').click();
-    await page.getByText('Viajera de Prueba').first().waitFor();
-  });
   await paso('Publicar experiencia con foto y lugar', async () => {
     await page.locator('.riel-crear').click();
     await page.setInputFiles('#crear-foto', foto);
     await page.fill('#crear-texto', 'Llegamos a Wari temprano. Lleven agua.');
     await page.selectOption('#crear-lugar', 'complejo-arqueologico-wari');
     await page.locator('#form-crear button[type=submit]').click();
+    await confirmarEn(page);
     await page.locator('.post:not(.lugar)').first().waitFor();
     assert.match(await page.locator('.post:not(.lugar) .post-texto').first().textContent(), /Llegamos a Wari/);
   });
@@ -97,11 +114,13 @@ try {
     await page.getByRole('tab', { name: 'Mis lugares' }).click();
     await page.locator('.celda').first().waitFor();
   });
-  await paso('Calendario y aviso de evento', async () => {
+  await paso('Calendario: guardar una fecha avisa en la campanita', async () => {
     await page.goto(BASE + '/#/calendario');
-    await page.locator('.evento').first().waitFor();
-    await page.getByRole('button', { name: 'Avísame' }).first().click();
-    await page.getByRole('button', { name: 'Te avisaremos' }).first().waitFor();
+    await page.locator('.hoja-calendario .hoja-dias').waitFor();
+    await page.locator('.evento-destacado').waitFor();
+    await page.getByRole('button', { name: 'Guardar fecha' }).first().click();
+    await page.getByRole('button', { name: 'Fecha guardada' }).first().waitFor();
+    await page.locator('#aviso', { hasText: 'te avisaremos en la campanita' }).waitFor();
   });
   await paso('Willaq Uma se presenta como sabio guía', async () => {
     await page.locator('#willaq-boton').click();
@@ -158,13 +177,15 @@ try {
     const p2 = await anon.newPage();
     await p2.route(/wikimedia|openstreetmap|googleusercontent|cartocdn|arcgisonline|opentopomap/, r => r.abort());
     await p2.goto(BASE + '/#/inicio');
-    await p2.locator('#willaq-boton').click();
-    await p2.getByText('Para conversar conmigo y armar tu viaje, entra con tu cuenta.').waitFor();
-    assert.ok(await p2.locator('#willaq-texto').isDisabled());
-    await p2.locator('[data-cerrar-willaq]').click();
-    await p2.locator('.post:not(.lugar):not(.patrocinado) .ver-comentarios').first().click();
-    await p2.getByText('Inicia sesión para comentar o responder.').waitFor();
-    assert.equal(await p2.locator('#form-comentario').isVisible(), false);
+    await p2.locator('#puerta').waitFor();
+    assert.equal(await p2.locator('#willaq-boton').isVisible(), false);   // Willaq vive detrás de la puerta
+    const cabeceras = { Origin: BASE, 'Content-Type': 'application/json' };
+    const chat = await p2.request.post(BASE + '/api/v1/asistente/mensajes', { headers: cabeceras, data: { texto: 'Hola' } });
+    assert.equal(chat.status(), 401);
+    const muro = await (await p2.request.get(BASE + '/api/v1/comunidad/muro')).json();
+    const pid = muro.items[0].id;
+    const comentario = await p2.request.post(`${BASE}/api/v1/comunidad/publicaciones/${pid}/comentarios`, { headers: cabeceras, data: { texto: 'Hola' } });
+    assert.equal(comentario.status(), 401);
     await anon.close();
   });
   await paso('Un negocio pide promoción y administración lo verifica', async () => {
@@ -172,12 +193,11 @@ try {
     const neg = await ctx.newPage();
     await neg.route(/wikimedia|openstreetmap|googleusercontent|cartocdn|arcgisonline|opentopomap/, r => r.abort());
     await neg.goto(BASE + '/#/inicio');
-    await neg.locator('#tarjeta-cuenta').getByRole('button', { name: 'Entrar' }).click();
-    await neg.locator('#acceso-bienvenida .acceso-google-form').click();
-    await neg.getByText('Cuenta Sospechosa').first().waitFor();
+    await entrarConGoogle(neg, 'Cuenta Sospechosa');
     await neg.waitForLoadState('networkidle');
     assert.equal(await neg.locator('.solo-admin').isVisible(), false);
     await neg.goto(BASE + '/#/mi-espacio?pestana=negocio');
+    await neg.locator('.plan-tarjeta.plan-premium').click();       // Premium: contacto visible para viajeros con sesión
     await neg.fill('#neg-nombre', 'Hostal Portal de Piedra');
     await neg.selectOption('#neg-rubro', 'hospedaje');
     await neg.getByText('Registro o clasificación ante DIRCETUR').waitFor();
@@ -189,14 +209,18 @@ try {
     await neg.getByText('Ubicación marcada').waitFor();
     await neg.fill('#neg-contacto', '966 000 111');
     await neg.getByRole('button', { name: 'Enviar solicitud' }).click();
+    await confirmarEn(neg);
     await neg.getByText('En verificación').waitFor();
     await ctx.close();
-    page.on('dialog', d => d.accept('Suplanta a otra persona'));
     await page.goto(BASE + '/#/admin?seccion=negocios');
     await page.getByRole('heading', { name: 'Administración' }).waitFor();
     const tarjeta = page.locator('.admin-fila', { hasText: 'Hostal Portal de Piedra' });
     for (const caja of await tarjeta.locator('input[type=checkbox]').all()) { await caja.check(); await page.waitForTimeout(150); }
-    await tarjeta.getByRole('button', { name: 'Aprobar' }).click();
+    await tarjeta.getByRole('button', { name: 'Registrar pago' }).click();
+    await confirmarEn(page, 'YAPE-000123');
+    await page.locator('.admin-fila', { hasText: 'Hostal Portal de Piedra' }).getByText('Pagado (YAPE-000123)').waitFor();
+    await page.locator('.admin-fila', { hasText: 'Hostal Portal de Piedra' }).getByRole('button', { name: 'Aprobar' }).click();
+    await confirmarEn(page);
     await page.locator('.admin-fila', { hasText: 'Hostal Portal de Piedra' }).getByText('aprobada').waitFor();
     await page.screenshot({ path: path.join(out, 'web-admin.png') });
     await page.goto(BASE + '/#/inicio');
@@ -208,18 +232,21 @@ try {
     assert.ok(await page.locator('.mapa-servicios .leaflet-marker-icon').count() >= 1);
     await page.goto(BASE + '/#/admin?seccion=cuentas');
     await page.locator('.admin-fila', { hasText: 'Cuenta Sospechosa' }).getByRole('button', { name: 'Suspender' }).click();
+    await confirmarEn(page, 'Suplanta a otra persona');
     await page.locator('.admin-fila', { hasText: 'Cuenta Sospechosa' }).getByRole('button', { name: 'Reactivar' }).waitFor();
     await page.locator('.admin-fila', { hasText: 'Cuenta Sospechosa' }).getByRole('button', { name: 'Reactivar' }).click();
     await page.locator('.admin-fila', { hasText: 'Cuenta Sospechosa' }).getByRole('button', { name: 'Suspender' }).waitFor();
   });
-  await paso('Servicios sin sesión: directorio y mapa, contacto oculto', async () => {
+  await paso('Servicios sin sesión: detrás de la puerta y sin contacto en la API', async () => {
     const anon = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
     const p2 = await anon.newPage();
     await p2.route(/wikimedia|openstreetmap|googleusercontent|cartocdn|arcgisonline|opentopomap/, r => r.abort());
     await p2.goto(BASE + '/#/servicios');
-    const ficha = p2.locator('.negocio', { hasText: 'Hostal Portal de Piedra' });
-    await ficha.getByRole('button', { name: 'Inicia sesión para ver el contacto' }).waitFor();
-    assert.equal(await ficha.getByText('966 000 111').count(), 0);
+    await p2.locator('#puerta').waitFor();
+    const { items } = await (await p2.request.get(BASE + '/api/v1/publicidad/directorio?rubro=hospedaje')).json();
+    const hostal = items.find(n => n.negocio === 'Hostal Portal de Piedra');
+    assert.ok(hostal && hostal.requiere_sesion);
+    assert.equal(hostal.contacto, null);
     await anon.close();
   });
   await paso('Registro con correo institucional, reporte y recuperación de clave', async () => {
@@ -228,16 +255,21 @@ try {
     p.on('pageerror', e => errores.push(e.message));
     await p.route(/wikimedia|openstreetmap|googleusercontent|cartocdn|arcgisonline|opentopomap/, r => r.abort());
     await p.goto(BASE + '/#/inicio');
-    await p.locator('#tarjeta-cuenta').getByRole('button', { name: 'Crear cuenta' }).click();
+    await p.locator('#puerta').waitFor();
+    await p.locator('#acceso-bienvenida').getByRole('button', { name: 'Crear cuenta nueva' }).click();
+    // El diálogo enfoca el primer campo al cambiar de pestaña: se espera ese foco antes de escribir.
+    await p.waitForFunction(() => document.activeElement && document.activeElement.id === 'registro-nombre');
     await p.fill('#registro-nombre', 'Rosa Estudiante');
     await p.fill('#registro-correo', 'rosa.e@unsch.edu.pe');
     await p.getByText('Correo institucional: perfecto').waitFor();
     await p.fill('#registro-clave', 'corta');
-    await p.locator('#form-registro button[type=submit]').click();
+    await p.locator('#form-registro button.boton-principal').click();
     await p.locator('#acceso-estado', { hasText: 'al menos 8' }).waitFor();
     await p.fill('#registro-clave', 'huamanga2026');
-    await p.locator('#form-registro button[type=submit]').click();
-    await p.locator('#tarjeta-cuenta').getByText('Rosa Estudiante').waitFor();
+    assert.equal(await p.inputValue('#registro-nombre'), 'Rosa Estudiante');
+    await p.locator('#form-registro button.boton-principal').click();
+    await p.locator('#puerta').waitFor({ state: 'hidden' });
+    await cerrarAvisos(p);
     // Reporta una publicación de otra persona.
     await p.locator('.post', { hasText: 'Viajera de Prueba' }).first().locator('.post-reportar').click();
     await p.getByLabel('Spam o publicidad engañosa').check();
@@ -245,11 +277,14 @@ try {
     await p.getByRole('button', { name: 'Enviar reporte' }).click();
     await p.getByText('Gracias. El equipo revisará tu reporte.').waitFor();
     // Sale, falla la clave, recupera y entra con la nueva.
-    await p.locator('#tarjeta-cuenta').getByRole('button', { name: 'Cerrar sesión' }).click();
-    await p.locator('#tarjeta-cuenta').getByRole('button', { name: 'Entrar' }).click();
+    await p.locator('.perfil-flotante [data-salir] button').click();
+    await confirmarEn(p);
+    await p.locator('#puerta').waitFor();
+    await p.locator('#acceso-bienvenida').getByRole('button', { name: 'Iniciar sesión' }).click();
+    await p.waitForFunction(() => document.activeElement && document.activeElement.id === 'entrar-correo');
     await p.fill('#entrar-correo', 'rosa.e@unsch.edu.pe');
     await p.fill('#entrar-clave', 'otraclave99');
-    await p.locator('#form-entrar button[type=submit]').click();
+    await p.locator('#form-entrar button.boton-principal').click();
     await p.locator('#acceso-estado', { hasText: 'Correo o clave incorrectos.' }).waitFor();
     await p.getByRole('button', { name: '¿Olvidaste tu clave?' }).click();
     await p.fill('#recuperar-correo', 'rosa.e@unsch.edu.pe');
@@ -262,12 +297,16 @@ try {
     await p.fill('#nueva-clave-2', 'retablos2027');
     await p.getByRole('button', { name: 'Guardar clave' }).click();
     await p.getByText('Tu clave se actualizó').waitFor();
-    await p.locator('#tarjeta-cuenta').getByRole('button', { name: 'Cerrar sesión' }).click();
-    await p.locator('#tarjeta-cuenta').getByRole('button', { name: 'Entrar' }).click();
+    await p.locator('.perfil-flotante [data-salir] button').click();
+    await confirmarEn(p);
+    await p.locator('#puerta').waitFor();
+    await p.locator('#acceso-bienvenida').getByRole('button', { name: 'Iniciar sesión' }).click();
+    await p.waitForFunction(() => document.activeElement && document.activeElement.id === 'entrar-correo');
     await p.fill('#entrar-correo', 'rosa.e@unsch.edu.pe');
     await p.fill('#entrar-clave', 'retablos2027');
-    await p.locator('#form-entrar button[type=submit]').click();
-    await p.locator('#tarjeta-cuenta').getByText('Rosa Estudiante').waitFor();
+    await p.locator('#form-entrar button.boton-principal').click();
+    await p.locator('#puerta').waitFor({ state: 'hidden' });
+    assert.equal((await (await p.request.get(BASE + '/api/v1/auth/me')).json()).nombre, 'Rosa Estudiante');
     await ctx.close();
   });
   await paso('Administración resuelve reportes, quita fotos y da de baja varias cuentas', async () => {
@@ -275,6 +314,7 @@ try {
     const rep = page.locator('.admin-fila', { hasText: 'Spam o publicidad engañosa' });
     await rep.getByText('Ofrece pagos por adelantado').waitFor();
     await rep.getByRole('button', { name: 'Desestimar' }).click();
+    await confirmarEn(page);
     await page.getByText('Sin reportes pendientes').waitFor();
     await page.goto(BASE + '/#/admin?seccion=contenido');
     await page.locator('.admin-pieza img.admin-foto').first().waitFor();
@@ -283,6 +323,7 @@ try {
     const antes = await conFoto.count();
     assert.ok(antes >= 1);
     await conFoto.first().getByRole('button', { name: 'Quitar foto' }).click();
+    await confirmarEn(page);
     await page.getByText('Foto eliminada').waitFor();
     await page.waitForFunction(n => document.querySelectorAll('.admin-pieza img.admin-foto').length === n - 1, antes);
     await page.goto(BASE + '/#/admin?seccion=cuentas');
@@ -291,6 +332,7 @@ try {
     }
     await page.getByText('2 seleccionadas').waitFor();
     await page.getByRole('button', { name: 'Suspender seleccionadas' }).click();
+    await confirmarEn(page, 'Cuentas falsas creadas en serie');
     await page.getByText('2 cuentas suspendidas').waitFor();
     await page.locator('.admin-fila', { hasText: 'Rosa Estudiante' }).getByRole('button', { name: 'Reactivar' }).waitFor();
     await page.screenshot({ path: path.join(out, 'web-admin-cuentas.png') });
@@ -308,28 +350,34 @@ try {
     await page.getByText('Ubicación marcada').waitFor();
     await page.fill('#lugar-recom', 'Ve al atardecer\nLleva abrigo');
     await page.getByRole('button', { name: 'Publicar lugar' }).click();
+    await confirmarEn(page);
     await page.getByText('Lugar publicado').waitFor();
     const fila = page.locator('.fila-lugar', { hasText: 'Mirador de Acuchimay' });
     await fila.getByRole('button', { name: 'Editar' }).click();
     await page.fill('#lugar-resumen', 'El mejor atardecer de Huamanga, a diez minutos del centro.');
     await page.getByRole('button', { name: 'Guardar cambios' }).click();
+    await confirmarEn(page);
     await page.getByText('Cambios guardados').waitFor();
     await page.goto(BASE + '/#/explorar?q=acuchimay');
     await page.locator('.celda', { hasText: 'Mirador de Acuchimay' }).click();
     await page.getByText('El mejor atardecer de Huamanga').first().waitFor();
-    assert.match(await page.locator('a', { hasText: 'Cómo llegar (Google Maps)' }).getAttribute('href'), /google\.com\/maps\/dir/);
+    assert.match(await page.locator('#como-llegar a', { hasText: 'Abrir la ruta en Google Maps' }).getAttribute('href'), /google\.com\/maps\/dir/);
     await page.goto(BASE + '/#/admin?seccion=lugares');
     await page.locator('.fila-lugar', { hasText: 'Mirador de Acuchimay' }).getByRole('button', { name: 'Retirar' }).click();
+    await confirmarEn(page);
     await page.locator('.fila-lugar', { hasText: 'Mirador de Acuchimay' }).getByRole('button', { name: 'Publicar de nuevo' }).waitFor();
   });
-  await paso('Mapa con capas, pines por tipo y cómo llegar', async () => {
+  await paso('Mapa con capas, lugares, terminales y cómo llegar', async () => {
     await page.goto(BASE + '/#/mapa');
-    await page.locator('.mapa-grande .pin').first().waitFor();
-    assert.ok(await page.locator('.leaflet-control-layers').count() === 1);
-    assert.ok(await page.locator('.leaflet-control-scale').count() === 1);
-    await page.locator('.mapa-grande .pin-arqueologico').first().click();
-    const ruta = await page.locator('.leaflet-popup .popup-acciones a').getAttribute('href');
-    assert.match(ruta, /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1&destination=-?\d+\.\d{6},-?\d+\.\d{6}$/);
+    await page.locator('.mapa-grande .pin-etiqueta').first().waitFor();
+    assert.equal(await page.locator('.leaflet-control-layers').count(), 1);
+    assert.equal(await page.locator('.leaflet-control-scale').count(), 1);
+    await page.locator('.mapa-grande .pin-etiqueta.tipo-arqueologico').first().click();
+    const ruta = await page.locator('.mapa-tarjeta a', { hasText: 'Google Maps' }).getAttribute('href');
+    assert.match(ruta, /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1&destination=/);
+    await page.locator('.mapa-tarjeta a', { hasText: 'Abrir ficha' }).waitFor();
+    await page.getByRole('tab', { name: 'Terminales' }).click();
+    await page.locator('.mapa-grande .pin-etiqueta').first().waitFor();
     await page.screenshot({ path: path.join(out, 'web-mapa.png') });
   });
   await paso('Móvil sin desbordes y movimiento reducido', async () => {
@@ -344,6 +392,9 @@ try {
   assert.deepEqual(errores, []);
   await fs.writeFile(path.join(out, 'web-navegador.json'), JSON.stringify({ fecha: new Date().toISOString(), estado: 'PASS', pasos, googleReal: 'PENDIENTE: requiere proyecto Supabase con Google habilitado' }, null, 2));
   console.log(`E2E: ${pasos.length} pasos aprobados.`);
+} catch (error) {
+  await page.screenshot({ path: path.join(out, 'e2e-fallo.png'), fullPage: true }).catch(() => {});
+  throw error;
 } finally {
   await fs.rm(foto, { force: true });
   await browser.close();
